@@ -1,11 +1,10 @@
-<!-- landing.html -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>ChatTok Tools — Build TikTok LIVE Games</title>
-  <meta name="description" content="Type a short description of your TikTok LIVE game idea. We’ll route you into the builder and auto-pick the best template." />
+  <meta name="description" content="Type a short description of your TikTok LIVE game idea. We’ll open the builder and auto-pick the best template." />
   <meta name="theme-color" content="#0b0b0d" />
 
   <style>
@@ -28,7 +27,6 @@
 
       --shadowPanel: 0 14px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08);
       --r: 18px;
-      --r2: 14px;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
       --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
@@ -52,7 +50,6 @@
 
     .wrap{ max-width: 1100px; margin: 0 auto; padding: 22px 14px 60px; }
 
-    /* Top nav */
     .nav{
       display:flex;
       align-items:center;
@@ -121,7 +118,6 @@
     }
     .dot{ width:10px; height:10px; border-radius: 50%; background: rgba(255,255,255,.22); box-shadow: 0 0 0 2px rgba(255,255,255,.08); }
     .dot.good{ background: var(--good); box-shadow: 0 0 0 2px rgba(46,229,157,.18); }
-    .dot.bad{  background: var(--bad);  box-shadow: 0 0 0 2px rgba(255,77,77,.18); }
 
     .btn{
       border: 0;
@@ -151,7 +147,6 @@
       box-shadow: 0 12px 24px rgba(0,0,0,.28), 0 7px 0 rgba(0,0,0,.35);
     }
 
-    /* Main */
     .hero{
       display:grid;
       grid-template-columns: 1.2fr .8fr;
@@ -265,7 +260,6 @@
     }
     .toast.show{ display:block; }
 
-    /* Footer */
     footer{
       margin-top: 14px;
       padding: 16px 14px;
@@ -294,7 +288,6 @@
       opacity: .85;
     }
 
-    /* Modal */
     .modalWrap{
       position:fixed;
       inset:0;
@@ -431,7 +424,7 @@ A TikTok LIVE trivia game where viewers join by typing !join, answer with A/B/C,
           </div>
           <div class="tip">
             <b>Monetization-safe wording</b>
-            <span>Avoid “pay to win”. Instead: “optional boosts”, “bonus effects”, “fun power-ups”.</span>
+            <span>Use “optional boosts”, “bonus effects”, “fun power-ups” (avoid “pay to win”).</span>
           </div>
         </div>
       </aside>
@@ -475,8 +468,8 @@ A TikTok LIVE trivia game where viewers join by typing !join, answer with A/B/C,
         </div>
 
         <div class="warn">
-          This is a simple GitHub Pages-friendly sign-in stored in your browser (localStorage) and is not secure like a real backend.
-          It’s perfect for MVP/testing. When you move to your full site later, we’ll swap this for real auth.
+          This is a GitHub Pages-friendly sign-in stored in your browser (localStorage). It’s great for MVP/testing.
+          Later, we’ll swap this to real auth when you tie it into your main site/app.
         </div>
       </div>
     </div>
@@ -486,8 +479,8 @@ A TikTok LIVE trivia game where viewers join by typing !join, answer with A/B/C,
     // ============================
     // Local auth (email + password)
     // ============================
-    const LS_USER = "ct_auth_user";      // { email, passHash }
-    const LS_SESSION = "ct_auth_session"; // { email, at }
+    const LS_USER = "ct_auth_user";        // { email, passHash }
+    const LS_SESSION = "ct_auth_session";  // { email, at }
 
     const authDot = document.getElementById("authDot");
     const authMsg = document.getElementById("authMsg");
@@ -510,20 +503,19 @@ A TikTok LIVE trivia game where viewers join by typing !join, answer with A/B/C,
     const btnClear = document.getElementById("btnClear");
     const toast = document.getElementById("toast");
 
-    // Keys the builder can read later (we’ll wire this in app.js next)
+    // Keys builder can read
     const LS_LAST_PROMPT = "ct_last_prompt";
     const LS_FROM_LANDING = "ct_from_landing";
 
     document.getElementById("year").textContent = new Date().getFullYear();
 
-    // Placeholder links (we’ll replace later with real pages)
+    // Placeholder links (we can build these pages later)
     document.getElementById("privacyLink").addEventListener("click", (e)=>{ e.preventDefault(); showToast("Privacy page coming soon."); });
     document.getElementById("termsLink").addEventListener("click", (e)=>{ e.preventDefault(); showToast("Terms page coming soon."); });
     document.getElementById("contactLink").addEventListener("click", (e)=>{ e.preventDefault(); showToast("Contact page coming soon."); });
 
     btnOpenBuilder.addEventListener("click", () => {
-      // Go to your existing builder page
-      window.location.href = "landing.html";
+      window.location.href = "builder.html";
     });
 
     btnClear.addEventListener("click", () => {
@@ -541,8 +533,8 @@ A TikTok LIVE trivia game where viewers join by typing !join, answer with A/B/C,
 
       localStorage.setItem(LS_LAST_PROMPT, v);
       localStorage.setItem(LS_FROM_LANDING, "1");
-      // Builder reads this, auto-fills, and generates.
-      window.location.href = "landing.html";
+
+      window.location.href = "builder.html";
     });
 
     btnSignIn.addEventListener("click", () => openModal());
@@ -574,12 +566,10 @@ A TikTok LIVE trivia game where viewers join by typing !join, answer with A/B/C,
       const s = getSession();
       if (s){
         authDot.classList.add("good");
-        authDot.classList.remove("bad");
         authMsg.textContent = s.email;
         btnSignIn.textContent = "Account";
       } else {
         authDot.classList.remove("good");
-        authDot.classList.remove("bad");
         authMsg.textContent = "Signed out";
         btnSignIn.textContent = "Sign In";
       }
