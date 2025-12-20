@@ -1,18 +1,18 @@
-<!-- index.html (Landing Page) -->
+<!-- landing.html -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>ChatTok Tools — AI TikTok LIVE Game Builder</title>
-  <meta name="description" content="Describe your TikTok LIVE game idea. Generate a working interactive game layout and builder-ready files in minutes." />
+  <title>ChatTok Tools — Build TikTok LIVE Games</title>
+  <meta name="description" content="Type a short description of your TikTok LIVE game idea. We’ll route you into the builder and auto-pick the best template." />
   <meta name="theme-color" content="#0b0b0d" />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <style>
     :root{
       --bg0:#07070a;
       --bg1:#0b0b0d;
+
       --panel: rgba(255,255,255,.06);
       --panel2: rgba(255,255,255,.04);
       --line: rgba(255,255,255,.10);
@@ -22,6 +22,7 @@
 
       --accent1:#ff8a00; /* orange */
       --accent2:#ffb15a;
+
       --good:#2ee59d;
       --bad:#ff4d4d;
 
@@ -49,7 +50,7 @@
     a{ color: rgba(255,177,90,.95); text-decoration:none; }
     a:hover{ text-decoration:underline; }
 
-    .wrap{ max-width: 1060px; margin: 0 auto; padding: 26px 16px 60px; }
+    .wrap{ max-width: 1100px; margin: 0 auto; padding: 22px 14px 60px; }
 
     /* Top nav */
     .nav{
@@ -57,7 +58,7 @@
       align-items:center;
       justify-content:space-between;
       gap:12px;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
     .logo{
       display:flex;
@@ -150,53 +151,16 @@
       box-shadow: 0 12px 24px rgba(0,0,0,.28), 0 7px 0 rgba(0,0,0,.35);
     }
 
-    /* Hero */
+    /* Main */
     .hero{
-      margin-top: 12px;
-      padding: 18px;
-      border-radius: var(--r);
-      border: 1px solid rgba(255,255,255,.10);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      box-shadow: var(--shadowPanel);
-      overflow:hidden;
-      position:relative;
-    }
-    .hero::before{
-      content:"";
-      position:absolute;
-      inset:-30%;
-      background:
-        radial-gradient(900px 520px at 15% 30%, rgba(255,138,0,.16), transparent 60%),
-        radial-gradient(820px 520px at 85% 20%, rgba(255,177,90,.10), transparent 60%);
-      pointer-events:none;
-      filter: saturate(1.1);
-    }
-    .heroInner{ position:relative; z-index:1; }
-
-    h1{
-      margin: 0 0 8px;
-      font-size: 30px;
-      font-weight: 950;
-      letter-spacing:.2px;
-      text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 14px rgba(255,138,0,.25);
-    }
-    .sub{
-      margin:0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.45;
-      max-width: 860px;
-    }
-
-    /* Layout */
-    .grid{
       display:grid;
       grid-template-columns: 1.2fr .8fr;
       gap: 14px;
-      margin-top: 14px;
+      align-items:start;
+      margin-top: 8px;
     }
     @media (max-width: 980px){
-      .grid{ grid-template-columns: 1fr; }
+      .hero{ grid-template-columns: 1fr; }
     }
 
     .panel{
@@ -209,21 +173,23 @@
     .panelHead{
       padding: 16px 16px 12px;
       border-bottom: 1px solid rgba(255,255,255,.08);
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
       background: linear-gradient(180deg, rgba(0,0,0,.18), transparent);
     }
-    .panelTitle{ display:flex; flex-direction:column; gap:4px; }
-    .panelTitle h2{
+    .panelHead h1{
       margin:0;
-      font-size: 18px;
-      font-weight: 900;
-      text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 10px rgba(255,138,0,.16);
+      font-size: 22px;
+      font-weight: 950;
+      letter-spacing:.2px;
+      text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 12px rgba(255,138,0,.16);
     }
-    .panelTitle p{ margin:0; color:var(--muted); font-size: 13px; line-height:1.35; }
-    .panelBody{ padding: 16px; position:relative; }
+    .panelHead p{
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+      max-width: 62ch;
+    }
+    .panelBody{ padding: 16px; }
 
     label{
       display:block;
@@ -247,32 +213,45 @@
       outline:none;
     }
     textarea{
-      min-height: 190px;
+      min-height: 180px;
       resize: vertical;
       line-height: 1.45;
     }
     textarea::placeholder{ color: rgba(255,255,255,.55); }
 
-    .hint{
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.45;
-    }
-    .hint ul{
-      margin: 8px 0 0;
-      padding-left: 18px;
-    }
-    .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; align-items:center; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top: 12px; }
+    .mini{ font-size: 12px; color: rgba(255,255,255,.66); line-height:1.4; margin-top: 10px; }
 
-    .mini{
-      font-size: 12px;
-      color: rgba(255,255,255,.66);
-      line-height:1.4;
-      margin-top: 10px;
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 9px 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,138,0,.22);
+      background: rgba(255,138,0,.10);
+      color: rgba(255,255,255,.90);
+      font-size: 12.5px;
+      font-weight: 900;
+      user-select:none;
+      white-space:nowrap;
     }
 
-    /* Toast */
+    .tips{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      padding: 14px;
+    }
+    .tip{
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
+      padding: 12px;
+    }
+    .tip b{ display:block; font-size: 13.5px; }
+    .tip span{ display:block; margin-top: 4px; color: rgba(255,255,255,.72); font-size: 12px; line-height: 1.35; }
+
     .toast{
       margin-top: 12px;
       padding: 10px 12px;
@@ -288,7 +267,7 @@
 
     /* Footer */
     footer{
-      margin-top: 18px;
+      margin-top: 14px;
       padding: 16px 14px;
       border-radius: 16px;
       border: 1px solid rgba(255,255,255,.10);
@@ -328,7 +307,7 @@
       z-index: 50;
     }
     .modal{
-      width: min(520px, 96vw);
+      width: min(560px, 96vw);
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,.12);
       background: linear-gradient(180deg, rgba(18,18,22,.92), rgba(10,10,12,.84));
@@ -382,7 +361,7 @@
         <div class="mark" aria-hidden="true"></div>
         <div class="brand">
           <b>ChatTok Tools</b>
-          <span>AI-powered TikTok LIVE games & overlays</span>
+          <span>Build TikTok LIVE games & overlays</span>
         </div>
       </div>
 
@@ -391,371 +370,292 @@
           <span id="authDot" class="dot"></span>
           <span id="authMsg">Signed out</span>
         </div>
-        <button id="btnSignIn" class="btn secondary" type="button">Sign in</button>
-        <button id="btnOpenBuilder" class="btn secondary" type="button" disabled>Open Builder</button>
+        <button id="btnOpenBuilder" class="btn secondary" type="button">Open Builder</button>
+        <button id="btnSignIn" class="btn" type="button">Sign In</button>
       </div>
     </div>
 
-    <section class="hero">
-      <div class="heroInner">
-        <h1>Describe it. Generate it. Go LIVE.</h1>
-        <p class="sub">
-          Drop a short game idea below. You’ll be taken into the builder where the system creates your
-          <b>index.html</b>, <b>style.css</b>, and <b>game.js</b> using a template that matches your idea.
-          <br /><span style="opacity:.85">GitHub Pages launch-ready — real accounts come later when you tie it into your app.</span>
-        </p>
-      </div>
-    </section>
-
-    <div class="grid">
-      <!-- Left: prompt -->
-      <div class="panel">
+    <div class="hero">
+      <section class="panel">
         <div class="panelHead">
-          <div class="panelTitle">
-            <h2>Your game prompt</h2>
-            <p>Keep it short. Just enough for the system to pick the right template and build a real-looking game.</p>
-          </div>
+          <h1>Describe your LIVE game idea.</h1>
+          <p>
+            Keep it short and clear. After you click <b>Generate Game</b>, we’ll open the builder and
+            pre-fill your prompt so it can choose the best template automatically.
+          </p>
         </div>
 
         <div class="panelBody">
-          <label for="promptBox">Game description</label>
-          <textarea
-            id="promptBox"
-            spellcheck="false"
-            placeholder="Example:
-- Viewers type !join to enter
-- Chat commands control actions (attack, dodge, vote, guess, etc.)
-- Likes charge a meter (boost / hints / speed)
-- Gifts trigger power-ups (small/medium/large)
-- Round length + win condition
-- What should the screen look like (characters/HUD/arena)"></textarea>
+          <label for="idea">Your game idea (short description)</label>
+          <textarea id="idea" placeholder="Example:
+A TikTok LIVE trivia game where viewers join by typing !join, answer with A/B/C, and gifts add bonus points. Needs a clean 9:16 layout, sound effects, and a winner screen."></textarea>
+
+          <div class="mini">
+            Include (when relevant):<br>
+            • How players join (command / keyword) • What chat actions do (answers, votes, attacks)<br>
+            • Scoring/win condition • Sounds/animations • Mobile readability (big text, bold UI)
+          </div>
 
           <div class="row">
-            <button id="btnSample" class="btn secondary" type="button">Insert sample</button>
-            <button id="btnClear" class="btn secondary" type="button">Clear</button>
+            <span class="badge">Auto-template selection</span>
+            <span class="badge">9:16 LIVE overlay ready</span>
+            <span class="badge">Chat/Gifts/Likes aware</span>
+          </div>
+
+          <div class="row">
             <button id="btnGenerate" class="btn" type="button">Generate Game</button>
+            <button id="btnClear" class="btn secondary" type="button">Clear</button>
           </div>
 
           <div id="toast" class="toast"></div>
-
-          <div class="hint">
-            <b style="color:rgba(255,255,255,.92)">What to include (fast):</b>
-            <ul>
-              <li><b>Chat controls</b> (commands like !join / !attack / A1 / red / vote, etc.)</li>
-              <li><b>Likes</b> do something visible (meter, boosts, shields, hints)</li>
-              <li><b>Gifts</b> trigger bigger effects (tiers)</li>
-              <li><b>Win condition</b> + <b>round timing</b></li>
-              <li><b>On-screen vibe</b> (HUD, characters, arena, cards, leaderboard)</li>
-            </ul>
-            <div class="mini">
-              Note: Sign-in is <b>local-only</b> for GitHub Pages (stored in your browser). When you move to your app, we’ll replace this with real accounts.
-            </div>
-          </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Right: quick explain -->
-      <div class="panel">
+      <aside class="panel">
         <div class="panelHead">
-          <div class="panelTitle">
-            <h2>How it works</h2>
-            <p>Simple flow: Prompt → Builder → Copy files into your game host.</p>
+          <h1 style="font-size:18px;margin:0">What to write</h1>
+          <p style="margin:6px 0 0">If you’re vague, you’ll get a bland game. These hints help.</p>
+        </div>
+        <div class="tips">
+          <div class="tip">
+            <b>Choose the “type” without saying template</b>
+            <span>Say what it does: trivia, wheel spin, battle, racing, voting, scoreboard overlay, etc.</span>
+          </div>
+          <div class="tip">
+            <b>One “main loop”</b>
+            <span>Example: “join → play rounds → show winner → reset” or “always running scoreboard overlay”.</span>
+          </div>
+          <div class="tip">
+            <b>Big UI for phones</b>
+            <span>Ask for bold fonts, high contrast, and clear spacing. (Your viewers are on mobile.)</span>
+          </div>
+          <div class="tip">
+            <b>Monetization-safe wording</b>
+            <span>Avoid “pay to win”. Instead: “optional boosts”, “bonus effects”, “fun power-ups”.</span>
           </div>
         </div>
-
-        <div class="panelBody">
-          <div class="pill" style="margin-bottom:10px;">
-            <span class="dot good" aria-hidden="true"></span>
-            <span><b style="color:rgba(255,255,255,.92)">Template-first</b> (no blank screens)</span>
-          </div>
-
-          <p class="sub" style="margin:0 0 10px;">
-            The builder will automatically choose the best template (arena / trivia / racing / boss fight / etc.)
-            based on your description — with an optional advanced override.
-          </p>
-
-          <div class="warn">
-            <b>GitHub Pages note:</b> this landing page is 100% static. The actual “Generate Files” calls
-            will be handled by your builder screen (and later by your hosted API when you’re ready).
-          </div>
-
-          <div class="row" style="margin-top:12px;">
-            <button id="btnGoBuilder2" class="btn secondary" type="button" disabled>Go to Builder</button>
-          </div>
-        </div>
-      </div>
+      </aside>
     </div>
 
     <footer>
       <div class="footRow">
+        <div class="copy">© <span id="year"></span> ChatTok Tools. All rights reserved.</div>
         <div class="footLinks">
-          <a href="about.html">About</a>
-          <a href="privacy.html">Privacy</a>
-          <a href="terms.html">Terms</a>
-          <a href="builder.html">Builder</a>
+          <a href="#" id="privacyLink">Privacy</a>
+          <a href="#" id="termsLink">Terms</a>
+          <a href="#" id="contactLink">Contact</a>
         </div>
-        <div class="copy">© <span id="yy"></span> ChatTok Tools. All rights reserved.</div>
       </div>
     </footer>
   </div>
 
-  <!-- Sign-in modal (local-only) -->
-  <div id="authModalWrap" class="modalWrap" role="dialog" aria-modal="true" aria-label="Sign in">
+  <!-- Sign-in Modal -->
+  <div id="modalWrap" class="modalWrap" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal">
       <div class="modalHead">
-        <div>
-          <b>Sign in (local-only)</b>
-          <div class="mini" style="margin-top:4px;color:rgba(255,255,255,.70)">
-            This is a simple browser-stored login for the GitHub Pages launch.
-          </div>
-        </div>
-        <button id="btnCloseModal" class="x" type="button" aria-label="Close">✕</button>
+        <b id="modalTitle">Local Sign-In</b>
+        <button class="x" id="btnCloseModal" type="button">X</button>
       </div>
-
       <div class="modalBody">
         <div class="twoCol">
           <div>
-            <label for="emailBox">Email</label>
-            <input id="emailBox" type="email" autocomplete="email" placeholder="you@email.com" />
+            <label for="email">Email</label>
+            <input id="email" type="email" placeholder="you@example.com" autocomplete="email" />
           </div>
           <div>
-            <label for="passBox">Password</label>
-            <input id="passBox" type="password" autocomplete="current-password" placeholder="••••••••" />
+            <label for="pass">Password</label>
+            <input id="pass" type="password" placeholder="••••••••" autocomplete="current-password" />
           </div>
         </div>
 
-        <div class="row" style="margin-top:12px;">
-          <button id="btnCreateAccount" class="btn secondary" type="button">Create account</button>
-          <button id="btnDoSignIn" class="btn" type="button">Sign in</button>
-          <button id="btnSignOut" class="btn secondary" type="button" style="margin-left:auto;">Sign out</button>
+        <div class="row">
+          <button id="btnCreate" class="btn" type="button">Create Account</button>
+          <button id="btnLogin" class="btn secondary" type="button">Sign In</button>
+          <button id="btnLogout" class="btn secondary" type="button">Sign Out</button>
         </div>
 
         <div class="warn">
-          <b>Important:</b> This is not secure authentication. It stores a salted hash in <b>localStorage</b>
-          on this device only. When you connect to your app later, we’ll replace this with real sign-in.
+          This is a simple GitHub Pages-friendly sign-in stored in your browser (localStorage) and is not secure like a real backend.
+          It’s perfect for MVP/testing. When you move to your full site later, we’ll swap this for real auth.
         </div>
-
-        <div id="authToast" class="toast" style="margin-top:12px;"></div>
       </div>
     </div>
   </div>
 
   <script>
-    // ----- Local-only auth + landing flow -----
-    const KEYS = {
-      auth: "ct_tools_auth_v1",
-      draftPrompt: "ct_tools_draft_prompt_v1",
-      lastUser: "ct_tools_last_user_v1"
-    };
+    // ============================
+    // Local auth (email + password)
+    // ============================
+    const LS_USER = "ct_auth_user";      // { email, passHash }
+    const LS_SESSION = "ct_auth_session"; // { email, at }
 
-    const el = (id) => document.getElementById(id);
+    const authDot = document.getElementById("authDot");
+    const authMsg = document.getElementById("authMsg");
+    const btnSignIn = document.getElementById("btnSignIn");
+    const btnOpenBuilder = document.getElementById("btnOpenBuilder");
 
-    const authDot = el("authDot");
-    const authMsg = el("authMsg");
-    const btnSignIn = el("btnSignIn");
-    const btnOpenBuilder = el("btnOpenBuilder");
-    const btnGoBuilder2 = el("btnGoBuilder2");
+    const modalWrap = document.getElementById("modalWrap");
+    const btnCloseModal = document.getElementById("btnCloseModal");
+    const emailEl = document.getElementById("email");
+    const passEl = document.getElementById("pass");
+    const btnCreate = document.getElementById("btnCreate");
+    const btnLogin = document.getElementById("btnLogin");
+    const btnLogout = document.getElementById("btnLogout");
 
-    const promptBox = el("promptBox");
-    const toastEl = el("toast");
+    // ============================
+    // Landing prompt -> builder handoff
+    // ============================
+    const ideaEl = document.getElementById("idea");
+    const btnGenerate = document.getElementById("btnGenerate");
+    const btnClear = document.getElementById("btnClear");
+    const toast = document.getElementById("toast");
 
-    const modalWrap = el("authModalWrap");
-    const btnCloseModal = el("btnCloseModal");
-    const emailBox = el("emailBox");
-    const passBox = el("passBox");
-    const btnCreateAccount = el("btnCreateAccount");
-    const btnDoSignIn = el("btnDoSignIn");
-    const btnSignOut = el("btnSignOut");
-    const authToast = el("authToast");
+    // Keys the builder can read later (we’ll wire this in app.js next)
+    const LS_LAST_PROMPT = "ct_last_prompt";
+    const LS_FROM_LANDING = "ct_from_landing";
 
-    function setDot(ok){
-      authDot.classList.remove("good","bad");
-      authDot.classList.add(ok ? "good" : "bad");
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // Placeholder links (we’ll replace later with real pages)
+    document.getElementById("privacyLink").addEventListener("click", (e)=>{ e.preventDefault(); showToast("Privacy page coming soon."); });
+    document.getElementById("termsLink").addEventListener("click", (e)=>{ e.preventDefault(); showToast("Terms page coming soon."); });
+    document.getElementById("contactLink").addEventListener("click", (e)=>{ e.preventDefault(); showToast("Contact page coming soon."); });
+
+    btnOpenBuilder.addEventListener("click", () => {
+      // Go to your existing builder page
+      window.location.href = "index.html";
+    });
+
+    btnClear.addEventListener("click", () => {
+      ideaEl.value = "";
+      ideaEl.focus();
+      showToast("Cleared.");
+    });
+
+    btnGenerate.addEventListener("click", () => {
+      const v = (ideaEl.value || "").trim();
+      if (!v || v.length < 18){
+        showToast("Give me a little more detail (at least ~1–2 sentences).");
+        return;
+      }
+
+      localStorage.setItem(LS_LAST_PROMPT, v);
+      localStorage.setItem(LS_FROM_LANDING, "1");
+      // Builder reads this, auto-fills, and generates.
+      window.location.href = "index.html";
+    });
+
+    btnSignIn.addEventListener("click", () => openModal());
+    btnCloseModal.addEventListener("click", () => closeModal());
+    modalWrap.addEventListener("click", (e) => { if (e.target === modalWrap) closeModal(); });
+
+    async function sha256Hex(str){
+      const enc = new TextEncoder().encode(str);
+      const digest = await crypto.subtle.digest("SHA-256", enc);
+      const bytes = Array.from(new Uint8Array(digest));
+      return bytes.map(b => b.toString(16).padStart(2,"0")).join("");
     }
 
-    function toast(msg){
-      toastEl.textContent = msg;
-      toastEl.classList.add("show");
-      setTimeout(() => toastEl.classList.remove("show"), 2200);
+    function readJSON(key){
+      try { return JSON.parse(localStorage.getItem(key) || "null"); }
+      catch { return null; }
+    }
+    function writeJSON(key, obj){
+      localStorage.setItem(key, JSON.stringify(obj));
     }
 
-    function authToastMsg(msg){
-      authToast.textContent = msg;
-      authToast.classList.add("show");
-      setTimeout(() => authToast.classList.remove("show"), 2400);
+    function getSession(){
+      const s = readJSON(LS_SESSION);
+      if (!s || !s.email) return null;
+      return s;
+    }
+
+    function setStatus(){
+      const s = getSession();
+      if (s){
+        authDot.classList.add("good");
+        authDot.classList.remove("bad");
+        authMsg.textContent = s.email;
+        btnSignIn.textContent = "Account";
+      } else {
+        authDot.classList.remove("good");
+        authDot.classList.remove("bad");
+        authMsg.textContent = "Signed out";
+        btnSignIn.textContent = "Sign In";
+      }
     }
 
     function openModal(){
       modalWrap.style.display = "flex";
-      setTimeout(() => emailBox.focus(), 0);
+      emailEl.focus();
+      setStatus();
     }
     function closeModal(){
       modalWrap.style.display = "none";
-      passBox.value = "";
+      passEl.value = "";
     }
 
-    function getAuth(){
-      try{
-        const raw = localStorage.getItem(KEYS.auth);
-        if (!raw) return null;
-        const j = JSON.parse(raw);
-        if (!j || typeof j !== "object") return null;
-        if (!j.email || !j.hash || !j.salt) return null;
-        return j;
-      }catch{ return null; }
-    }
+    btnCreate.addEventListener("click", async () => {
+      const email = (emailEl.value || "").trim().toLowerCase();
+      const pass = (passEl.value || "").trim();
 
-    function setSignedIn(email){
-      setDot(true);
-      authMsg.textContent = "Signed in: " + email;
-      btnOpenBuilder.disabled = false;
-      btnGoBuilder2.disabled = false;
-    }
-
-    function setSignedOut(){
-      setDot(false);
-      authMsg.textContent = "Signed out";
-      btnOpenBuilder.disabled = true;
-      btnGoBuilder2.disabled = true;
-    }
-
-    function normalizeEmail(v){
-      return String(v || "").trim().toLowerCase();
-    }
-
-    function randomSalt(){
-      const arr = new Uint8Array(16);
-      crypto.getRandomValues(arr);
-      return Array.from(arr).map(b => b.toString(16).padStart(2,"0")).join("");
-    }
-
-    async function sha256Hex(text){
-      const enc = new TextEncoder().encode(text);
-      const buf = await crypto.subtle.digest("SHA-256", enc);
-      const bytes = new Uint8Array(buf);
-      return Array.from(bytes).map(b => b.toString(16).padStart(2,"0")).join("");
-    }
-
-    async function makeHash(email, password, salt){
-      // local-only hash; not real security
-      return await sha256Hex(email + "::" + password + "::" + salt);
-    }
-
-    async function createAccount(){
-      const email = normalizeEmail(emailBox.value);
-      const pass = String(passBox.value || "");
-      if (!email || !email.includes("@")) { authToastMsg("Enter a valid email."); return; }
-      if (pass.length < 6) { authToastMsg("Password must be 6+ characters."); return; }
-
-      const salt = randomSalt();
-      const hash = await makeHash(email, pass, salt);
-
-      localStorage.setItem(KEYS.auth, JSON.stringify({ email, salt, hash, createdAt: Date.now() }));
-      localStorage.setItem(KEYS.lastUser, email);
-
-      setSignedIn(email);
-      authToastMsg("Account created (local).");
-      closeModal();
-    }
-
-    async function signIn(){
-      const existing = getAuth();
-      if (!existing) { authToastMsg("No local account found. Create one first."); return; }
-
-      const email = normalizeEmail(emailBox.value);
-      const pass = String(passBox.value || "");
-
-      if (email !== existing.email) { authToastMsg("Email does not match local account."); return; }
-
-      const hash = await makeHash(email, pass, existing.salt);
-      if (hash !== existing.hash) { authToastMsg("Wrong password."); return; }
-
-      localStorage.setItem(KEYS.lastUser, email);
-      setSignedIn(email);
-      authToastMsg("Signed in.");
-      closeModal();
-    }
-
-    function signOut(){
-      // keep account (so they can sign back in), just mark signed out in UI
-      setSignedOut();
-      authToastMsg("Signed out (local).");
-      closeModal();
-    }
-
-    function goBuilder(){
-      window.location.href = "builder.html";
-    }
-
-    function generateGame(){
-      const a = getAuth();
-      if (!a){
-        toast("Sign in first (local-only).");
-        openModal();
+      if (!email.includes("@") || email.length < 6){
+        showToast("Enter a real email.");
+        return;
+      }
+      if (pass.length < 6){
+        showToast("Password must be at least 6 characters.");
         return;
       }
 
-      const prompt = String(promptBox.value || "").trim();
-      if (!prompt){
-        toast("Type a short game description first.");
-        promptBox.focus();
-        return;
-      }
+      const passHash = await sha256Hex(pass);
+      writeJSON(LS_USER, { email, passHash, createdAt: Date.now() });
+      writeJSON(LS_SESSION, { email, at: Date.now() });
 
-      localStorage.setItem(KEYS.draftPrompt, prompt);
-      toast("Opening builder…");
-      setTimeout(() => goBuilder(), 250);
-    }
-
-    // Events
-    btnSignIn.addEventListener("click", openModal);
-    btnOpenBuilder.addEventListener("click", goBuilder);
-    btnGoBuilder2.addEventListener("click", goBuilder);
-    el("btnGenerate").addEventListener("click", generateGame);
-    el("btnSample").addEventListener("click", () => {
-      promptBox.value =
-`Emoji Arena (Teams)
-- Viewers type !join red / !join blue to pick a team
-- Chat: !attack triggers team push, !shield blocks for 3 seconds
-- Likes: charge a boost meter (when full, auto-speed burst)
-- Gifts: small=heal, medium=stun, large=meteor
-- Rounds are 30 seconds, first team to 100 points wins
-- Screen: arena + big HUD + flashy popups + leaderboard`;
-      toast("Sample inserted.");
+      setStatus();
+      showToast("Account created. Signed in.");
+      closeModal();
     });
-    el("btnClear").addEventListener("click", () => { promptBox.value=""; toast("Cleared."); });
 
-    btnCloseModal.addEventListener("click", closeModal);
-    modalWrap.addEventListener("click", (e) => { if (e.target === modalWrap) closeModal(); });
+    btnLogin.addEventListener("click", async () => {
+      const email = (emailEl.value || "").trim().toLowerCase();
+      const pass = (passEl.value || "").trim();
 
-    btnCreateAccount.addEventListener("click", createAccount);
-    btnDoSignIn.addEventListener("click", signIn);
-    btnSignOut.addEventListener("click", signOut);
-
-    // Init
-    (function init(){
-      el("yy").textContent = String(new Date().getFullYear());
-
-      // preload last email
-      try{
-        const last = localStorage.getItem(KEYS.lastUser);
-        if (last) emailBox.value = last;
-      }catch{}
-
-      const a = getAuth();
-      if (a && a.email){
-        // not auto-auth; just convenience: show signed in (local)
-        setSignedIn(a.email);
-      } else {
-        setSignedOut();
+      const u = readJSON(LS_USER);
+      if (!u || !u.email){
+        showToast("No account found. Click Create Account first.");
+        return;
+      }
+      if (u.email !== email){
+        showToast("Email not found on this device.");
+        return;
+      }
+      const passHash = await sha256Hex(pass);
+      if (passHash !== u.passHash){
+        showToast("Incorrect password.");
+        return;
       }
 
-      // if they previously drafted a prompt, keep it
-      try{
-        const draft = localStorage.getItem(KEYS.draftPrompt);
-        if (draft && !promptBox.value.trim()) promptBox.value = draft;
-      }catch{}
-    })();
+      writeJSON(LS_SESSION, { email, at: Date.now() });
+      setStatus();
+      showToast("Signed in.");
+      closeModal();
+    });
+
+    btnLogout.addEventListener("click", () => {
+      localStorage.removeItem(LS_SESSION);
+      setStatus();
+      showToast("Signed out.");
+    });
+
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.classList.add("show");
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(()=> toast.classList.remove("show"), 2200);
+    }
+
+    setStatus();
   </script>
 </body>
 </html>
