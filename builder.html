@@ -3,697 +3,1062 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>ChatTok Builder</title>
+  <title>ChatOck Game Builder</title>
+  <meta name="description" content="Build TikTok Live interactive games: staged HTML → CSS → game.js generation." />
 
   <style>
     :root{
-      --bg0:#070707;
-      --bg1:#0b0b0b;
+      --bg0:#0b0b0c;
+      --bg1:#121214;
       --panel: rgba(255,255,255,.06);
       --panel2: rgba(255,255,255,.04);
       --line: rgba(255,255,255,.10);
       --text:#ffffff;
-      --muted: rgba(255,255,255,.72);
+      --muted: rgba(255,255,255,.70);
 
       --orange:#ff7a18;
-      --orange2:#ff9c3a;
-
+      --orange2:#ffb154;
       --good:#2ee59d;
       --bad:#ff4d4d;
 
-      --r: 18px;
-      --r2: 14px;
-      --shadow: 0 18px 50px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08);
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Liberation Mono", "Courier New", monospace;
-      --sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      --shadow: 0 18px 55px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08);
+      --r: 16px;
+      --r2: 12px;
+
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
 
-    *{ box-sizing:border-box; }
+    *{box-sizing:border-box}
     body{
       margin:0;
-      font-family: var(--sans);
-      color: var(--text);
-      min-height: 100vh;
+      font-family:var(--sans);
+      color:var(--text);
       background:
-        radial-gradient(900px 600px at 20% 10%, rgba(255,122,24,.18), transparent 55%),
-        radial-gradient(900px 600px at 80% 20%, rgba(255,156,58,.12), transparent 55%),
+        radial-gradient(1200px 600px at 30% -10%, rgba(255,122,24,.22), transparent 60%),
+        radial-gradient(900px 500px at 80% 0%, rgba(255,177,84,.14), transparent 55%),
         linear-gradient(180deg, var(--bg0), var(--bg1));
+      min-height:100svh;
     }
-
-    a{ color: var(--orange2); text-decoration:none; }
-    a:hover{ text-decoration:underline; }
-
-    .topbar{
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      backdrop-filter: blur(10px);
-      background: linear-gradient(180deg, rgba(0,0,0,.72), rgba(0,0,0,.25));
-      border-bottom: 1px solid var(--line);
-    }
-    .topbar-inner{
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 14px 16px;
-      display:flex;
-      align-items:center;
-      justify-content: space-between;
-      gap: 12px;
+    a{color:inherit; text-decoration:none}
+    .wrap{max-width:1180px; margin:0 auto; padding:18px 16px 28px}
+    header{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; padding:10px 0 16px;
     }
     .brand{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      min-width: 260px;
+      display:flex; align-items:center; gap:10px;
     }
     .logo{
-      width: 34px;
-      height: 34px;
-      border-radius: 12px;
-      background: radial-gradient(circle at 30% 30%, var(--orange2), var(--orange));
-      box-shadow: 0 12px 30px rgba(255,122,24,.35);
+      width:38px; height:38px; border-radius:12px;
+      background:
+        radial-gradient(14px 14px at 28% 30%, rgba(255,255,255,.35), transparent 60%),
+        linear-gradient(135deg, rgba(255,122,24,.95), rgba(255,177,84,.8));
+      box-shadow: 0 12px 34px rgba(255,122,24,.18);
+      position:relative;
+      overflow:hidden;
     }
-    .brand .title{
-      display:flex;
-      flex-direction:column;
-      line-height: 1.1;
+    .logo:after{
+      content:"";
+      position:absolute; inset:-30%;
+      background: radial-gradient(circle at 20% 20%, rgba(255,255,255,.18), transparent 55%);
+      transform: rotate(14deg);
     }
-    .brand .title strong{ font-size: 14px; letter-spacing:.2px; }
-    .brand .title span{ font-size: 12px; color: var(--muted); margin-top: 2px; }
-
-    .wrap{ max-width:1200px; margin:0 auto; padding:16px; }
+    .brand h1{
+      margin:0;
+      font-size:16px;
+      letter-spacing:.2px;
+      line-height:1.1;
+    }
+    .brand p{
+      margin:2px 0 0;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .top-actions{
+      display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+      justify-content:flex-end;
+    }
 
     .grid{
       display:grid;
-      grid-template-columns: 420px 1fr;
-      gap: 14px;
+      grid-template-columns: 430px 1fr;
+      gap:14px;
       align-items:start;
     }
     @media (max-width: 980px){
-      .grid{ grid-template-columns: 1fr; }
-      .brand{ min-width: 0; }
+      .grid{grid-template-columns: 1fr}
     }
 
     .card{
-      background: linear-gradient(180deg, var(--panel), var(--panel2));
-      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.10);
       border-radius: var(--r);
       box-shadow: var(--shadow);
-      overflow: hidden;
+      overflow:hidden;
     }
-    .card-h{
-      padding: 14px 14px 10px 14px;
-      border-bottom: 1px solid rgba(255,255,255,.06);
-      display:flex;
-      align-items:flex-start;
-      justify-content: space-between;
-      gap: 10px;
+    .card .hd{
+      padding:14px 14px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
     }
-    .card-h h2{
-      margin:0;
-      font-size: 14px;
+    .hd .title{
+      font-weight:800;
       letter-spacing:.2px;
+      font-size:13px;
+      margin:0;
     }
-    .card-h p{
-      margin:6px 0 0 0;
-      font-size: 12px;
-      color: var(--muted);
+    .hd .sub{
+      margin:5px 0 0;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
     }
-    .card-b{ padding: 14px; }
+    .card .bd{padding:14px}
 
-    .row{ display:flex; gap:10px; flex-wrap:wrap; }
-    .row > *{ flex:1 1 auto; }
+    .row{display:flex; gap:10px; align-items:center}
+    .row.wrap{flex-wrap:wrap}
+    .sp{height:10px}
+    .sp2{height:14px}
+    .sp3{height:18px}
 
-    label.k{
-      display:block;
-      font-size: 12px;
-      color: var(--muted);
-      margin: 0 0 8px 2px;
+    .field{display:grid; gap:6px; margin-bottom:10px}
+    .label{
+      font-size:12px;
+      color:rgba(255,255,255,.82);
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px;
     }
-
-    .input, .ta{
+    .hint{
+      font-size:11px; color:rgba(255,255,255,.55);
+      display:flex; align-items:center; gap:6px;
+    }
+    .iBtn{
+      width:18px; height:18px; border-radius:999px;
+      display:inline-grid; place-items:center;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(0,0,0,.25);
+      color:rgba(255,255,255,.8);
+      font-size:12px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .iBtn:hover{border-color:rgba(255,255,255,.28)}
+    .input, textarea{
       width:100%;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.35);
-      color: var(--text);
-      outline: none;
-      padding: 12px 12px;
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,.25);
+      padding:12px 12px;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.28);
+      color:var(--text);
+      outline:none;
+      transition: border .15s ease, transform .15s ease;
+      font-size:14px;
     }
-    .input:focus, .ta:focus{
-      border-color: rgba(255,156,58,.55);
-      box-shadow: 0 0 0 3px rgba(255,122,24,.20);
-    }
-    .ta{
-      min-height: 140px;
-      resize: vertical;
-      font-family: var(--sans);
-      line-height: 1.35;
+    textarea{min-height:118px; resize:vertical; line-height:1.35}
+    .input:focus, textarea:focus{
+      border-color: rgba(255,122,24,.65);
+      box-shadow: 0 0 0 3px rgba(255,122,24,.18);
     }
 
     .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      padding: 11px 12px;
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      padding:11px 12px;
       border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.14);
       background: rgba(255,255,255,.06);
-      color: var(--text);
-      cursor: pointer;
+      color:var(--text);
+      cursor:pointer;
       user-select:none;
-      transition: transform .05s ease, background .15s ease, border-color .15s ease;
-      font-weight: 650;
+      font-weight:700;
       letter-spacing:.2px;
-      min-width: 160px;
+      transition: transform .12s ease, border .12s ease, background .12s ease;
+      white-space:nowrap;
     }
-    .btn:hover{ background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.14); }
-    .btn:active{ transform: translateY(1px); }
+    .btn:hover{transform: translateY(-1px); border-color: rgba(255,255,255,.25)}
+    .btn:active{transform: translateY(0px)}
+    .btn[disabled]{opacity:.45; cursor:not-allowed; transform:none !important}
     .btn.primary{
-      background: linear-gradient(180deg, rgba(255,156,58,.95), rgba(255,122,24,.92));
-      border-color: rgba(255,156,58,.75);
-      color: #1a0c02;
-      box-shadow: 0 14px 30px rgba(255,122,24,.18);
+      border-color: rgba(255,122,24,.55);
+      background: linear-gradient(135deg, rgba(255,122,24,.95), rgba(255,177,84,.70));
+      color:#120a02;
+      box-shadow: 0 12px 36px rgba(255,122,24,.18);
     }
-    .btn.primary:hover{ filter: brightness(1.03); }
-    .btn:disabled{
-      opacity: .45;
-      cursor:not-allowed;
-      transform:none;
-    }
-
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.10);
-      color: rgba(255,255,255,.82);
-      font-size: 12px;
-      white-space: nowrap;
-    }
-    .dot{ width:8px; height:8px; border-radius:50%; background: rgba(255,255,255,.35); }
-    .dot.good{ background: rgba(46,229,157,.95); box-shadow: 0 0 0 3px rgba(46,229,157,.18); }
-    .dot.bad{ background: rgba(255,77,77,.95); box-shadow: 0 0 0 3px rgba(255,77,77,.18); }
-    .dot.warn{ background: rgba(255,156,58,.95); box-shadow: 0 0 0 3px rgba(255,156,58,.18); }
-
-    .hint{
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(0,0,0,.28);
-      border: 1px solid rgba(255,255,255,.08);
-      color: rgba(255,255,255,.80);
-      font-size: 12px;
-      line-height: 1.35;
-    }
-    .hint .i{
-      width: 20px; height: 20px;
-      border-radius: 8px;
-      display:flex; align-items:center; justify-content:center;
-      background: rgba(255,156,58,.14);
-      border: 1px solid rgba(255,156,58,.25);
-      color: rgba(255,156,58,.95);
-      font-weight: 900;
-      flex: 0 0 auto;
-    }
-
-    .steps{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-    .step{
-      border-radius: var(--r2);
-      border: 1px solid rgba(255,255,255,.08);
+    .btn.primary:hover{border-color: rgba(255,122,24,.9)}
+    .btn.ghost{
       background: rgba(0,0,0,.22);
-      padding: 12px;
+      border-color: rgba(255,255,255,.14);
     }
-    .step-top{
-      display:flex;
-      align-items:center;
-      justify-content: space-between;
-      gap:10px;
-      margin-bottom: 10px;
+    .btn.warn{
+      background: rgba(255,77,77,.10);
+      border-color: rgba(255,77,77,.30);
     }
-    .step-top .left{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width: 0;
+    .btn.good{
+      background: rgba(46,229,157,.10);
+      border-color: rgba(46,229,157,.30);
     }
-    .badge{
-      width: 26px; height: 26px;
-      border-radius: 10px;
-      display:flex; align-items:center; justify-content:center;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.10);
-      color: rgba(255,255,255,.85);
-      font-weight: 900;
-      flex: 0 0 auto;
+    .chip{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      color:rgba(255,255,255,.82);
     }
-    .step h3{
-      margin:0;
-      font-size: 13px;
-      letter-spacing:.2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .step p{
-      margin:6px 0 0 0;
-      font-size: 12px;
-      color: var(--muted);
+    .chip.ok{border-color: rgba(46,229,157,.30); background: rgba(46,229,157,.08)}
+    .chip.bad{border-color: rgba(255,77,77,.35); background: rgba(255,77,77,.10)}
+    .divider{
+      height:1px;
+      background: rgba(255,255,255,.10);
+      margin:12px 0;
     }
 
-    .split{
+    .two{
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    @media (max-width: 980px){
-      .split{ grid-template-columns: 1fr; }
-    }
-
-    .codebox{
-      width:100%;
-      min-height: 250px;
-      resize: vertical;
-      font-family: var(--mono);
-      font-size: 12px;
-      line-height: 1.35;
-      padding: 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.35);
-      color: rgba(255,255,255,.92);
-      outline:none;
-      white-space: pre;
-      overflow:auto;
-    }
-
-    .mini-actions{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-      margin-top: 10px;
-    }
-    .mini{
-      min-width: 120px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.92);
-      cursor:pointer;
-      font-weight: 650;
-    }
-    .mini:hover{ background: rgba(255,255,255,.09); }
-
-    .micRow{
-      display:flex;
       gap:10px;
-      align-items: stretch;
     }
-    .micBtn{
-      width: 54px;
-      flex: 0 0 auto;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
+    @media (max-width: 520px){
+      .two{grid-template-columns:1fr}
+    }
+
+    .panel{
+      background: rgba(0,0,0,.22);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: var(--r2);
+      padding:12px;
+    }
+    .panel h3{
+      margin:0 0 8px;
+      font-size:12px;
+      letter-spacing:.25px;
+      opacity:.92;
+    }
+    .panel p{
+      margin:0;
+      font-size:12px;
+      color:rgba(255,255,255,.70);
+      line-height:1.35;
+    }
+
+    .outGrid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+    }
+    .outCard{
+      border-radius: var(--r);
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
+    }
+    .outTop{
+      padding:10px 12px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.03);
+    }
+    .outTop .name{
+      font-weight:800; font-size:12px; letter-spacing:.25px;
+      display:flex; align-items:center; gap:8px;
+    }
+    .outTop .mini{
+      display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end;
+    }
+    .codeBox{
+      width:100%;
+      height:250px;
+      border:0;
+      outline:none;
+      background: transparent;
+      color:rgba(255,255,255,.88);
+      padding:12px 12px 14px;
+      font-family: var(--mono);
+      font-size:12px;
+      line-height:1.4;
+      white-space:pre;
+      overflow:auto;
+      display:block;
+    }
+    .codeBox[readonly]{opacity:1}
+
+    .toast{
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 16px;
+      max-width: 92vw;
+      width: 720px;
+      background: rgba(0,0,0,.78);
+      border: 1px solid rgba(255,255,255,.14);
       color: rgba(255,255,255,.92);
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size: 18px;
+      border-radius: 16px;
+      box-shadow: 0 24px 70px rgba(0,0,0,.65);
+      padding: 10px 12px;
+      display:none;
+      z-index:9999;
     }
-    .micBtn:hover{ background: rgba(255,255,255,.10); }
-    .micBtn.on{
-      background: rgba(255,156,58,.16);
-      border-color: rgba(255,156,58,.28);
-      box-shadow: 0 0 0 3px rgba(255,122,24,.15);
+    .toast.show{display:block}
+    .toast .r{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+    }
+    .toast .msg{font-size:13px; line-height:1.35}
+    .toast .x{
+      width:28px; height:28px; border-radius: 12px;
+      display:grid; place-items:center;
+      cursor:pointer;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      flex:0 0 auto;
     }
 
     footer{
-      max-width: 1200px;
-      margin: 18px auto 0 auto;
-      padding: 18px 16px 26px 16px;
-      color: rgba(255,255,255,.60);
-      font-size: 12px;
-      border-top: 1px solid rgba(255,255,255,.08);
+      margin-top:16px;
+      padding:14px 0 0;
+      color:rgba(255,255,255,.60);
+      font-size:12px;
     }
     footer .frow{
-      display:flex;
-      gap: 12px;
-      align-items:center;
-      justify-content: space-between;
-      flex-wrap: wrap;
+      display:flex; gap:12px; justify-content:space-between; flex-wrap:wrap;
+      border-top: 1px solid rgba(255,255,255,.10);
+      padding-top:14px;
     }
-    footer .links{ display:flex; gap: 12px; flex-wrap:wrap; }
+    footer .links{display:flex; gap:12px; flex-wrap:wrap}
+    footer .links a{
+      opacity:.85;
+      border-bottom:1px dashed rgba(255,255,255,.22);
+    }
+    footer .links a:hover{opacity:1}
+
+    /* Simple modal */
+    .modalOverlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.62);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:9998;
+    }
+    .modalOverlay.show{display:flex}
+    .modal{
+      width:min(520px, 100%);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .modal .mhd{
+      padding:12px 12px;
+      display:flex; align-items:center; justify-content:space-between;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .modal .mhd b{font-size:13px}
+    .modal .mbd{padding:12px}
+    .modal .mft{padding:12px; border-top:1px solid rgba(255,255,255,.08); display:flex; justify-content:flex-end; gap:8px}
+    .small{font-size:12px; color:rgba(255,255,255,.70); line-height:1.35}
   </style>
 </head>
 
 <body>
-  <div class="topbar">
-    <div class="topbar-inner">
+  <div class="wrap">
+    <header>
       <div class="brand">
         <div class="logo" aria-hidden="true"></div>
-        <div class="title">
-          <strong>ChatTok Game Builder</strong>
-          <span>Step-by-step generator (HTML → CSS → game.js)</span>
+        <div>
+          <h1>ChatOck Game Builder</h1>
+          <p>Staged build: HTML → CSS → game.js (no preview)</p>
         </div>
       </div>
 
-      <div class="row" style="justify-content:flex-end;align-items:center;">
-        <span class="pill" id="statusPill">
-          <span class="dot warn" id="statusDot"></span>
-          <span id="statusText">Ready</span>
-        </span>
+      <div class="top-actions">
+        <span id="authChip" class="chip">Signed out</span>
+        <button class="btn ghost" id="btnSignIn">Sign in</button>
+        <button class="btn ghost" id="btnSignOut" style="display:none">Sign out</button>
       </div>
-    </div>
-  </div>
+    </header>
 
-  <div class="wrap">
     <div class="grid">
-      <!-- LEFT: controls -->
-      <div class="card">
-        <div class="card-h">
+      <!-- LEFT: Controls -->
+      <section class="card">
+        <div class="hd">
           <div>
-            <h2>1) Describe the game</h2>
-            <p>Keep it short. Tell what viewers do (chat / likes / gifts) and what “winning” looks like.</p>
+            <p class="title">1) Describe your game</p>
+            <p class="sub">
+              Keep it short. Tell what viewers do in chat/likes/gifts and what “winning” means.
+            </p>
+          </div>
+          <div class="row">
+            <span id="apiChip" class="chip">API: not checked</span>
           </div>
         </div>
-        <div class="card-b">
-          <div class="hint" style="margin-bottom:12px;">
-            <div class="i">i</div>
-            <div>
-              <strong>Tip:</strong> Mention your join keyword (example: “type !join”), the vibe (“cute / intense / arcade”), and 1–2 key actions (likes = ammo, gifts = power-ups).
+
+        <div class="bd">
+          <div class="field">
+            <div class="label">
+              <span>Builder API URL</span>
+              <span class="hint">
+                <span class="iBtn" data-tip="apiUrl">i</span>
+              </span>
+            </div>
+            <input id="apiUrl" class="input" type="url" placeholder="https://chattok-builder-api.onrender.com" />
+          </div>
+
+          <div class="field">
+            <div class="label">
+              <span>Game prompt</span>
+              <span class="hint">
+                <span id="micState" class="chip" style="display:none">Listening…</span>
+                <button class="btn ghost" id="btnMic" type="button">🎙️ Talk</button>
+                <span class="iBtn" data-tip="prompt">i</span>
+              </span>
+            </div>
+            <textarea id="idea" placeholder="Example: “A neon space runner where chat spawns obstacles, likes refill fuel, and gifts trigger a slow-motion power-up. First to 100 points wins.”"></textarea>
+          </div>
+
+          <div class="two">
+            <div class="field">
+              <div class="label">
+                <span>Theme primary</span>
+                <span class="hint"><span class="iBtn" data-tip="theme">i</span></span>
+              </div>
+              <input id="themePrimary" class="input" value="#ff7a18" />
+            </div>
+            <div class="field">
+              <div class="label">
+                <span>Theme secondary</span>
+              </div>
+              <input id="themeSecondary" class="input" value="#ffb154" />
             </div>
           </div>
 
-          <label class="k">Your prompt</label>
-          <div class="micRow">
-            <textarea class="ta" id="idea" placeholder="Example: A neon space race. Viewers type !boost to speed up, likes add fuel, gifts trigger rockets. First to 100 points wins."></textarea>
-            <button class="micBtn" id="micBtn" title="Talk-to-text (if supported)">🎤</button>
-          </div>
-          <div style="margin-top:8px;color:var(--muted);font-size:12px;" id="micHint"></div>
-
-          <div style="height:12px;"></div>
-
-          <label class="k">API URL (Render)</label>
-          <input class="input" id="apiBase" placeholder="https://chattok-builder-api.onrender.com" />
-
-          <div style="height:12px;"></div>
-
-          <div class="split">
-            <div>
-              <label class="k">Theme Primary</label>
-              <input class="input" id="primary" value="#ff7a18" />
+          <div class="field">
+            <div class="label">
+              <span>Theme background</span>
             </div>
-            <div>
-              <label class="k">Theme Secondary</label>
-              <input class="input" id="secondary" value="#ff9c3a" />
+            <input id="themeBg" class="input" value="#0b0b0c" />
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="row wrap">
+            <button class="btn primary" id="btnBuildHtml" type="button">Build HTML</button>
+            <button class="btn" id="btnBuildCss" type="button" disabled>Build CSS</button>
+            <button class="btn" id="btnBuildJs" type="button" disabled>Build game.js</button>
+            <button class="btn warn" id="btnReset" type="button">Reset</button>
+          </div>
+
+          <div class="sp2"></div>
+
+          <div class="panel">
+            <h3>Optional: Edit your game (AI_REGION only)</h3>
+            <p>
+              After you generate game.js, you can request up to <b>3 edits</b>.
+              This updates only the safe AI region (keeps TikTok connection rules intact).
+            </p>
+            <div class="sp"></div>
+            <div class="field">
+              <div class="label">
+                <span>Edit request</span>
+                <span class="hint"><span id="editsChip" class="chip">Edits left: 3</span></span>
+              </div>
+              <textarea id="editText" placeholder="Example: “Make names larger, add a big winner celebration, add better sound cues, and make chat cause more action.”" style="min-height:92px"></textarea>
             </div>
-          </div>
-
-          <div style="height:10px;"></div>
-
-          <div>
-            <label class="k">Theme Background</label>
-            <input class="input" id="background" value="#070707" />
-          </div>
-
-          <div style="height:14px;"></div>
-
-          <div class="row">
-            <button class="btn primary" id="btnHtml">Build HTML</button>
-            <button class="btn" id="btnCss" disabled>Build CSS</button>
-            <button class="btn" id="btnJs" disabled>Build game.js</button>
-          </div>
-
-          <div style="height:12px;"></div>
-
-          <div class="hint">
-            <div class="i">?</div>
-            <div>
-              <strong>How it flows:</strong><br>
-              Build HTML creates the game setup screen + settings UI.<br>
-              Build CSS applies your theme colors.<br>
-              Build game.js generates the actual gameplay logic (the fun part).
+            <div class="row wrap">
+              <button class="btn" id="btnApplyEdit" type="button" disabled>Apply edit</button>
+              <button class="btn ghost" id="btnCopyBundle" type="button" disabled>Copy all</button>
+              <button class="btn good" id="btnDownloadBundle" type="button" disabled>Download all</button>
             </div>
           </div>
 
-          <div style="height:12px;"></div>
+          <div class="sp3"></div>
 
-          <div class="row">
-            <button class="btn" id="btnReset">Reset</button>
-            <button class="btn" id="btnReloadTemplates">Reload Templates</button>
+          <div class="panel">
+            <h3>Quick notes</h3>
+            <p>
+              • This builder generates <b>index.html</b>, <b>style.css</b>, and <b>game.js</b> (no preview here).<br>
+              • Your preview happens on your other site (like you said).<br>
+              • If the API is down or your key isn’t set on Render, HTML/JS will fail.
+            </p>
           </div>
+
+        </div>
+      </section>
+
+      <!-- RIGHT: Outputs -->
+      <section class="outGrid">
+        <div class="outCard">
+          <div class="outTop">
+            <div class="name">index.html <span id="htmlChip" class="chip">pending</span></div>
+            <div class="mini">
+              <button class="btn ghost" id="btnCopyHtml" type="button" disabled>Copy</button>
+              <button class="btn ghost" id="btnDownloadHtml" type="button" disabled>Download</button>
+            </div>
+          </div>
+          <textarea id="outHtml" class="codeBox" readonly spellcheck="false"></textarea>
+        </div>
+
+        <div class="outCard">
+          <div class="outTop">
+            <div class="name">style.css <span id="cssChip" class="chip">pending</span></div>
+            <div class="mini">
+              <button class="btn ghost" id="btnCopyCss" type="button" disabled>Copy</button>
+              <button class="btn ghost" id="btnDownloadCss" type="button" disabled>Download</button>
+            </div>
+          </div>
+          <textarea id="outCss" class="codeBox" readonly spellcheck="false"></textarea>
+        </div>
+
+        <div class="outCard">
+          <div class="outTop">
+            <div class="name">game.js <span id="jsChip" class="chip">pending</span></div>
+            <div class="mini">
+              <button class="btn ghost" id="btnCopyJs" type="button" disabled>Copy</button>
+              <button class="btn ghost" id="btnDownloadJs" type="button" disabled>Download</button>
+            </div>
+          </div>
+          <textarea id="outJs" class="codeBox" readonly spellcheck="false"></textarea>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      <div class="frow">
+        <div>© <span id="year"></span> ChatOck Tools — Builder</div>
+        <div class="links">
+          <a href="#" id="linkPrivacy">Privacy (placeholder)</a>
+          <a href="#" id="linkTerms">Terms (placeholder)</a>
+          <a href="#" id="linkSupport">Support (placeholder)</a>
         </div>
       </div>
+    </footer>
+  </div>
 
-      <!-- RIGHT: outputs -->
-      <div class="card">
-        <div class="card-h">
-          <div>
-            <h2>2) Output files</h2>
-            <p>Copy/paste into your preview on chat… and you’re live.</p>
-          </div>
-        </div>
-
-        <div class="card-b">
-          <div class="steps">
-
-            <!-- HTML -->
-            <div class="step" id="stepHtml">
-              <div class="step-top">
-                <div class="left">
-                  <div class="badge">1</div>
-                  <div>
-                    <h3>index.html</h3>
-                    <p>Setup overlay + game container</p>
-                  </div>
-                </div>
-              </div>
-
-              <textarea class="codebox" id="outHtml" placeholder="index.html will appear here..."></textarea>
-
-              <div class="mini-actions">
-                <button class="mini" id="copyHtml">Copy</button>
-                <button class="mini" id="dlHtml">Download</button>
-              </div>
-            </div>
-
-            <!-- CSS -->
-            <div class="step" id="stepCss">
-              <div class="step-top">
-                <div class="left">
-                  <div class="badge">2</div>
-                  <div>
-                    <h3>style.css</h3>
-                    <p>Theme + layout styling</p>
-                  </div>
-                </div>
-              </div>
-
-              <textarea class="codebox" id="outCss" placeholder="style.css will appear here..."></textarea>
-
-              <div class="mini-actions">
-                <button class="mini" id="copyCss">Copy</button>
-                <button class="mini" id="dlCss">Download</button>
-              </div>
-            </div>
-
-            <!-- JS -->
-            <div class="step" id="stepJs">
-              <div class="step-top">
-                <div class="left">
-                  <div class="badge">3</div>
-                  <div>
-                    <h3>game.js</h3>
-                    <p>Gameplay + TikTok hooks</p>
-                  </div>
-                </div>
-              </div>
-
-              <textarea class="codebox" id="outJs" placeholder="game.js will appear here..."></textarea>
-
-              <div class="mini-actions">
-                <button class="mini" id="copyJs">Copy</button>
-                <button class="mini" id="dlJs">Download</button>
-              </div>
-            </div>
-
-            <!-- Edit (optional, but nice) -->
-            <div class="step" id="stepEdit">
-              <div class="step-top">
-                <div class="left">
-                  <div class="badge">✎</div>
-                  <div>
-                    <h3>Quick Edit (AI_REGION only)</h3>
-                    <p>Tell it what to change, safely.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="hint" style="margin-bottom:10px;">
-                <div class="i">i</div>
-                <div>
-                  This only edits the AI gameplay section inside <strong>game.js</strong>. It won’t break your TikTok connection template.
-                </div>
-              </div>
-
-              <div class="split">
-                <div>
-                  <label class="k">Edits remaining</label>
-                  <input class="input" id="editsRemaining" type="number" min="0" max="25" value="3" />
-                </div>
-                <div>
-                  <label class="k">Template hint (optional)</label>
-                  <input class="input" id="templateId" value="boss" />
-                </div>
-              </div>
-
-              <div style="height:10px;"></div>
-              <label class="k">Change request</label>
-              <textarea class="ta" id="editText" placeholder="Example: Make the join action spawn a character with a quick animation. Gifts should trigger a super attack."></textarea>
-
-              <div style="height:10px;"></div>
-              <div class="row" style="justify-content:flex-end;">
-                <button class="btn" id="btnEdit">Apply Edit</button>
-              </div>
-            </div>
-
-          </div>
-        </div>
+  <!-- Tooltips -->
+  <div id="tipModal" class="modalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal">
+      <div class="mhd">
+        <b id="tipTitle">Info</b>
+        <button class="btn ghost" id="tipClose" type="button">Close</button>
       </div>
-
+      <div class="mbd">
+        <div id="tipBody" class="small"></div>
+      </div>
+      <div class="mft">
+        <button class="btn" id="tipOk" type="button">OK</button>
+      </div>
     </div>
   </div>
 
-  <footer>
-    <div class="frow">
-      <div>© <span id="year"></span> ChatTok Tools</div>
-      <div class="links">
-        <a href="index.html">Home</a>
-        <a href="about.html">About</a>
-        <a href="privacy.html">Privacy</a>
-        <a href="terms.html">Terms</a>
+  <!-- Auth modal (LOCAL ONLY) -->
+  <div id="authModal" class="modalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal">
+      <div class="mhd">
+        <b>Sign in (local)</b>
+        <button class="btn ghost" id="authClose" type="button">Close</button>
+      </div>
+      <div class="mbd">
+        <p class="small" style="margin-top:0">
+          This is a simple <b>local</b> sign-in stored in your browser (GitHub Pages can’t securely store passwords server-side).
+          It’s mainly to keep your settings saved on your device.
+        </p>
+        <div class="field">
+          <div class="label"><span>Email</span></div>
+          <input id="authEmail" class="input" placeholder="you@email.com" />
+        </div>
+        <div class="field">
+          <div class="label"><span>Password</span></div>
+          <input id="authPass" class="input" type="password" placeholder="••••••••" />
+        </div>
+      </div>
+      <div class="mft">
+        <button class="btn" id="authDoSignIn" type="button">Sign in</button>
       </div>
     </div>
-  </footer>
+  </div>
 
-  <!-- Optional bridge (if present). If missing, no problem. -->
-  <script>
-    // If landing-bridge.js exists, it may set localStorage keys.
-    // We do NOT require it.
-  </script>
-  <script src="landing-bridge.js"></script>
+  <!-- Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite">
+    <div class="r">
+      <div id="toastMsg" class="msg"></div>
+      <div id="toastX" class="x" title="Close">✕</div>
+    </div>
+  </div>
 
   <script>
-    const $ = (id) => document.getElementById(id);
+    // -----------------------------
+    // State + Storage
+    // -----------------------------
+    const LS_KEY = "chattok_builder_state_v2";
+    const LS_AUTH = "chattok_builder_auth_v1";
 
     const state = {
-      context: null,      // { spec, templateId }
-      lastTemplateId: "boss",
-      busy: false,
-      speech: null,
-      recognizing: false,
+      apiUrl: "https://chattok-builder-api.onrender.com",
+      templateId: "boss",
+      remainingEdits: 3,
+      context: { spec: null, templateId: "boss" },
+      files: { "index.html": "", "style.css": "", "game.js": "" }
     };
 
-    const defaults = {
-      apiBase: "https://chattok-builder-api.onrender.com",
-      primary: "#ff7a18",
-      secondary: "#ff9c3a",
-      background: "#070707",
+    function saveState(){
+      const snapshot = {
+        apiUrl: state.apiUrl,
+        templateId: state.templateId,
+        remainingEdits: state.remainingEdits,
+        context: state.context,
+        files: state.files,
+        theme: {
+          primary: el.themePrimary.value,
+          secondary: el.themeSecondary.value,
+          background: el.themeBg.value
+        },
+        idea: el.idea.value
+      };
+      localStorage.setItem(LS_KEY, JSON.stringify(snapshot));
+    }
+
+    function loadState(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        if(!raw) return;
+        const s = JSON.parse(raw);
+        if(s.apiUrl) state.apiUrl = s.apiUrl;
+        if(s.templateId) state.templateId = s.templateId;
+        if(typeof s.remainingEdits === "number") state.remainingEdits = s.remainingEdits;
+        if(s.context) state.context = s.context;
+        if(s.files) state.files = s.files;
+        if(s.theme){
+          el.themePrimary.value = s.theme.primary || el.themePrimary.value;
+          el.themeSecondary.value = s.theme.secondary || el.themeSecondary.value;
+          el.themeBg.value = s.theme.background || el.themeBg.value;
+        }
+        if(typeof s.idea === "string") el.idea.value = s.idea;
+      }catch{}
+    }
+
+    // -----------------------------
+    // Elements
+    // -----------------------------
+    const el = {
+      apiUrl: document.getElementById("apiUrl"),
+      apiChip: document.getElementById("apiChip"),
+
+      idea: document.getElementById("idea"),
+      btnMic: document.getElementById("btnMic"),
+      micState: document.getElementById("micState"),
+
+      themePrimary: document.getElementById("themePrimary"),
+      themeSecondary: document.getElementById("themeSecondary"),
+      themeBg: document.getElementById("themeBg"),
+
+      btnBuildHtml: document.getElementById("btnBuildHtml"),
+      btnBuildCss: document.getElementById("btnBuildCss"),
+      btnBuildJs: document.getElementById("btnBuildJs"),
+      btnReset: document.getElementById("btnReset"),
+
+      outHtml: document.getElementById("outHtml"),
+      outCss: document.getElementById("outCss"),
+      outJs: document.getElementById("outJs"),
+
+      htmlChip: document.getElementById("htmlChip"),
+      cssChip: document.getElementById("cssChip"),
+      jsChip: document.getElementById("jsChip"),
+
+      btnCopyHtml: document.getElementById("btnCopyHtml"),
+      btnCopyCss: document.getElementById("btnCopyCss"),
+      btnCopyJs: document.getElementById("btnCopyJs"),
+
+      btnDownloadHtml: document.getElementById("btnDownloadHtml"),
+      btnDownloadCss: document.getElementById("btnDownloadCss"),
+      btnDownloadJs: document.getElementById("btnDownloadJs"),
+
+      editText: document.getElementById("editText"),
+      btnApplyEdit: document.getElementById("btnApplyEdit"),
+      editsChip: document.getElementById("editsChip"),
+
+      btnCopyBundle: document.getElementById("btnCopyBundle"),
+      btnDownloadBundle: document.getElementById("btnDownloadBundle"),
+
+      toast: document.getElementById("toast"),
+      toastMsg: document.getElementById("toastMsg"),
+      toastX: document.getElementById("toastX"),
+
+      tipModal: document.getElementById("tipModal"),
+      tipTitle: document.getElementById("tipTitle"),
+      tipBody: document.getElementById("tipBody"),
+      tipClose: document.getElementById("tipClose"),
+      tipOk: document.getElementById("tipOk"),
+
+      authChip: document.getElementById("authChip"),
+      btnSignIn: document.getElementById("btnSignIn"),
+      btnSignOut: document.getElementById("btnSignOut"),
+      authModal: document.getElementById("authModal"),
+      authClose: document.getElementById("authClose"),
+      authEmail: document.getElementById("authEmail"),
+      authPass: document.getElementById("authPass"),
+      authDoSignIn: document.getElementById("authDoSignIn"),
+
+      year: document.getElementById("year"),
+
+      linkPrivacy: document.getElementById("linkPrivacy"),
+      linkTerms: document.getElementById("linkTerms"),
+      linkSupport: document.getElementById("linkSupport"),
     };
 
-    function setStatus(kind, text){
-      const dot = $("statusDot");
-      const t = $("statusText");
-      t.textContent = text || "";
-      dot.classList.remove("good","bad","warn");
-      dot.classList.add(kind === "good" ? "good" : kind === "bad" ? "bad" : "warn");
+    el.year.textContent = new Date().getFullYear();
+
+    // -----------------------------
+    // UI Helpers
+    // -----------------------------
+    function showToast(msg, kind="info", ms=4200){
+      el.toastMsg.textContent = msg;
+      el.toast.classList.add("show");
+      if(kind === "bad") el.toast.style.borderColor = "rgba(255,77,77,.35)";
+      else if(kind === "good") el.toast.style.borderColor = "rgba(46,229,157,.30)";
+      else el.toast.style.borderColor = "rgba(255,255,255,.14)";
+
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(()=> el.toast.classList.remove("show"), ms);
+    }
+    el.toastX.addEventListener("click", ()=> el.toast.classList.remove("show"));
+
+    function setChip(chipEl, text, mode=""){
+      chipEl.textContent = text;
+      chipEl.classList.remove("ok","bad");
+      if(mode === "ok") chipEl.classList.add("ok");
+      if(mode === "bad") chipEl.classList.add("bad");
     }
 
-    function setBusy(on){
-      state.busy = !!on;
-      $("btnHtml").disabled = on;
-      $("btnCss").disabled = on || !state.context;
-      $("btnJs").disabled = on || !state.context;
-      $("btnEdit").disabled = on || !$("outJs").value.trim();
-      $("btnReloadTemplates").disabled = on;
-      $("btnReset").disabled = on;
+    function busy(btn, on){
+      if(!btn) return;
+      btn.disabled = !!on;
+      if(on){
+        btn.dataset._old = btn.textContent;
+        btn.textContent = "Working…";
+      } else if(btn.dataset._old){
+        btn.textContent = btn.dataset._old;
+        delete btn.dataset._old;
+      }
     }
 
-    function getApiBase(){
-      const raw = $("apiBase").value.trim();
-      return raw.replace(/\/+$/,"");
+    function apiBase(){
+      const u = (el.apiUrl.value || "").trim().replace(/\/+$/,"");
+      return u || "https://chattok-builder-api.onrender.com";
     }
 
     function themePayload(){
       return {
-        primary: $("primary").value.trim(),
-        secondary: $("secondary").value.trim(),
-        background: $("background").value.trim(),
+        primary: (el.themePrimary.value || "").trim(),
+        secondary: (el.themeSecondary.value || "").trim(),
+        background: (el.themeBg.value || "").trim()
       };
     }
 
     function ideaText(){
-      return $("idea").value.trim();
+      return (el.idea.value || "").trim();
     }
 
-    function persistSettings(){
-      localStorage.setItem("ct_builder_apiBase", $("apiBase").value.trim());
-      localStorage.setItem("ct_builder_primary", $("primary").value.trim());
-      localStorage.setItem("ct_builder_secondary", $("secondary").value.trim());
-      localStorage.setItem("ct_builder_background", $("background").value.trim());
+    function setOutputs(){
+      el.outHtml.value = state.files["index.html"] || "";
+      el.outCss.value = state.files["style.css"] || "";
+      el.outJs.value = state.files["game.js"] || "";
+
+      const hasHtml = !!(state.files["index.html"] || "").trim();
+      const hasCss  = !!(state.files["style.css"] || "").trim();
+      const hasJs   = !!(state.files["game.js"] || "").trim();
+
+      setChip(el.htmlChip, hasHtml ? "ready" : "pending", hasHtml ? "ok" : "");
+      setChip(el.cssChip,  hasCss  ? "ready" : "pending", hasCss  ? "ok" : "");
+      setChip(el.jsChip,   hasJs   ? "ready" : "pending", hasJs   ? "ok" : "");
+
+      el.btnBuildCss.disabled = !hasHtml;
+      el.btnBuildJs.disabled  = !(hasHtml && hasCss);
+
+      el.btnCopyHtml.disabled = !hasHtml;
+      el.btnCopyCss.disabled  = !hasCss;
+      el.btnCopyJs.disabled   = !hasJs;
+
+      el.btnDownloadHtml.disabled = !hasHtml;
+      el.btnDownloadCss.disabled  = !hasCss;
+      el.btnDownloadJs.disabled   = !hasJs;
+
+      el.btnApplyEdit.disabled = !hasJs || state.remainingEdits <= 0;
+      el.editsChip.textContent = `Edits left: ${state.remainingEdits}`;
+
+      const canBundle = hasHtml && hasCss && hasJs;
+      el.btnCopyBundle.disabled = !canBundle;
+      el.btnDownloadBundle.disabled = !canBundle;
     }
 
-    function loadSettings(){
-      $("apiBase").value = localStorage.getItem("ct_builder_apiBase") || defaults.apiBase;
-      $("primary").value = localStorage.getItem("ct_builder_primary") || defaults.primary;
-      $("secondary").value = localStorage.getItem("ct_builder_secondary") || defaults.secondary;
-      $("background").value = localStorage.getItem("ct_builder_background") || defaults.background;
-
-      // Pull idea from landing flow if available
-      const landingIdea = localStorage.getItem("ct_landing_idea") || "";
-      if (landingIdea && !$("idea").value.trim()) $("idea").value = landingIdea;
-
-      const urlIdea = new URLSearchParams(location.search).get("idea");
-      if (urlIdea && !$("idea").value.trim()) $("idea").value = urlIdea;
+    function resetAll(){
+      state.remainingEdits = 3;
+      state.context = { spec: null, templateId: state.templateId };
+      state.files = { "index.html": "", "style.css": "", "game.js": "" };
+      setOutputs();
+      saveState();
+      showToast("Reset complete.", "good");
     }
 
-    async function postJson(url, body){
+    // -----------------------------
+    // Networking
+    // -----------------------------
+    async function postJson(url, payload){
       const r = await fetch(url, {
         method: "POST",
         headers: { "Content-Type":"application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify(payload)
       });
 
-      const data = await r.json().catch(() => ({}));
-      if (!r.ok) {
-        const msg = data && (data.error || data.message) ? (data.error || data.message) : `HTTP ${r.status}`;
-        const e = new Error(msg);
-        e.status = r.status;
-        e.data = data;
-        throw e;
+      let data = null;
+      try{ data = await r.json(); } catch {}
+
+      if(!r.ok){
+        const msg = (data && (data.error || data.message)) ? (data.error || data.message) : `HTTP ${r.status}`;
+        const err = new Error(msg);
+        err.status = r.status;
+        err.data = data;
+        throw err;
       }
       return data;
     }
 
-    function ensureIdea(){
+    async function checkApi(){
+      try{
+        const r = await fetch(`${apiBase()}/health`, { method:"GET" });
+        if(!r.ok) throw new Error("Health check failed");
+        setChip(el.apiChip, "API: online", "ok");
+      }catch{
+        setChip(el.apiChip, "API: offline", "bad");
+      }
+    }
+
+    // -----------------------------
+    // Speech-to-text (Web Speech API)
+    // -----------------------------
+    let rec = null;
+    let isListening = false;
+
+    function supportsSpeech(){
+      return ("webkitSpeechRecognition" in window) || ("SpeechRecognition" in window);
+    }
+
+    function startSpeech(){
+      if(!supportsSpeech()){
+        showToast("Speech-to-text not supported in this browser.", "bad");
+        return;
+      }
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      rec = new SR();
+      rec.lang = "en-US";
+      rec.interimResults = true;
+      rec.continuous = true;
+
+      let finalText = "";
+
+      rec.onstart = () => {
+        isListening = true;
+        el.micState.style.display = "inline-flex";
+        el.btnMic.textContent = "⏹ Stop";
+      };
+      rec.onend = () => {
+        isListening = false;
+        el.micState.style.display = "none";
+        el.btnMic.textContent = "🎙️ Talk";
+      };
+      rec.onerror = () => {
+        showToast("Mic error. Check permissions.", "bad");
+      };
+      rec.onresult = (e) => {
+        let interim = "";
+        for(let i = e.resultIndex; i < e.results.length; i++){
+          const t = e.results[i][0].transcript;
+          if(e.results[i].isFinal) finalText += t + " ";
+          else interim += t;
+        }
+        // Live preview: append interim after a separator (without trashing user edits)
+        const base = el.idea.value.replace(/\s*\[listening\:\s[\s\S]*\]$/,"");
+        const preview = interim ? ` [listening: ${interim.trim()}]` : "";
+        el.idea.value = (base + " " + finalText).trim() + preview;
+      };
+
+      rec.start();
+    }
+
+    function stopSpeech(){
+      try{ rec && rec.stop(); } catch {}
+    }
+
+    el.btnMic.addEventListener("click", ()=>{
+      if(isListening) stopSpeech();
+      else startSpeech();
+    });
+
+    // Clean listening preview if user clicks in box
+    el.idea.addEventListener("focus", ()=>{
+      el.idea.value = el.idea.value.replace(/\s*\[listening\:\s[\s\S]*\]$/,"").trim();
+    });
+
+    // -----------------------------
+    // Build actions (staged)
+    // -----------------------------
+    async function buildHtml(){
       const idea = ideaText();
-      if (idea.length < 10) throw new Error("Please describe the game a little more (at least ~10 characters).");
-      return idea;
+      if(!idea){
+        showToast("Type a game prompt first.", "bad");
+        return;
+      }
+
+      busy(el.btnBuildHtml, true);
+      try{
+        const data = await postJson(`${apiBase()}/api/generate`, {
+          stage: "html",
+          idea,
+          templateId: state.templateId,
+          theme: themePayload()
+        });
+
+        if(!data || !data.ok) throw new Error(data?.error || "Build HTML failed");
+
+        state.files["index.html"] = data.file?.content || "";
+        state.context = data.context || state.context;
+
+        setOutputs();
+        saveState();
+        showToast("HTML generated.", "good");
+      }catch(e){
+        showToast(`HTML error: ${e.message}`, "bad", 7000);
+      }finally{
+        busy(el.btnBuildHtml, false);
+      }
+    }
+
+    async function buildCss(){
+      busy(el.btnBuildCss, true);
+      try{
+        const data = await postJson(`${apiBase()}/api/generate`, {
+          stage: "css",
+          // API no longer requires idea for css, but sending keeps things future-proof:
+          idea: ideaText() || "theme update",
+          templateId: state.templateId,
+          theme: themePayload(),
+          context: { spec: state.context?.spec || null }
+        });
+
+        if(!data || !data.ok) throw new Error(data?.error || "Build CSS failed");
+
+        state.files["style.css"] = data.file?.content || "";
+        state.context = data.context || state.context;
+
+        setOutputs();
+        saveState();
+        showToast("CSS generated.", "good");
+      }catch(e){
+        showToast(`CSS error: ${e.message}`, "bad", 7000);
+      }finally{
+        busy(el.btnBuildCss, false);
+      }
+    }
+
+    async function buildJs(){
+      const idea = ideaText();
+      if(!idea){
+        showToast("Type a game prompt first.", "bad");
+        return;
+      }
+      if(!state.context?.spec){
+        showToast("Missing spec context. Build HTML first.", "bad");
+        return;
+      }
+
+      busy(el.btnBuildJs, true);
+      try{
+        const data = await postJson(`${apiBase()}/api/generate`, {
+          stage: "js",
+          idea,
+          templateId: state.templateId,
+          theme: themePayload(),
+          context: { spec: state.context.spec }
+        });
+
+        if(!data || !data.ok) throw new Error(data?.error || "Build JS failed");
+
+        state.files["game.js"] = data.file?.content || "";
+        state.context = data.context || state.context;
+
+        setOutputs();
+        saveState();
+        showToast("game.js generated.", "good");
+      }catch(e){
+        showToast(`JS error: ${e.message}`, "bad", 7000);
+      }finally{
+        busy(el.btnBuildJs, false);
+      }
+    }
+
+    async function applyEdit(){
+      const txt = (el.editText.value || "").trim();
+      if(!txt){
+        showToast("Type an edit request first.", "bad");
+        return;
+      }
+      if(state.remainingEdits <= 0){
+        showToast("No edits remaining.", "bad");
+        return;
+      }
+
+      busy(el.btnApplyEdit, true);
+      try{
+        const payload = {
+          remainingEdits: state.remainingEdits,
+          changeRequest: txt,
+          templateId: state.templateId,
+          theme: themePayload(),
+          currentFiles: {
+            "style.css": state.files["style.css"] || "",
+            "game.js": state.files["game.js"] || ""
+          }
+        };
+
+        const data = await postJson(`${apiBase()}/api/edit`, payload);
+        if(!data || !data.ok) throw new Error(data?.error || "Edit failed");
+
+        state.remainingEdits = Number(data.remainingEdits ?? (state.remainingEdits - 1));
+
+        const patches = Array.isArray(data.patches) ? data.patches : [];
+        for(const p of patches){
+          if(p?.name && typeof p.content === "string"){
+            state.files[p.name] = p.content;
+          }
+        }
+
+        setOutputs();
+        saveState();
+        showToast("Edit applied.", "good");
+      }catch(e){
+        showToast(`Edit error: ${e.message}`, "bad", 7000);
+      }finally{
+        busy(el.btnApplyEdit, false);
+      }
+    }
+
+    // -----------------------------
+    // Copy / Download
+    // -----------------------------
+    async function copyText(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        showToast("Copied.", "good");
+      }catch{
+        // fallback
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+        showToast("Copied.", "good");
+      }
     }
 
     function downloadFile(name, content){
@@ -708,306 +1073,223 @@
       URL.revokeObjectURL(url);
     }
 
-    async function copyText(text){
+    function downloadBundle(){
+      // Simple multi-download (keeps it easy on GitHub Pages)
+      downloadFile("index.html", state.files["index.html"] || "");
+      downloadFile("style.css", state.files["style.css"] || "");
+      downloadFile("game.js", state.files["game.js"] || "");
+      showToast("Downloaded 3 files.", "good");
+    }
+
+    async function copyBundle(){
+      const text =
+`/* index.html */\n${state.files["index.html"] || ""}\n\n/* style.css */\n${state.files["style.css"] || ""}\n\n/* game.js */\n${state.files["game.js"] || ""}\n`;
+      await copyText(text);
+    }
+
+    // -----------------------------
+    // Tooltips
+    // -----------------------------
+    const tips = {
+      apiUrl: {
+        title: "API URL",
+        body: `
+Use your Render API base URL.<br><br>
+Example:<br>
+<b>https://chattok-builder-api.onrender.com</b><br><br>
+Your GitHub Pages site calls <code>/api/generate</code> and <code>/api/edit</code> from that base.
+        `.trim()
+      },
+      prompt: {
+        title: "Game prompt tips",
+        body: `
+Keep it short but clear:<br>
+• What happens on screen?<br>
+• What do chat / likes / gifts do?<br>
+• What is the win condition?<br><br>
+Example: “Chat spawns enemies, likes refill shields, gifts trigger power-ups. First to 100 points wins.”
+        `.trim()
+      },
+      theme: {
+        title: "Theme colors",
+        body: `
+These are injected into <b>style.css</b> from the template.<br>
+Primary/secondary control highlights, background controls the base dark tone.
+        `.trim()
+      }
+    };
+
+    function openTip(key){
+      const t = tips[key];
+      if(!t) return;
+      el.tipTitle.textContent = t.title;
+      el.tipBody.innerHTML = t.body;
+      el.tipModal.classList.add("show");
+      el.tipModal.setAttribute("aria-hidden", "false");
+    }
+    function closeTip(){
+      el.tipModal.classList.remove("show");
+      el.tipModal.setAttribute("aria-hidden", "true");
+    }
+
+    document.addEventListener("click", (e)=>{
+      const btn = e.target.closest("[data-tip]");
+      if(!btn) return;
+      openTip(btn.getAttribute("data-tip"));
+    });
+    el.tipClose.addEventListener("click", closeTip);
+    el.tipOk.addEventListener("click", closeTip);
+    el.tipModal.addEventListener("click", (e)=>{
+      if(e.target === el.tipModal) closeTip();
+    });
+
+    // -----------------------------
+    // Local Auth (browser-only)
+    // -----------------------------
+    function getAuth(){
       try{
-        await navigator.clipboard.writeText(text);
-        setStatus("good", "Copied to clipboard");
-        setTimeout(() => setStatus("warn","Ready"), 900);
-      }catch{
-        // fallback
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        ta.remove();
-        setStatus("good", "Copied");
-        setTimeout(() => setStatus("warn","Ready"), 900);
+        const raw = localStorage.getItem(LS_AUTH);
+        if(!raw) return null;
+        return JSON.parse(raw);
+      }catch{ return null; }
+    }
+    function setAuth(a){
+      localStorage.setItem(LS_AUTH, JSON.stringify(a));
+      refreshAuthUi();
+    }
+    function clearAuth(){
+      localStorage.removeItem(LS_AUTH);
+      refreshAuthUi();
+    }
+    async function hashText(s){
+      // SHA-256 for local storage (NOT a real auth system; just avoids storing plain text)
+      const enc = new TextEncoder().encode(s);
+      const buf = await crypto.subtle.digest("SHA-256", enc);
+      const arr = Array.from(new Uint8Array(buf));
+      return arr.map(b => b.toString(16).padStart(2,"0")).join("");
+    }
+
+    async function signInLocal(email, pass){
+      const e = String(email||"").trim().toLowerCase();
+      const p = String(pass||"");
+      if(!e || !p) throw new Error("Email and password required.");
+      const ph = await hashText(p);
+      setAuth({ email: e, passHash: ph, ts: Date.now() });
+      showToast("Signed in (local).", "good");
+    }
+
+    function refreshAuthUi(){
+      const a = getAuth();
+      if(a?.email){
+        el.authChip.textContent = `Signed in: ${a.email}`;
+        el.authChip.classList.add("ok");
+        el.btnSignIn.style.display = "none";
+        el.btnSignOut.style.display = "inline-flex";
+      }else{
+        el.authChip.textContent = "Signed out";
+        el.authChip.classList.remove("ok");
+        el.btnSignIn.style.display = "inline-flex";
+        el.btnSignOut.style.display = "none";
       }
     }
 
-    // ---------------------------
-    // Speech to text (Web Speech)
-    // ---------------------------
-    function setupSpeech(){
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const hint = $("micHint");
-      if (!SR) {
-        hint.textContent = "Talk-to-text not supported in this browser. (Chrome usually works.)";
-        $("micBtn").disabled = true;
-        return;
-      }
-
-      const rec = new SR();
-      rec.continuous = true;
-      rec.interimResults = true;
-      rec.lang = "en-US";
-
-      let baseText = "";
-      rec.onstart = () => {
-        state.recognizing = true;
-        $("micBtn").classList.add("on");
-        setStatus("warn", "Listening…");
-      };
-      rec.onerror = (e) => {
-        setStatus("bad", `Mic error: ${e.error || "unknown"}`);
-      };
-      rec.onend = () => {
-        state.recognizing = false;
-        $("micBtn").classList.remove("on");
-        setStatus("warn", "Ready");
-      };
-
-      rec.onresult = (event) => {
-        let interim = "";
-        let finalText = "";
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const res = event.results[i];
-          const txt = res[0] && res[0].transcript ? res[0].transcript : "";
-          if (res.isFinal) finalText += txt;
-          else interim += txt;
-        }
-
-        const combined = (baseText + " " + finalText + " " + interim).replace(/\s+/g," ").trim();
-        $("idea").value = combined;
-      };
-
-      $("micBtn").addEventListener("click", async () => {
-        try{
-          if (state.recognizing) {
-            rec.stop();
-            return;
-          }
-          // request mic permission early (helps some browsers)
-          try { await navigator.mediaDevices.getUserMedia({ audio: true }); } catch {}
-          baseText = $("idea").value.trim();
-          rec.start();
-        }catch(err){
-          setStatus("bad", "Could not start microphone.");
-          console.warn(err);
-        }
-      });
-
-      state.speech = rec;
-      hint.textContent = "Click 🎤 and talk. Click again to stop. (Works best on HTTPS.)";
+    function openAuth(){
+      el.authModal.classList.add("show");
+      el.authModal.setAttribute("aria-hidden","false");
+    }
+    function closeAuth(){
+      el.authModal.classList.remove("show");
+      el.authModal.setAttribute("aria-hidden","true");
     }
 
-    // ---------------------------
-    // Staged build
-    // ---------------------------
-    async function buildHtml(){
-      persistSettings();
-      ensureIdea();
-
-      const api = getApiBase();
-      const templateId = $("templateId").value.trim() || "boss";
-      state.lastTemplateId = templateId;
-
-      setBusy(true);
-      setStatus("warn", "Building HTML…");
-
+    el.btnSignIn.addEventListener("click", openAuth);
+    el.authClose.addEventListener("click", closeAuth);
+    el.authModal.addEventListener("click", (e)=>{
+      if(e.target === el.authModal) closeAuth();
+    });
+    el.btnSignOut.addEventListener("click", ()=>{
+      clearAuth();
+      showToast("Signed out.", "good");
+    });
+    el.authDoSignIn.addEventListener("click", async ()=>{
       try{
-        const data = await postJson(`${api}/api/generate`, {
-          stage: "html",
-          idea: ideaText(),
-          templateId,
-        });
-
-        const html = data?.file?.content || "";
-        if (!html) throw new Error("HTML stage returned empty content.");
-
-        $("outHtml").value = html;
-        state.context = data.context || null;
-
-        // enable next steps
-        $("btnCss").disabled = false;
-        $("btnJs").disabled = false;
-
-        setStatus("good", "HTML done");
-        setTimeout(() => setStatus("warn","Ready"), 900);
-      }finally{
-        setBusy(false);
+        await signInLocal(el.authEmail.value, el.authPass.value);
+        closeAuth();
+      }catch(e){
+        showToast(e.message, "bad");
       }
+    });
+
+    // -----------------------------
+    // Placeholder footer links
+    // -----------------------------
+    function placeholderLink(name){
+      showToast(`${name} page placeholder — we’ll build it later.`, "info");
     }
+    el.linkPrivacy.addEventListener("click", (e)=>{ e.preventDefault(); placeholderLink("Privacy"); });
+    el.linkTerms.addEventListener("click", (e)=>{ e.preventDefault(); placeholderLink("Terms"); });
+    el.linkSupport.addEventListener("click", (e)=>{ e.preventDefault(); placeholderLink("Support"); });
 
-    async function buildCss(){
-      persistSettings();
+    // -----------------------------
+    // Events
+    // -----------------------------
+    el.apiUrl.addEventListener("change", ()=>{
+      state.apiUrl = apiBase();
+      saveState();
+      checkApi();
+    });
 
-      const api = getApiBase();
-      const templateId = state.context?.templateId || state.lastTemplateId || ($("templateId").value.trim() || "boss");
+    el.idea.addEventListener("input", ()=>{
+      saveState();
+    });
 
-      setBusy(true);
-      setStatus("warn", "Building CSS…");
+    el.themePrimary.addEventListener("input", saveState);
+    el.themeSecondary.addEventListener("input", saveState);
+    el.themeBg.addEventListener("input", saveState);
 
-      try{
-        const data = await postJson(`${api}/api/generate`, {
-          stage: "css",
-          templateId,
-          theme: themePayload(),
-          context: { spec: state.context?.spec || null }
-        });
+    el.btnBuildHtml.addEventListener("click", buildHtml);
+    el.btnBuildCss.addEventListener("click", buildCss);
+    el.btnBuildJs.addEventListener("click", buildJs);
+    el.btnReset.addEventListener("click", resetAll);
 
-        const css = data?.file?.content || "";
-        if (!css) throw new Error("CSS stage returned empty content.");
+    el.btnApplyEdit.addEventListener("click", applyEdit);
 
-        $("outCss").value = css;
+    el.btnCopyHtml.addEventListener("click", ()=> copyText(state.files["index.html"] || ""));
+    el.btnCopyCss.addEventListener("click", ()=> copyText(state.files["style.css"] || ""));
+    el.btnCopyJs.addEventListener("click", ()=> copyText(state.files["game.js"] || ""));
 
-        setStatus("good", "CSS done");
-        setTimeout(() => setStatus("warn","Ready"), 900);
-      }finally{
-        setBusy(false);
+    el.btnDownloadHtml.addEventListener("click", ()=> downloadFile("index.html", state.files["index.html"] || ""));
+    el.btnDownloadCss.addEventListener("click", ()=> downloadFile("style.css", state.files["style.css"] || ""));
+    el.btnDownloadJs.addEventListener("click", ()=> downloadFile("game.js", state.files["game.js"] || ""));
+
+    el.btnCopyBundle.addEventListener("click", copyBundle);
+    el.btnDownloadBundle.addEventListener("click", downloadBundle);
+
+    // -----------------------------
+    // Init
+    // -----------------------------
+    (function init(){
+      el.apiUrl.value = state.apiUrl;
+      loadState();
+
+      // If user changed saved apiUrl, sync state
+      state.apiUrl = apiBase();
+
+      // Restore outputs and chips
+      setOutputs();
+
+      refreshAuthUi();
+      checkApi();
+
+      if(!supportsSpeech()){
+        // keep it quiet; just disable mic button
+        el.btnMic.disabled = true;
+        el.btnMic.title = "Speech-to-text not supported in this browser.";
       }
-    }
 
-    async function buildJs(){
-      persistSettings();
-      ensureIdea();
-
-      const api = getApiBase();
-      const templateId = state.context?.templateId || state.lastTemplateId || ($("templateId").value.trim() || "boss");
-
-      setBusy(true);
-      setStatus("warn", "Building game.js…");
-
-      try{
-        const data = await postJson(`${api}/api/generate`, {
-          stage: "js",
-          idea: ideaText(),
-          templateId,
-          context: { spec: state.context?.spec || null }
-        });
-
-        const js = data?.file?.content || "";
-        if (!js) throw new Error("JS stage returned empty content.");
-
-        $("outJs").value = js;
-        $("btnEdit").disabled = false;
-
-        setStatus("good", "game.js done");
-        setTimeout(() => setStatus("warn","Ready"), 900);
-      }finally{
-        setBusy(false);
-      }
-    }
-
-    async function reloadTemplates(){
-      const api = getApiBase();
-      setBusy(true);
-      setStatus("warn", "Reloading templates…");
-      try{
-        await postJson(`${api}/api/reload-templates`, {});
-        setStatus("good", "Templates reloaded");
-        setTimeout(() => setStatus("warn","Ready"), 900);
-      }finally{
-        setBusy(false);
-      }
-    }
-
-    async function applyEdit(){
-      persistSettings();
-
-      const api = getApiBase();
-      const remaining = Number($("editsRemaining").value || 0);
-      if (!$("outJs").value.trim()) throw new Error("Generate game.js first, then edit.");
-      const changeRequest = $("editText").value.trim();
-      if (!changeRequest) throw new Error("Type what you want changed.");
-
-      const templateId = state.context?.templateId || $("templateId").value.trim() || "boss";
-
-      setBusy(true);
-      setStatus("warn", "Applying edit…");
-
-      try{
-        const data = await postJson(`${api}/api/edit`, {
-          remainingEdits: remaining,
-          changeRequest,
-          templateId,
-          theme: themePayload(),
-          currentFiles: {
-            "style.css": $("outCss").value || "",
-            "game.js": $("outJs").value || ""
-          }
-        });
-
-        if (!data.ok) throw new Error(data.error || "Edit failed.");
-
-        // patch
-        const patches = Array.isArray(data.patches) ? data.patches : [];
-        for (const p of patches) {
-          if (p.name === "game.js") $("outJs").value = p.content || "";
-          if (p.name === "style.css") $("outCss").value = p.content || "";
-        }
-
-        if (typeof data.remainingEdits === "number") $("editsRemaining").value = String(data.remainingEdits);
-
-        setStatus("good", "Edit applied");
-        setTimeout(() => setStatus("warn","Ready"), 900);
-      }finally{
-        setBusy(false);
-      }
-    }
-
-    function resetAll(){
-      state.context = null;
-      $("outHtml").value = "";
-      $("outCss").value = "";
-      $("outJs").value = "";
-      $("editText").value = "";
-      $("btnCss").disabled = true;
-      $("btnJs").disabled = true;
-      $("btnEdit").disabled = true;
-      setStatus("warn","Ready");
-    }
-
-    // ---------------------------
-    // Wire UI
-    // ---------------------------
-    function bind(){
-      $("year").textContent = new Date().getFullYear();
-
-      $("btnHtml").addEventListener("click", async () => {
-        try{ await buildHtml(); }catch(e){ setStatus("bad", e.message || "HTML failed"); console.error(e); }
-      });
-
-      $("btnCss").addEventListener("click", async () => {
-        try{ await buildCss(); }catch(e){ setStatus("bad", e.message || "CSS failed"); console.error(e); }
-      });
-
-      $("btnJs").addEventListener("click", async () => {
-        try{ await buildJs(); }catch(e){ setStatus("bad", e.message || "JS failed"); console.error(e); }
-      });
-
-      $("btnReloadTemplates").addEventListener("click", async () => {
-        try{ await reloadTemplates(); }catch(e){ setStatus("bad", e.message || "Reload failed"); console.error(e); }
-      });
-
-      $("btnReset").addEventListener("click", () => resetAll());
-
-      $("btnEdit").addEventListener("click", async () => {
-        try{ await applyEdit(); }catch(e){ setStatus("bad", e.message || "Edit failed"); console.error(e); }
-      });
-
-      // Copy + Download
-      $("copyHtml").addEventListener("click", () => copyText($("outHtml").value || ""));
-      $("copyCss").addEventListener("click", () => copyText($("outCss").value || ""));
-      $("copyJs").addEventListener("click", () => copyText($("outJs").value || ""));
-
-      $("dlHtml").addEventListener("click", () => downloadFile("index.html", $("outHtml").value || ""));
-      $("dlCss").addEventListener("click", () => downloadFile("style.css", $("outCss").value || ""));
-      $("dlJs").addEventListener("click", () => downloadFile("game.js", $("outJs").value || ""));
-
-      // Persist settings on change
-      for (const id of ["apiBase","primary","secondary","background"]) {
-        $(id).addEventListener("change", persistSettings);
-        $(id).addEventListener("blur", persistSettings);
-      }
-    }
-
-    // Boot
-    loadSettings();
-    bind();
-    setupSpeech();
-    resetAll();
+      // autosave periodically
+      setInterval(saveState, 2000);
+    })();
   </script>
 </body>
 </html>
