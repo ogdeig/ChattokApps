@@ -1,15 +1,18 @@
+<!-- index.html (Landing Page) -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>AI Live Interactive Game Builder</title>
+  <title>ChatTok Tools — AI TikTok LIVE Game Builder</title>
+  <meta name="description" content="Describe your TikTok LIVE game idea. Generate a working interactive game layout and builder-ready files in minutes." />
+  <meta name="theme-color" content="#0b0b0d" />
 
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <style>
     :root{
-      --bg0:#050b17;
-      --bg1:#071a35;
-
+      --bg0:#07070a;
+      --bg1:#0b0b0d;
       --panel: rgba(255,255,255,.06);
       --panel2: rgba(255,255,255,.04);
       --line: rgba(255,255,255,.10);
@@ -17,56 +20,88 @@
       --text:#ffffff;
       --muted: rgba(255,255,255,.72);
 
+      --accent1:#ff8a00; /* orange */
+      --accent2:#ffb15a;
       --good:#2ee59d;
       --bad:#ff4d4d;
 
-      --shadowPanel: 0 14px 40px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.08);
+      --shadowPanel: 0 14px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08);
       --r: 18px;
       --r2: 14px;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-
-      /* builder accent (not the game theme) */
-      --accent1:#ff8a00;
-      --accent2:#ffb15a;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
 
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
     body{
       margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-family: var(--sans);
       color:var(--text);
       background:
-        radial-gradient(1200px 700px at 20% 10%, rgba(255,138,0,.12), transparent 60%),
-        radial-gradient(900px 600px at 85% 25%, rgba(0,242,234,.10), transparent 55%),
+        radial-gradient(1200px 700px at 20% 10%, rgba(255,138,0,.14), transparent 60%),
+        radial-gradient(900px 600px at 85% 25%, rgba(255,177,90,.08), transparent 55%),
+        radial-gradient(900px 600px at 30% 90%, rgba(255,138,0,.08), transparent 60%),
         linear-gradient(180deg, var(--bg0), var(--bg1));
       overflow-x:hidden;
     }
 
-    .wrap{ max-width: 1260px; margin: 0 auto; padding: 22px 16px 44px; }
+    a{ color: rgba(255,177,90,.95); text-decoration:none; }
+    a:hover{ text-decoration:underline; }
 
-    .topbar{
+    .wrap{ max-width: 1060px; margin: 0 auto; padding: 26px 16px 60px; }
+
+    /* Top nav */
+    .nav{
       display:flex;
-      align-items:flex-start;
+      align-items:center;
       justify-content:space-between;
-      gap:14px;
-      margin-bottom: 14px;
+      gap:12px;
+      margin-bottom: 18px;
+    }
+    .logo{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .mark{
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background:
+        radial-gradient(18px 18px at 25% 25%, rgba(255,255,255,.20), transparent 60%),
+        linear-gradient(180deg, rgba(255,177,90,.95), rgba(255,138,0,.85));
+      box-shadow: 0 12px 26px rgba(255,138,0,.22), 0 0 0 1px rgba(255,255,255,.10);
+      flex: 0 0 auto;
+    }
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+    }
+    .brand b{
+      font-size: 14px;
+      letter-spacing:.2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .brand span{
+      font-size: 12px;
+      color: var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
 
-    .brand{ display:flex; flex-direction:column; gap:6px; }
-    .brand h1{
-      margin:0;
-      font-size: 28px;
-      font-weight: 900;
-      letter-spacing:.2px;
-      text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 14px rgba(255,138,0,.35);
-    }
-    .brand p{
-      margin:0;
-      color:var(--muted);
-      font-size: 13.5px;
-      line-height: 1.35;
-      max-width: 860px;
+    .navRight{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
     }
 
     .pill{
@@ -81,62 +116,11 @@
       color: var(--muted);
       font-size: 13px;
       white-space:nowrap;
+      user-select:none;
     }
     .dot{ width:10px; height:10px; border-radius: 50%; background: rgba(255,255,255,.22); box-shadow: 0 0 0 2px rgba(255,255,255,.08); }
     .dot.good{ background: var(--good); box-shadow: 0 0 0 2px rgba(46,229,157,.18); }
     .dot.bad{  background: var(--bad);  box-shadow: 0 0 0 2px rgba(255,77,77,.18); }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1.2fr .8fr;
-      gap: 14px;
-    }
-    @media (max-width: 980px){
-      .grid{ grid-template-columns: 1fr; }
-      .pill{ width:100%; justify-content:center; }
-    }
-
-    .panel{
-      background: linear-gradient(180deg, var(--panel), var(--panel2));
-      border: 1px solid var(--line);
-      border-radius: var(--r);
-      box-shadow: var(--shadowPanel);
-      overflow:hidden;
-    }
-
-    .panelHead{
-      padding: 16px 16px 12px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      background: linear-gradient(180deg, rgba(0,0,0,.18), transparent);
-    }
-    .panelTitle{ display:flex; flex-direction:column; gap:4px; }
-    .panelTitle h2{
-      margin:0;
-      font-size: 18px;
-      font-weight: 900;
-      text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 10px rgba(255,138,0,.22);
-    }
-    .panelTitle p{ margin:0; color:var(--muted); font-size: 13px; }
-
-    .panelBody{ padding: 16px; }
-
-    label{
-      display:block;
-      font-weight: 900;
-      font-size: 12.5px;
-      letter-spacing:.3px;
-      color: rgba(255,255,255,.90);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      text-shadow: 0 1px 0 rgba(0,0,0,.35), 0 0 10px rgba(255,138,0,.16);
-    }
-
-    .hint{ color: var(--muted); font-size: 13px; margin: 10px 0 0; line-height: 1.4; }
-    .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; align-items:center; }
 
     .btn{
       border: 0;
@@ -145,7 +129,7 @@
       border-radius: 14px;
       font-weight: 900;
       letter-spacing:.2px;
-      color: #07162e;
+      color: #0b0b0d;
       background: linear-gradient(180deg, var(--accent2), var(--accent1));
       box-shadow: 0 14px 26px rgba(255,138,0,.22), 0 7px 0 rgba(0,0,0,.35);
       transform: translateY(0);
@@ -165,13 +149,94 @@
       border: 1px solid rgba(255,255,255,.14);
       box-shadow: 0 12px 24px rgba(0,0,0,.28), 0 7px 0 rgba(0,0,0,.35);
     }
-    .btn.danger{
-      color: var(--text);
-      background: linear-gradient(180deg, rgba(255,77,77,.22), rgba(0,0,0,.18));
-      border: 1px solid rgba(255,77,77,.35);
+
+    /* Hero */
+    .hero{
+      margin-top: 12px;
+      padding: 18px;
+      border-radius: var(--r);
+      border: 1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      box-shadow: var(--shadowPanel);
+      overflow:hidden;
+      position:relative;
+    }
+    .hero::before{
+      content:"";
+      position:absolute;
+      inset:-30%;
+      background:
+        radial-gradient(900px 520px at 15% 30%, rgba(255,138,0,.16), transparent 60%),
+        radial-gradient(820px 520px at 85% 20%, rgba(255,177,90,.10), transparent 60%);
+      pointer-events:none;
+      filter: saturate(1.1);
+    }
+    .heroInner{ position:relative; z-index:1; }
+
+    h1{
+      margin: 0 0 8px;
+      font-size: 30px;
+      font-weight: 950;
+      letter-spacing:.2px;
+      text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 14px rgba(255,138,0,.25);
+    }
+    .sub{
+      margin:0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+      max-width: 860px;
     }
 
-    textarea, input, select{
+    /* Layout */
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .panel{
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      box-shadow: var(--shadowPanel);
+      overflow:hidden;
+    }
+    .panelHead{
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      background: linear-gradient(180deg, rgba(0,0,0,.18), transparent);
+    }
+    .panelTitle{ display:flex; flex-direction:column; gap:4px; }
+    .panelTitle h2{
+      margin:0;
+      font-size: 18px;
+      font-weight: 900;
+      text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 10px rgba(255,138,0,.16);
+    }
+    .panelTitle p{ margin:0; color:var(--muted); font-size: 13px; line-height:1.35; }
+    .panelBody{ padding: 16px; position:relative; }
+
+    label{
+      display:block;
+      font-weight: 900;
+      font-size: 12.5px;
+      letter-spacing:.3px;
+      color: rgba(255,255,255,.90);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      text-shadow: 0 1px 0 rgba(0,0,0,.35), 0 0 10px rgba(255,138,0,.10);
+    }
+
+    textarea, input{
       width:100%;
       border-radius: 14px;
       border: 1px solid rgba(255,255,255,.12);
@@ -181,54 +246,35 @@
       font-family: var(--mono);
       outline:none;
     }
-    textarea{ min-height: 170px; resize: vertical; line-height: 1.45; }
+    textarea{
+      min-height: 190px;
+      resize: vertical;
+      line-height: 1.45;
+    }
     textarea::placeholder{ color: rgba(255,255,255,.55); }
 
-    .steps{ display:flex; flex-direction:column; gap:12px; }
-    .stepCard{
-      border-radius: var(--r2);
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      box-shadow: 0 12px 24px rgba(0,0,0,.26);
-      overflow:hidden;
-    }
-    .stepHead{
-      padding: 12px 12px 10px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), transparent);
-    }
-    .stepTitle{ display:flex; flex-direction:column; gap:2px; min-width:0; }
-    .stepTitle .name{
-      font-weight: 900;
-      font-size: 14px;
-      text-shadow: 0 1px 0 rgba(0,0,0,.35), 0 0 10px rgba(255,138,0,.16);
-    }
-    .stepTitle .sub{
-      color: var(--muted);
-      font-size: 12.5px;
-      overflow:hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      max-width: 520px;
-    }
-    .badge{
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
-      color: rgba(255,255,255,.76);
-      font-size: 12px;
-      font-family: var(--mono);
-      white-space: nowrap;
-    }
-    textarea.outBox{ min-height: 140px; font-size: 12.5px; }
-
-    .toast{
+    .hint{
       margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .hint ul{
+      margin: 8px 0 0;
+      padding-left: 18px;
+    }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; align-items:center; }
+
+    .mini{
+      font-size: 12px;
+      color: rgba(255,255,255,.66);
+      line-height:1.4;
+      margin-top: 10px;
+    }
+
+    /* Toast */
+    .toast{
+      margin-top: 12px;
       padding: 10px 12px;
       border-radius: 14px;
       border: 1px solid rgba(255,138,0,.22);
@@ -240,991 +286,475 @@
     }
     .toast.show{ display:block; }
 
-    /* Theme UI */
-    .themeCard{
-      padding: 14px;
-      border-radius: 14px;
+    /* Footer */
+    footer{
+      margin-top: 18px;
+      padding: 16px 14px;
+      border-radius: 16px;
       border: 1px solid rgba(255,255,255,.10);
       background: rgba(0,0,0,.22);
-      box-shadow: 0 12px 24px rgba(0,0,0,.22);
-    }
-    .themeGrid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 10px;
-    }
-    @media (max-width: 560px){
-      .themeGrid{ grid-template-columns: 1fr; }
-    }
-    .themeRow{ display:flex; gap:10px; align-items:center; }
-    .colorPick{
-      width: 54px;
-      height: 40px;
-      padding: 0;
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(0,0,0,.28);
-      border-radius: 12px;
-      overflow:hidden;
-      box-shadow: 0 10px 18px rgba(0,0,0,.25);
-    }
-    .hexInput{ height: 40px; }
-    .swatchBar{
-      margin-top: 12px;
-      height: 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
-      overflow:hidden;
-      display:grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      box-shadow: 0 10px 22px rgba(0,0,0,.25);
-    }
-    .sw{ height: 100%; }
-    .themeMeta{
-      margin-top: 10px;
+      box-shadow: 0 12px 26px rgba(0,0,0,.30);
       color: rgba(255,255,255,.72);
-      font-size: 12.5px;
-      font-family: var(--mono);
+    }
+    .footRow{
       display:flex;
-      flex-wrap:wrap;
-      gap:10px;
+      gap:12px;
       align-items:center;
       justify-content:space-between;
+      flex-wrap:wrap;
     }
-    .chip{
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
-      white-space: nowrap;
+    .footLinks{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .copy{
+      font-family: var(--mono);
+      font-size: 12px;
+      opacity: .85;
     }
 
-    /* Completed + Edit panel */
-    .doneCard{
-      margin-top: 12px;
-      padding: 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(46,229,157,.22);
-      background: rgba(46,229,157,.08);
-      box-shadow: 0 12px 28px rgba(0,0,0,.25);
+    /* Modal */
+    .modalWrap{
+      position:fixed;
+      inset:0;
       display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 16px;
+      background: rgba(0,0,0,.62);
+      backdrop-filter: blur(10px);
+      z-index: 50;
     }
-    .doneCard.show{ display:block; }
-    .doneHead{
-      display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
-      margin-bottom: 10px;
+    .modal{
+      width: min(520px, 96vw);
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(18,18,22,.92), rgba(10,10,12,.84));
+      box-shadow: 0 18px 55px rgba(0,0,0,.60);
+      overflow:hidden;
     }
-    .doneHead b{ font-size: 14px; }
-    .editGrid{
+    .modalHead{
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .modalHead b{ font-size: 15px; letter-spacing:.2px; }
+    .x{
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.85);
+      border-radius: 12px;
+      padding: 8px 10px;
+      cursor:pointer;
+      font-weight: 900;
+    }
+    .modalBody{ padding: 14px; }
+    .twoCol{
       display:grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
+    }
+    @media (max-width: 560px){
+      .twoCol{ grid-template-columns: 1fr; }
+    }
+    .warn{
       margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,138,0,.18);
+      background: rgba(255,138,0,.08);
+      color: rgba(255,255,255,.80);
+      font-size: 12.5px;
+      line-height: 1.4;
     }
-    @media (max-width: 980px){
-      .editGrid{ grid-template-columns: 1fr; }
-    }
-    .fieldSmall label{ margin:0 0 6px; font-size:12px; }
-    .fieldSmall textarea{ min-height: 90px; font-size:12.5px; }
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <div class="topbar">
-      <div class="brand">
-        <h1>AI Live Interactive Game Builder</h1>
-        <p>
-          Template-first generator: <b>HTML → CSS → JS</b>. Connect-first TikTok games. No blank builds.
-          Theme colors are injected into <b>style.template.css</b> as CSS variables (no full CSS rewrite).
-        </p>
+    <div class="nav">
+      <div class="logo">
+        <div class="mark" aria-hidden="true"></div>
+        <div class="brand">
+          <b>ChatTok Tools</b>
+          <span>AI-powered TikTok LIVE games & overlays</span>
+        </div>
       </div>
 
-      <div id="serverPill" class="pill" title="Local API status">
-        <span id="serverDot" class="dot"></span>
-        <span id="serverMsg">Checking…</span>
+      <div class="navRight">
+        <div class="pill" title="Local sign-in status">
+          <span id="authDot" class="dot"></span>
+          <span id="authMsg">Signed out</span>
+        </div>
+        <button id="btnSignIn" class="btn secondary" type="button">Sign in</button>
+        <button id="btnOpenBuilder" class="btn secondary" type="button" disabled>Open Builder</button>
       </div>
     </div>
 
+    <section class="hero">
+      <div class="heroInner">
+        <h1>Describe it. Generate it. Go LIVE.</h1>
+        <p class="sub">
+          Drop a short game idea below. You’ll be taken into the builder where the system creates your
+          <b>index.html</b>, <b>style.css</b>, and <b>game.js</b> using a template that matches your idea.
+          <br /><span style="opacity:.85">GitHub Pages launch-ready — real accounts come later when you tie it into your app.</span>
+        </p>
+      </div>
+    </section>
+
     <div class="grid">
-      <!-- LEFT -->
+      <!-- Left: prompt -->
       <div class="panel">
         <div class="panelHead">
           <div class="panelTitle">
-            <h2>Prompt + Theme + Template</h2>
-            <p>Pick your theme first, then describe the game idea.</p>
-          </div>
-          <div class="pill" title="API base">
-            <span class="dot" id="apiDot"></span>
-            <span id="apiMsg">API: checking…</span>
+            <h2>Your game prompt</h2>
+            <p>Keep it short. Just enough for the system to pick the right template and build a real-looking game.</p>
           </div>
         </div>
 
         <div class="panelBody">
-          <!-- THEME PICKER -->
-          <div class="themeCard">
-            <label>Theme Colors (Required)</label>
+          <label for="promptBox">Game description</label>
+          <textarea
+            id="promptBox"
+            spellcheck="false"
+            placeholder="Example:
+- Viewers type !join to enter
+- Chat commands control actions (attack, dodge, vote, guess, etc.)
+- Likes charge a meter (boost / hints / speed)
+- Gifts trigger power-ups (small/medium/large)
+- Round length + win condition
+- What should the screen look like (characters/HUD/arena)"></textarea>
 
-            <div class="themeGrid">
-              <div>
-                <div class="themeRow">
-                  <input class="colorPick" id="primaryPick" type="color" value="#ff0050" />
-                  <input class="hexInput" id="primaryHex" type="text" value="#ff0050" spellcheck="false" />
-                </div>
-                <p class="hint" style="margin:8px 0 0;">Primary</p>
-              </div>
-
-              <div>
-                <div class="themeRow">
-                  <input class="colorPick" id="secondaryPick" type="color" value="#00f2ea" />
-                  <input class="hexInput" id="secondaryHex" type="text" value="#00f2ea" spellcheck="false" />
-                </div>
-                <p class="hint" style="margin:8px 0 0;">Secondary</p>
-              </div>
-
-              <div>
-                <div class="themeRow">
-                  <input class="colorPick" id="backgroundPick" type="color" value="#0b0f14" />
-                  <input class="hexInput" id="backgroundHex" type="text" value="#0b0f14" spellcheck="false" />
-                </div>
-                <p class="hint" style="margin:8px 0 0;">Background</p>
-              </div>
-
-              <div>
-                <label style="margin:0 0 8px;">Template</label>
-                <select id="templateSelect">
-                  <option value="boss">Boss (Hero vs Boss)</option>
-                  <option value="trivia">Trivia</option>
-                  <option value="arena">Arena</option>
-                  <option value="racing">Racing</option>
-                </select>
-
-                <div class="row" style="margin-top:10px;">
-                  <button id="btnChatTokTheme" class="btn secondary" type="button">Use ChatTok Theme</button>
-                  <button id="btnResetTheme" class="btn secondary" type="button">Reset</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="swatchBar" aria-label="Theme preview">
-              <div class="sw" id="swPrimary"></div>
-              <div class="sw" id="swSecondary"></div>
-              <div class="sw" id="swBackground"></div>
-            </div>
-
-            <div class="themeMeta">
-              <span class="chip" id="chipPrimary">primary:#ff0050</span>
-              <span class="chip" id="chipSecondary">secondary:#00f2ea</span>
-              <span class="chip" id="chipBackground">background:#0b0f14</span>
-              <span class="chip" id="chipTemplate">template:boss</span>
-            </div>
+          <div class="row">
+            <button id="btnSample" class="btn secondary" type="button">Insert sample</button>
+            <button id="btnClear" class="btn secondary" type="button">Clear</button>
+            <button id="btnGenerate" class="btn" type="button">Generate Game</button>
           </div>
 
-          <div style="margin-top:14px;">
-            <label for="ideaBox">Describe your game</label>
-            <textarea
-              id="ideaBox"
-              spellcheck="false"
-              placeholder="Describe your TikTok LIVE game idea…
+          <div id="toast" class="toast"></div>
 
-Include:
-- how chat controls the game
-- how likes do something
-- how gifts do something (tiers)
-- win condition / round timing
-- what the player sees on screen"></textarea>
-
-            <div class="row">
-              <button id="sampleBtn" class="btn secondary" type="button">Insert Sample</button>
-              <button id="clearBtn" class="btn secondary" type="button">Clear</button>
-              <button id="testBtn" class="btn secondary" type="button">Test API</button>
+          <div class="hint">
+            <b style="color:rgba(255,255,255,.92)">What to include (fast):</b>
+            <ul>
+              <li><b>Chat controls</b> (commands like !join / !attack / A1 / red / vote, etc.)</li>
+              <li><b>Likes</b> do something visible (meter, boosts, shields, hints)</li>
+              <li><b>Gifts</b> trigger bigger effects (tiers)</li>
+              <li><b>Win condition</b> + <b>round timing</b></li>
+              <li><b>On-screen vibe</b> (HUD, characters, arena, cards, leaderboard)</li>
+            </ul>
+            <div class="mini">
+              Note: Sign-in is <b>local-only</b> for GitHub Pages (stored in your browser). When you move to your app, we’ll replace this with real accounts.
             </div>
-
-            <div id="toast" class="toast"></div>
-
-            <p class="hint">
-              Build order is enforced. Each stage returns a file + <b>context</b>. Context is passed forward so JS uses the spec created in HTML.
-            </p>
           </div>
         </div>
       </div>
 
-      <!-- RIGHT -->
+      <!-- Right: quick explain -->
       <div class="panel">
         <div class="panelHead">
           <div class="panelTitle">
-            <h2>Build files</h2>
-            <p>Generate exactly 3 files: <b>index.html</b>, <b>style.css</b>, <b>game.js</b>.</p>
+            <h2>How it works</h2>
+            <p>Simple flow: Prompt → Builder → Copy files into your game host.</p>
           </div>
         </div>
 
         <div class="panelBody">
-          <div class="steps">
-            <!-- HTML -->
-            <div class="stepCard">
-              <div class="stepHead">
-                <div class="stepTitle">
-                  <div class="name">index.html</div>
-                  <div class="sub">Stage 1 — HTML structure (creates spec/context)</div>
-                </div>
-                <div class="row" style="margin:0;">
-                  <span class="badge" id="statusHtml">idle</span>
-                  <button class="btn" id="btnBuildHtml" type="button">Build HTML</button>
-                  <button class="btn secondary" id="btnCopyHtml" type="button" disabled>Copy</button>
-                </div>
-              </div>
-              <div class="panelBody" style="padding:12px;">
-                <textarea class="outBox" id="outHtml" readonly placeholder="HTML output…"></textarea>
-              </div>
-            </div>
-
-            <!-- CSS -->
-            <div class="stepCard">
-              <div class="stepHead">
-                <div class="stepTitle">
-                  <div class="name">style.css</div>
-                  <div class="sub" id="cssSub">Stage 2 — CSS template + injected theme vars</div>
-                </div>
-                <div class="row" style="margin:0;">
-                  <span class="badge" id="statusCss">locked</span>
-                  <button class="btn" id="btnBuildCss" type="button" disabled>Build CSS</button>
-                  <button class="btn secondary" id="btnCopyCss" type="button" disabled>Copy</button>
-                </div>
-              </div>
-              <div class="panelBody" style="padding:12px;">
-                <textarea class="outBox" id="outCss" readonly placeholder="CSS output…"></textarea>
-              </div>
-            </div>
-
-            <!-- JS -->
-            <div class="stepCard">
-              <div class="stepHead">
-                <div class="stepTitle">
-                  <div class="name">game.js</div>
-                  <div class="sub">Stage 3 — game logic + TikTok wiring + GAME_RULES block</div>
-                </div>
-                <div class="row" style="margin:0;">
-                  <span class="badge" id="statusJs">locked</span>
-                  <button class="btn" id="btnBuildJs" type="button" disabled>Build JS</button>
-                  <button class="btn secondary" id="btnCopyJs" type="button" disabled>Copy</button>
-                </div>
-              </div>
-              <div class="panelBody" style="padding:12px;">
-                <textarea class="outBox" id="outJs" readonly placeholder="JS output…"></textarea>
-              </div>
-            </div>
+          <div class="pill" style="margin-bottom:10px;">
+            <span class="dot good" aria-hidden="true"></span>
+            <span><b style="color:rgba(255,255,255,.92)">Template-first</b> (no blank screens)</span>
           </div>
 
-          <!-- DONE + EDIT SYSTEM -->
-          <div id="doneCard" class="doneCard">
-            <div class="doneHead">
-              <div>
-                <b>Build Completed ✅</b>
-                <div class="hint" style="margin:6px 0 0;">
-                  Edit system: max <b>3 edits</b>. Revert is free. Start Over regenerates from original prompt + theme + template.
-                </div>
-              </div>
-              <span class="chip" id="editsChip">edits remaining: 3</span>
-            </div>
+          <p class="sub" style="margin:0 0 10px;">
+            The builder will automatically choose the best template (arena / trivia / racing / boss fight / etc.)
+            based on your description — with an optional advanced override.
+          </p>
 
-            <label for="editRequest">Edit Game (consumes 1 edit)</label>
-            <textarea id="editRequest" placeholder="Example: 'Make the popups bigger, add more particle drift, and make gifts trigger a big boss stun animation.'"></textarea>
-
-            <div class="editGrid">
-              <div class="fieldSmall">
-                <label for="screenshotNotes">Screenshot notes (optional)</label>
-                <textarea id="screenshotNotes" placeholder="Paste notes about what you see / what should change…"></textarea>
-              </div>
-              <div class="fieldSmall">
-                <label for="consoleLog">F12 console output (optional)</label>
-                <textarea id="consoleLog" placeholder="Paste console errors / warnings…"></textarea>
-              </div>
-              <div class="fieldSmall">
-                <label for="networkLog">Network log (optional)</label>
-                <textarea id="networkLog" placeholder="Paste failed requests, 404s, websocket status, etc…"></textarea>
-              </div>
-              <div class="fieldSmall">
-                <label>Actions</label>
-                <div class="row" style="margin-top:0;">
-                  <button class="btn" id="btnApplyEdit" type="button">Apply Edit</button>
-                  <button class="btn secondary" id="btnRevert" type="button" disabled>Revert (free)</button>
-                  <button class="btn danger" id="btnStartOver" type="button">Start Over</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="hint" id="editHint" style="margin-top:10px;">
-              Backend route needed: <b>POST /api/edit</b>. (We’ll add it next.)
-            </div>
+          <div class="warn">
+            <b>GitHub Pages note:</b> this landing page is 100% static. The actual “Generate Files” calls
+            will be handled by your builder screen (and later by your hosted API when you’re ready).
           </div>
 
+          <div class="row" style="margin-top:12px;">
+            <button id="btnGoBuilder2" class="btn secondary" type="button" disabled>Go to Builder</button>
+          </div>
         </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="footRow">
+        <div class="footLinks">
+          <a href="about.html">About</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="terms.html">Terms</a>
+          <a href="builder.html">Builder</a>
+        </div>
+        <div class="copy">© <span id="yy"></span> ChatTok Tools. All rights reserved.</div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Sign-in modal (local-only) -->
+  <div id="authModalWrap" class="modalWrap" role="dialog" aria-modal="true" aria-label="Sign in">
+    <div class="modal">
+      <div class="modalHead">
+        <div>
+          <b>Sign in (local-only)</b>
+          <div class="mini" style="margin-top:4px;color:rgba(255,255,255,.70)">
+            This is a simple browser-stored login for the GitHub Pages launch.
+          </div>
+        </div>
+        <button id="btnCloseModal" class="x" type="button" aria-label="Close">✕</button>
+      </div>
+
+      <div class="modalBody">
+        <div class="twoCol">
+          <div>
+            <label for="emailBox">Email</label>
+            <input id="emailBox" type="email" autocomplete="email" placeholder="you@email.com" />
+          </div>
+          <div>
+            <label for="passBox">Password</label>
+            <input id="passBox" type="password" autocomplete="current-password" placeholder="••••••••" />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px;">
+          <button id="btnCreateAccount" class="btn secondary" type="button">Create account</button>
+          <button id="btnDoSignIn" class="btn" type="button">Sign in</button>
+          <button id="btnSignOut" class="btn secondary" type="button" style="margin-left:auto;">Sign out</button>
+        </div>
+
+        <div class="warn">
+          <b>Important:</b> This is not secure authentication. It stores a salted hash in <b>localStorage</b>
+          on this device only. When you connect to your app later, we’ll replace this with real sign-in.
+        </div>
+
+        <div id="authToast" class="toast" style="margin-top:12px;"></div>
       </div>
     </div>
   </div>
 
   <script>
-    // ===== CONFIG =====
-    const API_BASE = "http://127.0.0.1:8787";
-    const THEME_KEY = "ct_builder_theme_v2";
-    const TEMPLATE_KEY = "ct_builder_template_v1";
-    const EDITS_KEY = "ct_builder_edits_v1";
-
-    // ===== DOM =====
-    const toastEl = document.getElementById("toast");
-    const serverDot = document.getElementById("serverDot");
-    const serverMsg = document.getElementById("serverMsg");
-
-    const apiDot = document.getElementById("apiDot");
-    const apiMsg = document.getElementById("apiMsg");
-
-    const ideaBox = document.getElementById("ideaBox");
-
-    const outHtml = document.getElementById("outHtml");
-    const outCss  = document.getElementById("outCss");
-    const outJs   = document.getElementById("outJs");
-
-    const statusHtml = document.getElementById("statusHtml");
-    const statusCss  = document.getElementById("statusCss");
-    const statusJs   = document.getElementById("statusJs");
-
-    const btnBuildHtml = document.getElementById("btnBuildHtml");
-    const btnBuildCss  = document.getElementById("btnBuildCss");
-    const btnBuildJs   = document.getElementById("btnBuildJs");
-
-    const btnCopyHtml = document.getElementById("btnCopyHtml");
-    const btnCopyCss  = document.getElementById("btnCopyCss");
-    const btnCopyJs   = document.getElementById("btnCopyJs");
-
-    const cssSub = document.getElementById("cssSub");
-
-    // Theme DOM
-    const primaryPick = document.getElementById("primaryPick");
-    const secondaryPick = document.getElementById("secondaryPick");
-    const backgroundPick = document.getElementById("backgroundPick");
-
-    const primaryHex = document.getElementById("primaryHex");
-    const secondaryHex = document.getElementById("secondaryHex");
-    const backgroundHex = document.getElementById("backgroundHex");
-
-    const swPrimary = document.getElementById("swPrimary");
-    const swSecondary = document.getElementById("swSecondary");
-    const swBackground = document.getElementById("swBackground");
-
-    const chipPrimary = document.getElementById("chipPrimary");
-    const chipSecondary = document.getElementById("chipSecondary");
-    const chipBackground = document.getElementById("chipBackground");
-
-    const templateSelect = document.getElementById("templateSelect");
-    const chipTemplate = document.getElementById("chipTemplate");
-
-    // Edit DOM
-    const doneCard = document.getElementById("doneCard");
-    const editsChip = document.getElementById("editsChip");
-    const editRequest = document.getElementById("editRequest");
-    const screenshotNotes = document.getElementById("screenshotNotes");
-    const consoleLog = document.getElementById("consoleLog");
-    const networkLog = document.getElementById("networkLog");
-    const btnApplyEdit = document.getElementById("btnApplyEdit");
-    const btnRevert = document.getElementById("btnRevert");
-    const btnStartOver = document.getElementById("btnStartOver");
-    const editHint = document.getElementById("editHint");
-
-    // ===== STATE =====
-    const state = {
-      theme: { primary:"#ff0050", secondary:"#00f2ea", background:"#0b0f14" },
-      templateId: "boss",
-      context: null,
-
-      files: { html:"", css:"", js:"" },
-
-      original: { idea:"", theme:null, templateId:"boss" },
-
-      editsRemaining: 3,
-      history: [],
-
-      timers: {}
+    // ----- Local-only auth + landing flow -----
+    const KEYS = {
+      auth: "ct_tools_auth_v1",
+      draftPrompt: "ct_tools_draft_prompt_v1",
+      lastUser: "ct_tools_last_user_v1"
     };
 
-    // ===== UI helpers =====
-    function setDot(el, ok){
-      el.classList.remove("good","bad");
-      el.classList.add(ok ? "good" : "bad");
+    const el = (id) => document.getElementById(id);
+
+    const authDot = el("authDot");
+    const authMsg = el("authMsg");
+    const btnSignIn = el("btnSignIn");
+    const btnOpenBuilder = el("btnOpenBuilder");
+    const btnGoBuilder2 = el("btnGoBuilder2");
+
+    const promptBox = el("promptBox");
+    const toastEl = el("toast");
+
+    const modalWrap = el("authModalWrap");
+    const btnCloseModal = el("btnCloseModal");
+    const emailBox = el("emailBox");
+    const passBox = el("passBox");
+    const btnCreateAccount = el("btnCreateAccount");
+    const btnDoSignIn = el("btnDoSignIn");
+    const btnSignOut = el("btnSignOut");
+    const authToast = el("authToast");
+
+    function setDot(ok){
+      authDot.classList.remove("good","bad");
+      authDot.classList.add(ok ? "good" : "bad");
     }
-    function setPill(ok, msg){
-      setDot(serverDot, ok);
-      serverMsg.textContent = msg;
-      const pill = document.getElementById("serverPill");
-      pill.style.borderColor = ok ? "rgba(46,229,157,.28)" : "rgba(255,77,77,.28)";
-    }
+
     function toast(msg){
       toastEl.textContent = msg;
       toastEl.classList.add("show");
-      clearTimeout(state.timers.toast);
-      state.timers.toast = setTimeout(() => toastEl.classList.remove("show"), 2200);
+      setTimeout(() => toastEl.classList.remove("show"), 2200);
     }
 
-    async function copyText(text){
-      if (!text) { toast("Nothing to copy."); return; }
-      try{ await navigator.clipboard.writeText(text); toast("Copied!"); }
-      catch{ toast("Copy blocked — select & Ctrl+C."); }
+    function authToastMsg(msg){
+      authToast.textContent = msg;
+      authToast.classList.add("show");
+      setTimeout(() => authToast.classList.remove("show"), 2400);
     }
 
-    function lockStep(statusEl, buildBtn){
-      statusEl.textContent = "locked";
-      buildBtn.disabled = true;
+    function openModal(){
+      modalWrap.style.display = "flex";
+      setTimeout(() => emailBox.focus(), 0);
     }
-    function unlockStep(statusEl, buildBtn){
-      statusEl.textContent = "idle";
-      buildBtn.disabled = false;
-    }
-    function startBuilding(statusEl, buildBtn){
-      buildBtn.disabled = true;
-      let n = 0;
-      statusEl.textContent = "building";
-      clearInterval(state.timers[statusEl.id]);
-      state.timers[statusEl.id] = setInterval(() => {
-        n = (n + 1) % 4;
-        statusEl.textContent = "building" + ".".repeat(n);
-      }, 280);
-    }
-    function stopBuilding(statusEl){ clearInterval(state.timers[statusEl.id]); statusEl.textContent = "done"; }
-    function failBuilding(statusEl){ clearInterval(state.timers[statusEl.id]); statusEl.textContent = "failed"; }
-
-    // ===== Theme helpers =====
-    function isHex6(v){ return /^#[0-9a-fA-F]{6}$/.test(String(v||"").trim()); }
-    function normalizeHex(v, fallback){
-      const s = String(v || "").trim();
-      if (!s) return fallback;
-      const h = s.startsWith("#") ? s : ("#" + s);
-      return isHex6(h) ? h.toLowerCase() : fallback;
+    function closeModal(){
+      modalWrap.style.display = "none";
+      passBox.value = "";
     }
 
-    function saveTheme(){
-      try{ localStorage.setItem(THEME_KEY, JSON.stringify(state.theme)); }catch{}
-    }
-    function loadTheme(){
+    function getAuth(){
       try{
-        const raw = localStorage.getItem(THEME_KEY);
-        if (!raw) return;
-        const t = JSON.parse(raw);
-        if (t && typeof t === "object"){
-          state.theme.primary = normalizeHex(t.primary, state.theme.primary);
-          state.theme.secondary = normalizeHex(t.secondary, state.theme.secondary);
-          state.theme.background = normalizeHex(t.background, state.theme.background);
-        }
-      }catch{}
+        const raw = localStorage.getItem(KEYS.auth);
+        if (!raw) return null;
+        const j = JSON.parse(raw);
+        if (!j || typeof j !== "object") return null;
+        if (!j.email || !j.hash || !j.salt) return null;
+        return j;
+      }catch{ return null; }
     }
 
-    function saveTemplate(){
-      try{ localStorage.setItem(TEMPLATE_KEY, state.templateId); }catch{}
-    }
-    function loadTemplate(){
-      try{
-        const t = localStorage.getItem(TEMPLATE_KEY);
-        if (t) state.templateId = String(t).trim().toLowerCase() || "boss";
-      }catch{}
+    function setSignedIn(email){
+      setDot(true);
+      authMsg.textContent = "Signed in: " + email;
+      btnOpenBuilder.disabled = false;
+      btnGoBuilder2.disabled = false;
     }
 
-    function saveEdits(){
-      try{ localStorage.setItem(EDITS_KEY, String(state.editsRemaining)); }catch{}
-    }
-    function loadEdits(){
-      try{
-        const n = parseInt(localStorage.getItem(EDITS_KEY) || "3", 10);
-        state.editsRemaining = Number.isFinite(n) ? Math.max(0, Math.min(3, n)) : 3;
-      }catch{}
+    function setSignedOut(){
+      setDot(false);
+      authMsg.textContent = "Signed out";
+      btnOpenBuilder.disabled = true;
+      btnGoBuilder2.disabled = true;
     }
 
-    function updateThemeUI(){
-      primaryPick.value = normalizeHex(state.theme.primary, "#ff0050");
-      secondaryPick.value = normalizeHex(state.theme.secondary, "#00f2ea");
-      backgroundPick.value = normalizeHex(state.theme.background, "#0b0f14");
-
-      primaryHex.value = primaryPick.value;
-      secondaryHex.value = secondaryPick.value;
-      backgroundHex.value = backgroundPick.value;
-
-      swPrimary.style.background = primaryPick.value;
-      swSecondary.style.background = secondaryPick.value;
-      swBackground.style.background = backgroundPick.value;
-
-      chipPrimary.textContent = "primary:" + primaryPick.value;
-      chipSecondary.textContent = "secondary:" + secondaryPick.value;
-      chipBackground.textContent = "background:" + backgroundPick.value;
-
-      if (cssSub){
-        cssSub.textContent =
-          "Stage 2 — CSS template + injected theme vars • " +
-          primaryPick.value + " / " + secondaryPick.value + " / " + backgroundPick.value +
-          " • template:" + state.templateId;
-      }
-
-      saveTheme();
+    function normalizeEmail(v){
+      return String(v || "").trim().toLowerCase();
     }
 
-    function updateTemplateUI(){
-      templateSelect.value = state.templateId;
-      chipTemplate.textContent = "template:" + state.templateId;
-      saveTemplate();
-      updateThemeUI();
+    function randomSalt(){
+      const arr = new Uint8Array(16);
+      crypto.getRandomValues(arr);
+      return Array.from(arr).map(b => b.toString(16).padStart(2,"0")).join("");
     }
 
-    function bindThemeInputs(){
-      primaryPick.addEventListener("input", () => { state.theme.primary = primaryPick.value; updateThemeUI(); });
-      secondaryPick.addEventListener("input", () => { state.theme.secondary = secondaryPick.value; updateThemeUI(); });
-      backgroundPick.addEventListener("input", () => { state.theme.background = backgroundPick.value; updateThemeUI(); });
-
-      function wireHex(hexEl, pickEl, key){
-        hexEl.addEventListener("keydown", (e) => { if (e.key === "Enter"){ e.preventDefault(); hexEl.blur(); } });
-        hexEl.addEventListener("blur", () => {
-          const norm = normalizeHex(hexEl.value, pickEl.value);
-          pickEl.value = norm;
-          state.theme[key] = norm;
-          updateThemeUI();
-        });
-      }
-      wireHex(primaryHex, primaryPick, "primary");
-      wireHex(secondaryHex, secondaryPick, "secondary");
-      wireHex(backgroundHex, backgroundPick, "background");
-
-      document.getElementById("btnChatTokTheme").addEventListener("click", () => {
-        state.theme.primary = "#ff0050";
-        state.theme.secondary = "#00f2ea";
-        state.theme.background = "#0b0f14";
-        updateThemeUI();
-        toast("ChatTok theme applied.");
-      });
-
-      document.getElementById("btnResetTheme").addEventListener("click", () => {
-        state.theme.primary = "#ff0050";
-        state.theme.secondary = "#00f2ea";
-        state.theme.background = "#0b0f14";
-        updateThemeUI();
-        toast("Theme reset.");
-      });
-
-      templateSelect.addEventListener("change", () => {
-        state.templateId = String(templateSelect.value || "boss").trim().toLowerCase();
-        updateTemplateUI();
-        toast("Template set: " + state.templateId);
-      });
+    async function sha256Hex(text){
+      const enc = new TextEncoder().encode(text);
+      const buf = await crypto.subtle.digest("SHA-256", enc);
+      const bytes = new Uint8Array(buf);
+      return Array.from(bytes).map(b => b.toString(16).padStart(2,"0")).join("");
     }
 
-    // ===== API =====
-    async function checkApi(){
-      try{
-        const r = await fetch(API_BASE + "/health");
-        if (!r.ok) throw new Error("bad");
-        const j = await r.json().catch(()=> ({}));
-        setDot(apiDot, true);
-        apiMsg.textContent = "API: online";
-        setPill(true, "API online");
-        return true;
-      }catch{
-        setDot(apiDot, false);
-        apiMsg.textContent = "API: offline";
-        setPill(false, "API offline");
-        return false;
-      }
+    async function makeHash(email, password, salt){
+      // local-only hash; not real security
+      return await sha256Hex(email + "::" + password + "::" + salt);
     }
 
-    async function postGenerate(stage){
-      const idea = (ideaBox.value || "").trim();
-      if (!idea) return { ok:false, error:"Idea is empty." };
+    async function createAccount(){
+      const email = normalizeEmail(emailBox.value);
+      const pass = String(passBox.value || "");
+      if (!email || !email.includes("@")) { authToastMsg("Enter a valid email."); return; }
+      if (pass.length < 6) { authToastMsg("Password must be 6+ characters."); return; }
 
-      const payload = {
-        stage,
-        idea,
-        theme: { ...state.theme },
-        templateId: state.templateId,
-        context: state.context || {}
-      };
+      const salt = randomSalt();
+      const hash = await makeHash(email, pass, salt);
 
-      const r = await fetch(API_BASE + "/api/generate", {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify(payload)
-      });
+      localStorage.setItem(KEYS.auth, JSON.stringify({ email, salt, hash, createdAt: Date.now() }));
+      localStorage.setItem(KEYS.lastUser, email);
 
-      const raw = await r.text();
-      let json = null;
-      try{ json = JSON.parse(raw); }catch{}
-
-      if (!r.ok){
-        return { ok:false, status:r.status, error:(json && (json.error || json.message)) || raw || "Request failed" };
-      }
-      return { ok:true, data: json || {} };
+      setSignedIn(email);
+      authToastMsg("Account created (local).");
+      closeModal();
     }
 
-    // ===== Build flow =====
-    function showDonePanel(){
-      if (!state.files.html || !state.files.css || !state.files.js) return;
-      doneCard.classList.add("show");
-      editsChip.textContent = "edits remaining: " + state.editsRemaining;
-      btnApplyEdit.disabled = state.editsRemaining <= 0;
-      btnRevert.disabled = state.history.length === 0;
-      saveEdits();
+    async function signIn(){
+      const existing = getAuth();
+      if (!existing) { authToastMsg("No local account found. Create one first."); return; }
+
+      const email = normalizeEmail(emailBox.value);
+      const pass = String(passBox.value || "");
+
+      if (email !== existing.email) { authToastMsg("Email does not match local account."); return; }
+
+      const hash = await makeHash(email, pass, existing.salt);
+      if (hash !== existing.hash) { authToastMsg("Wrong password."); return; }
+
+      localStorage.setItem(KEYS.lastUser, email);
+      setSignedIn(email);
+      authToastMsg("Signed in.");
+      closeModal();
     }
 
-    async function buildHtml(){
-      startBuilding(statusHtml, btnBuildHtml);
-      outHtml.value = "Building HTML...\n";
-      doneCard.classList.remove("show");
-      try{
-        // store original on first build click
-        if (!state.original.idea){
-          state.original.idea = (ideaBox.value || "").trim();
-          state.original.theme = { ...state.theme };
-          state.original.templateId = state.templateId;
-        }
-
-        const res = await postGenerate("html");
-        if (!res.ok){
-          failBuilding(statusHtml);
-          outHtml.value = "FAILED (" + (res.status || "?") + ")\n\n" + (res.error || "");
-          btnBuildHtml.disabled = false;
-          return;
-        }
-
-        const file = res.data.file || {};
-        state.files.html = file.content || "";
-        state.context = res.data.context || state.context || {};
-        outHtml.value = state.files.html;
-
-        stopBuilding(statusHtml);
-        btnCopyHtml.disabled = !state.files.html;
-
-        unlockStep(statusCss, btnBuildCss);
-        toast("HTML built. CSS unlocked.");
-      }catch(e){
-        failBuilding(statusHtml);
-        outHtml.value = "ERROR\n\n" + (e.message || String(e));
-        btnBuildHtml.disabled = false;
-      }
+    function signOut(){
+      // keep account (so they can sign back in), just mark signed out in UI
+      setSignedOut();
+      authToastMsg("Signed out (local).");
+      closeModal();
     }
 
-    async function buildCss(){
-      startBuilding(statusCss, btnBuildCss);
-      outCss.value = "Building CSS...\n";
-      doneCard.classList.remove("show");
-      try{
-        const res = await postGenerate("css");
-        if (!res.ok){
-          failBuilding(statusCss);
-          outCss.value = "FAILED (" + (res.status || "?") + ")\n\n" + (res.error || "");
-          btnBuildCss.disabled = false;
-          return;
-        }
-
-        const file = res.data.file || {};
-        state.files.css = file.content || "";
-        state.context = res.data.context || state.context || {};
-        outCss.value = state.files.css;
-
-        stopBuilding(statusCss);
-        btnCopyCss.disabled = !state.files.css;
-
-        unlockStep(statusJs, btnBuildJs);
-        toast("CSS built. JS unlocked.");
-      }catch(e){
-        failBuilding(statusCss);
-        outCss.value = "ERROR\n\n" + (e.message || String(e));
-        btnBuildCss.disabled = false;
-      }
+    function goBuilder(){
+      window.location.href = "builder.html";
     }
 
-    async function buildJs(){
-      startBuilding(statusJs, btnBuildJs);
-      outJs.value = "Building JS...\n";
-      doneCard.classList.remove("show");
-      try{
-        const res = await postGenerate("js");
-        if (!res.ok){
-          failBuilding(statusJs);
-          outJs.value = "FAILED (" + (res.status || "?") + ")\n\n" + (res.error || "");
-          btnBuildJs.disabled = false;
-          return;
-        }
-
-        const file = res.data.file || {};
-        state.files.js = file.content || "";
-        state.context = res.data.context || state.context || {};
-        outJs.value = state.files.js;
-
-        stopBuilding(statusJs);
-        btnCopyJs.disabled = !state.files.js;
-
-        toast("JS built. Build complete.");
-        showDonePanel();
-      }catch(e){
-        failBuilding(statusJs);
-        outJs.value = "ERROR\n\n" + (e.message || String(e));
-        btnBuildJs.disabled = false;
-      }
-    }
-
-    // ===== Edit system (UI wired; backend comes next) =====
-    async function applyEdit(){
-      if (state.editsRemaining <= 0){
-        toast("No edits remaining.");
-        return;
-      }
-      if (!state.files.html || !state.files.css || !state.files.js){
-        toast("Build all 3 files first.");
-        return;
-      }
-      const changeRequest = (editRequest.value || "").trim();
-      if (!changeRequest){
-        toast("Type an edit request first.");
+    function generateGame(){
+      const a = getAuth();
+      if (!a){
+        toast("Sign in first (local-only).");
+        openModal();
         return;
       }
 
-      btnApplyEdit.disabled = true;
-      editHint.textContent = "Applying edit…";
-
-      // save snapshot for revert
-      state.history.push({
-        files: { ...state.files },
-        context: JSON.parse(JSON.stringify(state.context || {})),
-        editsRemaining: state.editsRemaining
-      });
-
-      try{
-        const payload = {
-          changeRequest,
-          theme: { ...state.theme },
-          templateId: state.templateId,
-          remainingEdits: state.editsRemaining,
-          currentFiles: {
-            "index.html": state.files.html,
-            "style.css": state.files.css,
-            "game.js": state.files.js
-          },
-          debug: {
-            screenshotNotes: (screenshotNotes.value || "").trim(),
-            consoleLog: (consoleLog.value || "").trim(),
-            networkLog: (networkLog.value || "").trim()
-          }
-        };
-
-        const r = await fetch(API_BASE + "/api/edit", {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        const raw = await r.text();
-        let json = null;
-        try{ json = JSON.parse(raw); }catch{}
-
-        if (!r.ok){
-          // revert auto if backend fails
-          const snap = state.history.pop();
-          if (snap){
-            state.files = { ...snap.files };
-            state.context = snap.context;
-            state.editsRemaining = snap.editsRemaining;
-            outHtml.value = state.files.html;
-            outCss.value = state.files.css;
-            outJs.value = state.files.js;
-          }
-
-          editHint.textContent = "Edit failed: " + ((json && (json.error || json.message)) || raw || ("HTTP " + r.status));
-          toast("Edit failed.");
-          showDonePanel();
-          return;
-        }
-
-        // Expected shape: { ok:true, updates:[{name, content}] } OR { replace:{...} }
-        const updates = (json && (json.updates || json.files || json.replace)) || null;
-
-        if (Array.isArray(updates)){
-          updates.forEach(u => {
-            const name = (u && u.name) ? String(u.name) : "";
-            const content = (u && u.content) ? String(u.content) : "";
-            if (name === "index.html") state.files.html = content;
-            if (name === "style.css") state.files.css = content;
-            if (name === "game.js") state.files.js = content;
-          });
-        } else if (updates && typeof updates === "object"){
-          if (updates["index.html"]) state.files.html = String(updates["index.html"]);
-          if (updates["style.css"]) state.files.css = String(updates["style.css"]);
-          if (updates["game.js"]) state.files.js = String(updates["game.js"]);
-        }
-
-        outHtml.value = state.files.html;
-        outCss.value = state.files.css;
-        outJs.value = state.files.js;
-
-        state.editsRemaining = Math.max(0, state.editsRemaining - 1);
-        editHint.textContent = "Edit applied ✅";
-        toast("Edit applied.");
-        showDonePanel();
-
-      } catch(e){
-        const snap = state.history.pop();
-        if (snap){
-          state.files = { ...snap.files };
-          state.context = snap.context;
-          state.editsRemaining = snap.editsRemaining;
-          outHtml.value = state.files.html;
-          outCss.value = state.files.css;
-          outJs.value = state.files.js;
-        }
-        editHint.textContent = "Edit error: " + (e.message || String(e));
-        toast("Edit error.");
-        showDonePanel();
-      } finally {
-        btnRevert.disabled = state.history.length === 0;
-        btnApplyEdit.disabled = state.editsRemaining <= 0;
-      }
-    }
-
-    function revertEdit(){
-      const snap = state.history.pop();
-      if (!snap){ toast("Nothing to revert."); return; }
-      state.files = { ...snap.files };
-      state.context = snap.context;
-      state.editsRemaining = snap.editsRemaining;
-
-      outHtml.value = state.files.html;
-      outCss.value = state.files.css;
-      outJs.value = state.files.js;
-
-      editHint.textContent = "Reverted (free) ✅";
-      toast("Reverted.");
-      showDonePanel();
-    }
-
-    async function startOver(){
-      // resets edits + history but keeps original inputs
-      state.history = [];
-      state.editsRemaining = 3;
-      saveEdits();
-
-      // if user never built before, just clear
-      const idea = state.original.idea || (ideaBox.value || "").trim();
-      if (!idea){
-        toast("Nothing to start over from.");
+      const prompt = String(promptBox.value || "").trim();
+      if (!prompt){
+        toast("Type a short game description first.");
+        promptBox.focus();
         return;
       }
 
-      // restore original theme/template if captured
-      if (state.original.theme){
-        state.theme = { ...state.original.theme };
-      }
-      if (state.original.templateId){
-        state.templateId = state.original.templateId;
-      }
-      updateTemplateUI();
-      updateThemeUI();
-
-      // clear outputs and context
-      state.context = null;
-      state.files = { html:"", css:"", js:"" };
-      outHtml.value = "";
-      outCss.value = "";
-      outJs.value = "";
-      doneCard.classList.remove("show");
-      editHint.textContent = "Start Over: rebuilding…";
-
-      // lock stages
-      statusHtml.textContent = "idle";
-      lockStep(statusCss, btnBuildCss);
-      lockStep(statusJs, btnBuildJs);
-      btnCopyHtml.disabled = true;
-      btnCopyCss.disabled = true;
-      btnCopyJs.disabled = true;
-
-      // rebuild chain automatically
-      toast("Starting over…");
-      await buildHtml();
-      if (statusHtml.textContent === "done") await buildCss();
-      if (statusCss.textContent === "done") await buildJs();
-
-      editHint.textContent = "Start Over complete ✅";
-      showDonePanel();
+      localStorage.setItem(KEYS.draftPrompt, prompt);
+      toast("Opening builder…");
+      setTimeout(() => goBuilder(), 250);
     }
 
-    // ===== Wire buttons =====
-    document.getElementById("sampleBtn").addEventListener("click", () => {
-      ideaBox.value =
-`Hot/Cold Map Hunt (Battleship but cooler)
-- 6×10 grid (A–F, 1–10)
-- Viewers guess coordinates like B7 / E3 in chat
-- Show HOT / WARM / COOL / COLD feedback + mark the grid
-- Likes fill a Radar Meter (hint triggers)
-- Gifts trigger power-ups: Row Scan / Reveal / Double Points
-- End screen: final map + top contributors`;
+    // Events
+    btnSignIn.addEventListener("click", openModal);
+    btnOpenBuilder.addEventListener("click", goBuilder);
+    btnGoBuilder2.addEventListener("click", goBuilder);
+    el("btnGenerate").addEventListener("click", generateGame);
+    el("btnSample").addEventListener("click", () => {
+      promptBox.value =
+`Emoji Arena (Teams)
+- Viewers type !join red / !join blue to pick a team
+- Chat: !attack triggers team push, !shield blocks for 3 seconds
+- Likes: charge a boost meter (when full, auto-speed burst)
+- Gifts: small=heal, medium=stun, large=meteor
+- Rounds are 30 seconds, first team to 100 points wins
+- Screen: arena + big HUD + flashy popups + leaderboard`;
       toast("Sample inserted.");
     });
+    el("btnClear").addEventListener("click", () => { promptBox.value=""; toast("Cleared."); });
 
-    document.getElementById("clearBtn").addEventListener("click", () => {
-      ideaBox.value = "";
+    btnCloseModal.addEventListener("click", closeModal);
+    modalWrap.addEventListener("click", (e) => { if (e.target === modalWrap) closeModal(); });
 
-      state.context = null;
-      state.files = { html:"", css:"", js:"" };
-      state.original = { idea:"", theme:null, templateId: state.templateId };
+    btnCreateAccount.addEventListener("click", createAccount);
+    btnDoSignIn.addEventListener("click", signIn);
+    btnSignOut.addEventListener("click", signOut);
 
-      outHtml.value = "";
-      outCss.value = "";
-      outJs.value = "";
-
-      statusHtml.textContent = "idle";
-      lockStep(statusCss, btnBuildCss);
-      lockStep(statusJs, btnBuildJs);
-
-      btnCopyHtml.disabled = true;
-      btnCopyCss.disabled = true;
-      btnCopyJs.disabled = true;
-
-      btnBuildHtml.disabled = false;
-      doneCard.classList.remove("show");
-
-      state.history = [];
-      state.editsRemaining = 3;
-      saveEdits();
-      toast("Cleared.");
-    });
-
-    document.getElementById("testBtn").addEventListener("click", async () => {
-      const ok = await checkApi();
-      toast(ok ? "API is online." : "API is offline.");
-    });
-
-    btnBuildHtml.addEventListener("click", buildHtml);
-    btnBuildCss.addEventListener("click", buildCss);
-    btnBuildJs.addEventListener("click", buildJs);
-
-    btnCopyHtml.addEventListener("click", () => copyText(outHtml.value));
-    btnCopyCss.addEventListener("click", () => copyText(outCss.value));
-    btnCopyJs.addEventListener("click", () => copyText(outJs.value));
-
-    btnApplyEdit.addEventListener("click", applyEdit);
-    btnRevert.addEventListener("click", revertEdit);
-    btnStartOver.addEventListener("click", startOver);
-
-    // ===== Init =====
+    // Init
     (function init(){
-      setPill(true, "Local page loaded");
+      el("yy").textContent = String(new Date().getFullYear());
 
-      loadTheme();
-      loadTemplate();
-      loadEdits();
-      bindThemeInputs();
+      // preload last email
+      try{
+        const last = localStorage.getItem(KEYS.lastUser);
+        if (last) emailBox.value = last;
+      }catch{}
 
-      updateTemplateUI();
-      updateThemeUI();
+      const a = getAuth();
+      if (a && a.email){
+        // not auto-auth; just convenience: show signed in (local)
+        setSignedIn(a.email);
+      } else {
+        setSignedOut();
+      }
 
-      // lock stages until prior stages finish
-      lockStep(statusCss, btnBuildCss);
-      lockStep(statusJs, btnBuildJs);
-
-      editsChip.textContent = "edits remaining: " + state.editsRemaining;
-
-      checkApi();
-      setInterval(checkApi, 5000);
+      // if they previously drafted a prompt, keep it
+      try{
+        const draft = localStorage.getItem(KEYS.draftPrompt);
+        if (draft && !promptBox.value.trim()) promptBox.value = draft;
+      }catch{}
     })();
   </script>
 </body>
