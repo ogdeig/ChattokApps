@@ -2,15 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>ChatTok Tools — Build TikTok LIVE Games</title>
-  <meta name="description" content="Type a short description of your TikTok LIVE game idea. We’ll open the builder and auto-pick the best template." />
-  <meta name="theme-color" content="#0b0b0d" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>ChatOck Tools — Game Builder</title>
+  <meta name="description" content="Describe your TikTok Live game idea, then build staged files: index.html → style.css → game.js." />
 
   <style>
     :root{
-      --bg0:#07070a;
-      --bg1:#0b0b0d;
+      --bg0:#0b0b0c;
+      --bg1:#121214;
 
       --panel: rgba(255,255,255,.06);
       --panel2: rgba(255,255,255,.04);
@@ -19,633 +18,503 @@
       --text:#ffffff;
       --muted: rgba(255,255,255,.72);
 
-      --accent1:#ff8a00; /* orange */
-      --accent2:#ffb15a;
+      --orange:#ff7a18;
+      --orange2:#ffb154;
 
       --good:#2ee59d;
       --bad:#ff4d4d;
 
-      --shadowPanel: 0 14px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08);
+      --shadow: 0 18px 55px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08);
       --r: 18px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      --r2: 14px;
+
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
+    *{box-sizing:border-box}
+    html,body{height:100%}
     body{
       margin:0;
-      font-family: var(--sans);
+      font-family:var(--sans);
       color:var(--text);
       background:
-        radial-gradient(1200px 700px at 20% 10%, rgba(255,138,0,.14), transparent 60%),
-        radial-gradient(900px 600px at 85% 25%, rgba(255,177,90,.08), transparent 55%),
-        radial-gradient(900px 600px at 30% 90%, rgba(255,138,0,.08), transparent 60%),
+        radial-gradient(1200px 600px at 30% -10%, rgba(255,122,24,.22), transparent 60%),
+        radial-gradient(900px 500px at 80% 0%, rgba(255,177,84,.14), transparent 55%),
         linear-gradient(180deg, var(--bg0), var(--bg1));
-      overflow-x:hidden;
+      min-height:100svh;
     }
+    a{color:inherit; text-decoration:none}
 
-    a{ color: rgba(255,177,90,.95); text-decoration:none; }
-    a:hover{ text-decoration:underline; }
-
-    .wrap{ max-width: 1100px; margin: 0 auto; padding: 22px 14px 60px; }
-
-    .nav{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom: 16px;
+    .wrap{max-width:1060px; margin:0 auto; padding:18px 16px 30px}
+    header{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; padding:10px 0 16px;
     }
+    .brand{display:flex; align-items:center; gap:10px;}
     .logo{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
-    .mark{
-      width: 40px;
-      height: 40px;
-      border-radius: 14px;
+      width:40px; height:40px; border-radius:14px;
       background:
-        radial-gradient(18px 18px at 25% 25%, rgba(255,255,255,.20), transparent 60%),
-        linear-gradient(180deg, rgba(255,177,90,.95), rgba(255,138,0,.85));
-      box-shadow: 0 12px 26px rgba(255,138,0,.22), 0 0 0 1px rgba(255,255,255,.10);
-      flex: 0 0 auto;
+        radial-gradient(14px 14px at 28% 30%, rgba(255,255,255,.35), transparent 60%),
+        linear-gradient(135deg, rgba(255,122,24,.95), rgba(255,177,84,.8));
+      box-shadow: 0 12px 34px rgba(255,122,24,.18);
+      position:relative; overflow:hidden;
     }
-    .brand{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-      min-width:0;
+    .logo:after{
+      content:"";
+      position:absolute; inset:-30%;
+      background: radial-gradient(circle at 20% 20%, rgba(255,255,255,.18), transparent 55%);
+      transform: rotate(14deg);
     }
-    .brand b{
-      font-size: 14px;
-      letter-spacing:.2px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .brand span{
-      font-size: 12px;
-      color: var(--muted);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .navRight{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 10px 12px;
-      background: rgba(0,0,0,.22);
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      box-shadow: 0 10px 25px rgba(0,0,0,.25);
-      color: var(--muted);
-      font-size: 13px;
-      white-space:nowrap;
-      user-select:none;
-    }
-    .dot{ width:10px; height:10px; border-radius: 50%; background: rgba(255,255,255,.22); box-shadow: 0 0 0 2px rgba(255,255,255,.08); }
-    .dot.good{ background: var(--good); box-shadow: 0 0 0 2px rgba(46,229,157,.18); }
+    .brand h1{margin:0; font-size:16px; letter-spacing:.2px; line-height:1.1}
+    .brand p{margin:2px 0 0; font-size:12px; color:var(--muted)}
 
     .btn{
-      border: 0;
-      cursor:pointer;
-      padding: 12px 14px;
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      padding:11px 12px;
       border-radius: 14px;
-      font-weight: 900;
-      letter-spacing:.2px;
-      color: #0b0b0d;
-      background: linear-gradient(180deg, var(--accent2), var(--accent1));
-      box-shadow: 0 14px 26px rgba(255,138,0,.22), 0 7px 0 rgba(0,0,0,.35);
-      transform: translateY(0);
-      transition: transform .08s ease, box-shadow .08s ease, filter .15s ease, opacity .15s ease;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      cursor:pointer;
       user-select:none;
+      font-weight:800;
+      letter-spacing:.2px;
+      transition: transform .12s ease, border .12s ease, background .12s ease;
+      white-space:nowrap;
     }
-    .btn:hover{ filter: brightness(1.04); }
-    .btn:active{
-      transform: translateY(6px);
-      box-shadow: 0 8px 18px rgba(255,138,0,.18), 0 1px 0 rgba(0,0,0,.35);
+    .btn:hover{transform: translateY(-1px); border-color: rgba(255,255,255,.25)}
+    .btn:active{transform: translateY(0px)}
+    .btn[disabled]{opacity:.45; cursor:not-allowed; transform:none !important}
+    .btn.primary{
+      border-color: rgba(255,122,24,.55);
+      background: linear-gradient(135deg, rgba(255,122,24,.95), rgba(255,177,84,.70));
+      color:#120a02;
+      box-shadow: 0 12px 36px rgba(255,122,24,.18);
     }
-    .btn[disabled]{ opacity:.55; cursor:not-allowed; filter:saturate(.6); }
+    .btn.primary:hover{border-color: rgba(255,122,24,.9)}
+    .btn.ghost{
+      background: rgba(0,0,0,.22);
+      border-color: rgba(255,255,255,.14);
+    }
 
-    .btn.secondary{
-      color: var(--text);
-      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.08));
-      border: 1px solid rgba(255,255,255,.14);
-      box-shadow: 0 12px 24px rgba(0,0,0,.28), 0 7px 0 rgba(0,0,0,.35);
+    .chip{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      color:rgba(255,255,255,.82);
     }
 
     .hero{
       display:grid;
       grid-template-columns: 1.2fr .8fr;
-      gap: 14px;
+      gap:14px;
       align-items:start;
-      margin-top: 8px;
+      margin-top:6px;
     }
     @media (max-width: 980px){
-      .hero{ grid-template-columns: 1fr; }
+      .hero{grid-template-columns:1fr}
     }
 
-    .panel{
-      background: linear-gradient(180deg, var(--panel), var(--panel2));
-      border: 1px solid var(--line);
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.10);
       border-radius: var(--r);
-      box-shadow: var(--shadowPanel);
+      box-shadow: var(--shadow);
       overflow:hidden;
     }
-    .panelHead{
-      padding: 16px 16px 12px;
+    .hd{
+      padding:14px 14px 10px;
       border-bottom: 1px solid rgba(255,255,255,.08);
-      background: linear-gradient(180deg, rgba(0,0,0,.18), transparent);
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
     }
-    .panelHead h1{
-      margin:0;
-      font-size: 22px;
-      font-weight: 950;
-      letter-spacing:.2px;
-      text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 12px rgba(255,138,0,.16);
-    }
-    .panelHead p{
-      margin: 6px 0 0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.4;
-      max-width: 62ch;
-    }
-    .panelBody{ padding: 16px; }
+    .hd .title{font-weight:900; letter-spacing:.2px; font-size:13px; margin:0}
+    .hd .sub{margin:5px 0 0; font-size:12px; color:var(--muted); line-height:1.35}
+    .bd{padding:14px}
 
-    label{
-      display:block;
-      font-weight: 900;
-      font-size: 12.5px;
-      letter-spacing:.3px;
-      color: rgba(255,255,255,.90);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      text-shadow: 0 1px 0 rgba(0,0,0,.35), 0 0 10px rgba(255,138,0,.10);
-    }
-
-    textarea, input{
-      width:100%;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.26);
-      color: rgba(255,255,255,.92);
-      padding: 12px 12px;
-      font-family: var(--mono);
-      outline:none;
-    }
-    textarea{
-      min-height: 180px;
-      resize: vertical;
-      line-height: 1.45;
-    }
-    textarea::placeholder{ color: rgba(255,255,255,.55); }
-
-    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top: 12px; }
-    .mini{ font-size: 12px; color: rgba(255,255,255,.66); line-height:1.4; margin-top: 10px; }
-
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 9px 11px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,138,0,.22);
-      background: rgba(255,138,0,.10);
-      color: rgba(255,255,255,.90);
-      font-size: 12.5px;
-      font-weight: 900;
-      user-select:none;
-      white-space:nowrap;
-    }
-
-    .tips{
-      display:flex;
-      flex-direction:column;
-      gap: 10px;
-      padding: 14px;
-    }
-    .tip{
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      padding: 12px;
-    }
-    .tip b{ display:block; font-size: 13.5px; }
-    .tip span{ display:block; margin-top: 4px; color: rgba(255,255,255,.72); font-size: 12px; line-height: 1.35; }
-
-    .toast{
-      margin-top: 12px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,138,0,.22);
-      background: rgba(255,138,0,.10);
-      box-shadow: 0 10px 22px rgba(255,138,0,.10);
-      display:none;
-      color: rgba(255,255,255,.90);
-      font-size: 13px;
-    }
-    .toast.show{ display:block; }
-
-    footer{
-      margin-top: 14px;
-      padding: 16px 14px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      box-shadow: 0 12px 26px rgba(0,0,0,.30);
-      color: rgba(255,255,255,.72);
-    }
-    .footRow{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      justify-content:space-between;
-      flex-wrap:wrap;
-    }
-    .footLinks{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-    .copy{
-      font-family: var(--mono);
-      font-size: 12px;
-      opacity: .85;
-    }
-
-    .modalWrap{
-      position:fixed;
-      inset:0;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding: 16px;
-      background: rgba(0,0,0,.62);
-      backdrop-filter: blur(10px);
-      z-index: 50;
-    }
-    .modal{
-      width: min(560px, 96vw);
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: linear-gradient(180deg, rgba(18,18,22,.92), rgba(10,10,12,.84));
-      box-shadow: 0 18px 55px rgba(0,0,0,.60);
-      overflow:hidden;
-    }
-    .modalHead{
-      padding: 14px 14px 10px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
+    .field{display:grid; gap:6px; margin-bottom:10px}
+    .label{
+      font-size:12px;
+      color:rgba(255,255,255,.86);
+      display:flex; align-items:center; justify-content:space-between;
       gap:10px;
     }
-    .modalHead b{ font-size: 15px; letter-spacing:.2px; }
-    .x{
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.85);
+    .muted{color:var(--muted)}
+    .input, textarea{
+      width:100%;
+      padding:12px 12px;
       border-radius: 12px;
-      padding: 8px 10px;
-      cursor:pointer;
-      font-weight: 900;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.28);
+      color:var(--text);
+      outline:none;
+      transition: border .15s ease, transform .15s ease;
+      font-size:14px;
     }
-    .modalBody{ padding: 14px; }
-    .twoCol{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+    textarea{min-height:150px; resize:vertical; line-height:1.35}
+    .input:focus, textarea:focus{
+      border-color: rgba(255,122,24,.65);
+      box-shadow: 0 0 0 3px rgba(255,122,24,.18);
     }
-    @media (max-width: 560px){
-      .twoCol{ grid-template-columns: 1fr; }
+
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .divider{height:1px; background: rgba(255,255,255,.10); margin:12px 0}
+
+    .miniHelp{
+      font-size:12px;
+      color:rgba(255,255,255,.72);
+      line-height:1.45;
+      margin:0;
     }
-    .warn{
-      margin-top: 10px;
+    .bullets{
+      margin:10px 0 0;
+      padding-left:18px;
+      color:rgba(255,255,255,.72);
+      font-size:12px;
+      line-height:1.5;
+    }
+    .bullets b{color:rgba(255,255,255,.92)}
+
+    /* Ad placeholders */
+    .adSlot{
+      border-radius: var(--r2);
+      border: 1px dashed rgba(255,255,255,.20);
+      background: rgba(0,0,0,.18);
+      padding:12px;
+      min-height: 86px;
+      display:flex; align-items:center; justify-content:center;
+      text-align:center;
+      color:rgba(255,255,255,.58);
+      font-size:12px;
+      line-height:1.35;
+    }
+    .adBig{min-height:140px}
+
+    /* Toast */
+    .toast{
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 16px;
+      max-width: 92vw;
+      width: 720px;
+      background: rgba(0,0,0,.78);
+      border: 1px solid rgba(255,255,255,.14);
+      color: rgba(255,255,255,.92);
+      border-radius: 16px;
+      box-shadow: 0 24px 70px rgba(0,0,0,.65);
       padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,138,0,.18);
-      background: rgba(255,138,0,.08);
-      color: rgba(255,255,255,.80);
-      font-size: 12.5px;
-      line-height: 1.4;
+      display:none;
+      z-index:9999;
     }
+    .toast.show{display:block}
+    .toast .r{display:flex; align-items:flex-start; justify-content:space-between; gap:12px}
+    .toast .msg{font-size:13px; line-height:1.35}
+    .toast .x{
+      width:28px; height:28px; border-radius: 12px;
+      display:grid; place-items:center;
+      cursor:pointer;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      flex:0 0 auto;
+    }
+
+    footer{
+      margin-top:16px;
+      padding:14px 0 0;
+      color:rgba(255,255,255,.60);
+      font-size:12px;
+    }
+    footer .frow{
+      display:flex; gap:12px; justify-content:space-between; flex-wrap:wrap;
+      border-top: 1px solid rgba(255,255,255,.10);
+      padding-top:14px;
+    }
+    footer .links{display:flex; gap:12px; flex-wrap:wrap}
+    footer .links a{
+      opacity:.85;
+      border-bottom:1px dashed rgba(255,255,255,.22);
+    }
+    footer .links a:hover{opacity:1}
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <div class="nav">
-      <div class="logo">
-        <div class="mark" aria-hidden="true"></div>
-        <div class="brand">
-          <b>ChatTok Tools</b>
-          <span>Build TikTok LIVE games & overlays</span>
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>ChatOck Tools</h1>
+          <p>Describe your game → open the builder</p>
         </div>
       </div>
 
-      <div class="navRight">
-        <div class="pill" title="Local sign-in status">
-          <span id="authDot" class="dot"></span>
-          <span id="authMsg">Signed out</span>
+      <div class="row">
+        <a class="btn ghost" href="builder.html">Open Builder</a>
+      </div>
+    </header>
+
+    <!-- Top ad placeholder -->
+    <div class="card" style="margin-bottom:14px">
+      <div class="bd">
+        <div class="adSlot">
+          <div>
+            <b>Ad Placeholder (Header Banner)</b><br />
+            We’ll wire this up later (AdSense / other provider).
+          </div>
         </div>
-        <button id="btnOpenBuilder" class="btn secondary" type="button">Open Builder</button>
-        <button id="btnSignIn" class="btn" type="button">Sign In</button>
       </div>
     </div>
 
     <div class="hero">
-      <section class="panel">
-        <div class="panelHead">
-          <h1>Describe your LIVE game idea.</h1>
-          <p>
-            Keep it short and clear. After you click <b>Generate Game</b>, we’ll open the builder and
-            pre-fill your prompt so it can choose the best template automatically.
-          </p>
+      <!-- LEFT: prompt -->
+      <section class="card">
+        <div class="hd">
+          <div>
+            <p class="title">Start here</p>
+            <p class="sub">Type your idea. Keep it short. Then we’ll open the staged builder.</p>
+          </div>
+          <div class="row">
+            <span id="micChip" class="chip" style="display:none">Listening…</span>
+            <button class="btn ghost" id="btnMic" type="button">🎙️ Talk</button>
+          </div>
         </div>
 
-        <div class="panelBody">
-          <label for="idea">Your game idea (short description)</label>
-          <textarea id="idea" placeholder="Example:
-A TikTok LIVE trivia game where viewers join by typing !join, answer with A/B/C, and gifts add bonus points. Needs a clean 9:16 layout, sound effects, and a winner screen."></textarea>
-
-          <div class="mini">
-            Include (when relevant):<br>
-            • How players join (command / keyword) • What chat actions do (answers, votes, attacks)<br>
-            • Scoring/win condition • Sounds/animations • Mobile readability (big text, bold UI)
+        <div class="bd">
+          <div class="field">
+            <div class="label">
+              <span>Game idea prompt</span>
+              <span class="muted">Tell what viewers do</span>
+            </div>
+            <textarea id="idea" placeholder="Example: “Asteroid Arena: a neon ship dodges asteroids. Chat spawns asteroids, likes add shields, gifts trigger a laser blast. Survive 60 seconds to win.”"></textarea>
           </div>
 
           <div class="row">
-            <span class="badge">Auto-template selection</span>
-            <span class="badge">9:16 LIVE overlay ready</span>
-            <span class="badge">Chat/Gifts/Likes aware</span>
+            <button class="btn primary" id="btnGo" type="button">Generate Game</button>
+            <span class="chip">No preview here (builder exports files)</span>
           </div>
 
-          <div class="row">
-            <button id="btnGenerate" class="btn" type="button">Generate Game</button>
-            <button id="btnClear" class="btn secondary" type="button">Clear</button>
-          </div>
+          <div class="divider"></div>
 
-          <div id="toast" class="toast"></div>
+          <p class="miniHelp">
+            What to include (fast):
+          </p>
+          <ul class="bullets">
+            <li><b>Theme / vibe:</b> neon, retro, cute, gritty</li>
+            <li><b>On-screen action:</b> ship dodges asteroids, racers, trivia duel, etc.</li>
+            <li><b>Chat controls:</b> commands, votes, joining</li>
+            <li><b>Likes:</b> fuel / shield / bonus</li>
+            <li><b>Gifts:</b> power-ups / attacks / boss spawn</li>
+            <li><b>Win condition:</b> survive time, score goal, last player, etc.</li>
+          </ul>
         </div>
       </section>
 
-      <aside class="panel">
-        <div class="panelHead">
-          <h1 style="font-size:18px;margin:0">What to write</h1>
-          <p style="margin:6px 0 0">If you’re vague, you’ll get a bland game. These hints help.</p>
+      <!-- RIGHT: simple explanation + ad placeholder -->
+      <aside class="card">
+        <div class="hd">
+          <div>
+            <p class="title">What happens next?</p>
+            <p class="sub">You’ll build files in stages (HTML → CSS → JS) and copy them into your preview site.</p>
+          </div>
         </div>
-        <div class="tips">
-          <div class="tip">
-            <b>Choose the “type” without saying template</b>
-            <span>Say what it does: trivia, wheel spin, battle, racing, voting, scoreboard overlay, etc.</span>
+        <div class="bd">
+          <div class="adSlot adBig">
+            <div>
+              <b>Ad Placeholder (Sidebar)</b><br />
+              Optional slot for later monetization.
+            </div>
           </div>
-          <div class="tip">
-            <b>One “main loop”</b>
-            <span>Example: “join → play rounds → show winner → reset” or “always running scoreboard overlay”.</span>
-          </div>
-          <div class="tip">
-            <b>Big UI for phones</b>
-            <span>Ask for bold fonts, high contrast, and clear spacing. (Your viewers are on mobile.)</span>
-          </div>
-          <div class="tip">
-            <b>Monetization-safe wording</b>
-            <span>Use “optional boosts”, “bonus effects”, “fun power-ups” (avoid “pay to win”).</span>
-          </div>
+
+          <div class="divider"></div>
+
+          <p class="miniHelp" style="margin-bottom:8px">
+            Staged output:
+          </p>
+          <ul class="bullets" style="margin-top:0">
+            <li><b>index.html</b> — game layout + setup overlay</li>
+            <li><b>style.css</b> — theme + UI polish</li>
+            <li><b>game.js</b> — TikTok events + gameplay logic</li>
+          </ul>
+
+          <div class="divider"></div>
+
+          <p class="miniHelp">
+            You can refine the prompt afterward to get more “real game action”
+            (like your asteroid movement / collisions / powerups).
+          </p>
         </div>
       </aside>
     </div>
 
     <footer>
-      <div class="footRow">
-        <div class="copy">© <span id="year"></span> ChatTok Tools. All rights reserved.</div>
-        <div class="footLinks">
-          <a href="#" id="privacyLink">Privacy</a>
-          <a href="#" id="termsLink">Terms</a>
-          <a href="#" id="contactLink">Contact</a>
+      <div class="frow">
+        <div>© <span id="year"></span> ChatOck Tools</div>
+        <div class="links">
+          <a href="#" id="linkPrivacy">Privacy (placeholder)</a>
+          <a href="#" id="linkTerms">Terms (placeholder)</a>
+          <a href="#" id="linkSupport">Support (placeholder)</a>
         </div>
       </div>
     </footer>
   </div>
 
-  <!-- Sign-in Modal -->
-  <div id="modalWrap" class="modalWrap" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="modal">
-      <div class="modalHead">
-        <b id="modalTitle">Local Sign-In</b>
-        <button class="x" id="btnCloseModal" type="button">X</button>
-      </div>
-      <div class="modalBody">
-        <div class="twoCol">
-          <div>
-            <label for="email">Email</label>
-            <input id="email" type="email" placeholder="you@example.com" autocomplete="email" />
-          </div>
-          <div>
-            <label for="pass">Password</label>
-            <input id="pass" type="password" placeholder="••••••••" autocomplete="current-password" />
-          </div>
-        </div>
-
-        <div class="row">
-          <button id="btnCreate" class="btn" type="button">Create Account</button>
-          <button id="btnLogin" class="btn secondary" type="button">Sign In</button>
-          <button id="btnLogout" class="btn secondary" type="button">Sign Out</button>
-        </div>
-
-        <div class="warn">
-          This is a GitHub Pages-friendly sign-in stored in your browser (localStorage). It’s great for MVP/testing.
-          Later, we’ll swap this to real auth when you tie it into your main site/app.
-        </div>
-      </div>
+  <!-- Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite">
+    <div class="r">
+      <div id="toastMsg" class="msg"></div>
+      <div id="toastX" class="x" title="Close">✕</div>
     </div>
   </div>
 
   <script>
-    // ============================
-    // Local auth (email + password)
-    // ============================
-    const LS_USER = "ct_auth_user";        // { email, passHash }
-    const LS_SESSION = "ct_auth_session";  // { email, at }
+    // This key MUST match builder.html so it picks up the prompt automatically.
+    const LS_KEY = "chattok_builder_state_v2";
 
-    const authDot = document.getElementById("authDot");
-    const authMsg = document.getElementById("authMsg");
-    const btnSignIn = document.getElementById("btnSignIn");
-    const btnOpenBuilder = document.getElementById("btnOpenBuilder");
+    const el = {
+      idea: document.getElementById("idea"),
+      btnGo: document.getElementById("btnGo"),
+      btnMic: document.getElementById("btnMic"),
+      micChip: document.getElementById("micChip"),
+      year: document.getElementById("year"),
+      toast: document.getElementById("toast"),
+      toastMsg: document.getElementById("toastMsg"),
+      toastX: document.getElementById("toastX"),
+      linkPrivacy: document.getElementById("linkPrivacy"),
+      linkTerms: document.getElementById("linkTerms"),
+      linkSupport: document.getElementById("linkSupport")
+    };
 
-    const modalWrap = document.getElementById("modalWrap");
-    const btnCloseModal = document.getElementById("btnCloseModal");
-    const emailEl = document.getElementById("email");
-    const passEl = document.getElementById("pass");
-    const btnCreate = document.getElementById("btnCreate");
-    const btnLogin = document.getElementById("btnLogin");
-    const btnLogout = document.getElementById("btnLogout");
+    el.year.textContent = new Date().getFullYear();
 
-    // ============================
-    // Landing prompt -> builder handoff
-    // ============================
-    const ideaEl = document.getElementById("idea");
-    const btnGenerate = document.getElementById("btnGenerate");
-    const btnClear = document.getElementById("btnClear");
-    const toast = document.getElementById("toast");
-
-    // Keys builder can read
-    const LS_LAST_PROMPT = "ct_last_prompt";
-    const LS_FROM_LANDING = "ct_from_landing";
-
-    document.getElementById("year").textContent = new Date().getFullYear();
-
-    // Placeholder links (we can build these pages later)
-    document.getElementById("privacyLink").addEventListener("click", (e)=>{ e.preventDefault(); showToast("Privacy page coming soon."); });
-    document.getElementById("termsLink").addEventListener("click", (e)=>{ e.preventDefault(); showToast("Terms page coming soon."); });
-    document.getElementById("contactLink").addEventListener("click", (e)=>{ e.preventDefault(); showToast("Contact page coming soon."); });
-
-    btnOpenBuilder.addEventListener("click", () => {
-      window.location.href = "builder.html";
-    });
-
-    btnClear.addEventListener("click", () => {
-      ideaEl.value = "";
-      ideaEl.focus();
-      showToast("Cleared.");
-    });
-
-    btnGenerate.addEventListener("click", () => {
-      const v = (ideaEl.value || "").trim();
-      if (!v || v.length < 18){
-        showToast("Give me a little more detail (at least ~1–2 sentences).");
-        return;
-      }
-
-      localStorage.setItem(LS_LAST_PROMPT, v);
-      localStorage.setItem(LS_FROM_LANDING, "1");
-
-      window.location.href = "builder.html";
-    });
-
-    btnSignIn.addEventListener("click", () => openModal());
-    btnCloseModal.addEventListener("click", () => closeModal());
-    modalWrap.addEventListener("click", (e) => { if (e.target === modalWrap) closeModal(); });
-
-    async function sha256Hex(str){
-      const enc = new TextEncoder().encode(str);
-      const digest = await crypto.subtle.digest("SHA-256", enc);
-      const bytes = Array.from(new Uint8Array(digest));
-      return bytes.map(b => b.toString(16).padStart(2,"0")).join("");
-    }
-
-    function readJSON(key){
-      try { return JSON.parse(localStorage.getItem(key) || "null"); }
-      catch { return null; }
-    }
-    function writeJSON(key, obj){
-      localStorage.setItem(key, JSON.stringify(obj));
-    }
-
-    function getSession(){
-      const s = readJSON(LS_SESSION);
-      if (!s || !s.email) return null;
-      return s;
-    }
-
-    function setStatus(){
-      const s = getSession();
-      if (s){
-        authDot.classList.add("good");
-        authMsg.textContent = s.email;
-        btnSignIn.textContent = "Account";
-      } else {
-        authDot.classList.remove("good");
-        authMsg.textContent = "Signed out";
-        btnSignIn.textContent = "Sign In";
-      }
-    }
-
-    function openModal(){
-      modalWrap.style.display = "flex";
-      emailEl.focus();
-      setStatus();
-    }
-    function closeModal(){
-      modalWrap.style.display = "none";
-      passEl.value = "";
-    }
-
-    btnCreate.addEventListener("click", async () => {
-      const email = (emailEl.value || "").trim().toLowerCase();
-      const pass = (passEl.value || "").trim();
-
-      if (!email.includes("@") || email.length < 6){
-        showToast("Enter a real email.");
-        return;
-      }
-      if (pass.length < 6){
-        showToast("Password must be at least 6 characters.");
-        return;
-      }
-
-      const passHash = await sha256Hex(pass);
-      writeJSON(LS_USER, { email, passHash, createdAt: Date.now() });
-      writeJSON(LS_SESSION, { email, at: Date.now() });
-
-      setStatus();
-      showToast("Account created. Signed in.");
-      closeModal();
-    });
-
-    btnLogin.addEventListener("click", async () => {
-      const email = (emailEl.value || "").trim().toLowerCase();
-      const pass = (passEl.value || "").trim();
-
-      const u = readJSON(LS_USER);
-      if (!u || !u.email){
-        showToast("No account found. Click Create Account first.");
-        return;
-      }
-      if (u.email !== email){
-        showToast("Email not found on this device.");
-        return;
-      }
-      const passHash = await sha256Hex(pass);
-      if (passHash !== u.passHash){
-        showToast("Incorrect password.");
-        return;
-      }
-
-      writeJSON(LS_SESSION, { email, at: Date.now() });
-      setStatus();
-      showToast("Signed in.");
-      closeModal();
-    });
-
-    btnLogout.addEventListener("click", () => {
-      localStorage.removeItem(LS_SESSION);
-      setStatus();
-      showToast("Signed out.");
-    });
-
-    function showToast(msg){
-      toast.textContent = msg;
-      toast.classList.add("show");
+    function showToast(msg, ms=4200){
+      el.toastMsg.textContent = msg;
+      el.toast.classList.add("show");
       clearTimeout(showToast._t);
-      showToast._t = setTimeout(()=> toast.classList.remove("show"), 2200);
+      showToast._t = setTimeout(()=> el.toast.classList.remove("show"), ms);
+    }
+    el.toastX.addEventListener("click", ()=> el.toast.classList.remove("show"));
+
+    function placeholderLink(name){
+      showToast(`${name} page placeholder — we’ll build it later.`, 3500);
+    }
+    el.linkPrivacy.addEventListener("click", (e)=>{ e.preventDefault(); placeholderLink("Privacy"); });
+    el.linkTerms.addEventListener("click", (e)=>{ e.preventDefault(); placeholderLink("Terms"); });
+    el.linkSupport.addEventListener("click", (e)=>{ e.preventDefault(); placeholderLink("Support"); });
+
+    // Restore last prompt if present
+    (function load(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        if(!raw) return;
+        const s = JSON.parse(raw);
+        if(typeof s.idea === "string" && s.idea.trim()){
+          el.idea.value = s.idea.trim();
+        }
+      }catch{}
+    })();
+
+    function writePromptIntoBuilderState(){
+      const idea = (el.idea.value || "").trim();
+      if(!idea) throw new Error("Type a short game idea first.");
+
+      // Minimal snapshot builder.html understands
+      const snapshot = {
+        apiUrl: "https://chattok-builder-api.onrender.com",
+        templateId: "boss",
+        remainingEdits: 3,
+        context: { spec: null, templateId: "boss" },
+        files: { "index.html": "", "style.css": "", "game.js": "" },
+        theme: {
+          primary: "#ff7a18",
+          secondary: "#ffb154",
+          background: "#0b0b0c"
+        },
+        idea
+      };
+
+      localStorage.setItem(LS_KEY, JSON.stringify(snapshot));
     }
 
-    setStatus();
+    el.btnGo.addEventListener("click", ()=>{
+      try{
+        writePromptIntoBuilderState();
+        // Go to staged builder
+        window.location.href = "builder.html";
+      }catch(e){
+        showToast(e.message, 5200);
+      }
+    });
+
+    // Speech-to-text (Web Speech API)
+    let rec = null;
+    let isListening = false;
+
+    function supportsSpeech(){
+      return ("webkitSpeechRecognition" in window) || ("SpeechRecognition" in window);
+    }
+
+    function startSpeech(){
+      if(!supportsSpeech()){
+        showToast("Speech-to-text not supported in this browser.", 5200);
+        return;
+      }
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      rec = new SR();
+      rec.lang = "en-US";
+      rec.interimResults = true;
+      rec.continuous = true;
+
+      let finalText = "";
+
+      rec.onstart = () => {
+        isListening = true;
+        el.micChip.style.display = "inline-flex";
+        el.btnMic.textContent = "⏹ Stop";
+      };
+      rec.onend = () => {
+        isListening = false;
+        el.micChip.style.display = "none";
+        el.btnMic.textContent = "🎙️ Talk";
+      };
+      rec.onerror = () => {
+        showToast("Mic error. Check permissions.", 5200);
+      };
+      rec.onresult = (e) => {
+        let interim = "";
+        for(let i = e.resultIndex; i < e.results.length; i++){
+          const t = e.results[i][0].transcript;
+          if(e.results[i].isFinal) finalText += t + " ";
+          else interim += t;
+        }
+        const base = el.idea.value.replace(/\s*\[listening\:\s[\s\S]*\]$/,"");
+        const preview = interim ? ` [listening: ${interim.trim()}]` : "";
+        el.idea.value = (base + " " + finalText).trim() + preview;
+      };
+
+      rec.start();
+    }
+
+    function stopSpeech(){
+      try{ rec && rec.stop(); }catch{}
+    }
+
+    el.btnMic.addEventListener("click", ()=>{
+      if(isListening) stopSpeech();
+      else startSpeech();
+    });
+
+    el.idea.addEventListener("focus", ()=>{
+      el.idea.value = el.idea.value.replace(/\s*\[listening\:\s[\s\S]*\]$/,"").trim();
+    });
+
+    if(!supportsSpeech()){
+      el.btnMic.disabled = true;
+      el.btnMic.title = "Speech-to-text not supported in this browser.";
+    }
   </script>
 </body>
 </html>
