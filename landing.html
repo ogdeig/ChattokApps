@@ -523,7 +523,7 @@ A TikTok LIVE trivia game where viewers join by typing !join, answer with A/B/C,
 
     btnOpenBuilder.addEventListener("click", () => {
       // Go to your existing builder page
-      window.location.href = "index.html";
+      window.location.href = "landing.html";
     });
 
     btnClear.addEventListener("click", () => {
@@ -542,7 +542,7 @@ A TikTok LIVE trivia game where viewers join by typing !join, answer with A/B/C,
       localStorage.setItem(LS_LAST_PROMPT, v);
       localStorage.setItem(LS_FROM_LANDING, "1");
       // Builder reads this, auto-fills, and generates.
-      window.location.href = "index.html";
+      window.location.href = "landing.html";
     });
 
     btnSignIn.addEventListener("click", () => openModal());
