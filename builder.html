@@ -1,1 +1,3492 @@
+<!-- builder.html (Game Builder Screen) -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>ChatTok Tools — Game Builder</title>
+  <meta name="description" content="Build TikTok LIVE interactive games & overlays. Auto-selects a template from your prompt and generates index.html, style.css, and game.js." />
+  <meta name="theme-color" content="#0b0b0d" />
+
+  <style>
+    :root{
+      --bg0:#07070a;
+      --bg1:#0b0b0d;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.04);
+      --line: rgba(255,255,255,.10);
+
+      --text:#ffffff;
+      --muted: rgba(255,255,255,.72);
+
+      --accent1:#ff8a00; /* orange */
+      --accent2:#ffb15a;
+      --good:#2ee59d;
+      --bad:#ff4d4d;
+
+      --shadowPanel: 0 14px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08);
+      --r: 18px;
+      --r2: 14px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 20% 10%, rgba(255,138,0,.14), transparent 60%),
+        radial-gradient(900px 600px at 85% 25%, rgba(255,177,90,.08), transparent 55%),
+        radial-gradient(900px 600px at 30% 90%, rgba(255,138,0,.08), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow-x:hidden;
+    }
+
+    a{ color: rgba(255,177,90,.95); text-decoration:none; }
+    a:hover{ text-decoration:underline; }
+
+    .wrap{ max-width: 1320px; margin: 0 auto; padding: 22px 14px 60px; }
+
+    /* Top nav */
+    .nav{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom: 14px;
+    }
+    .logo{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .mark{
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background:
+        radial-gradient(18px 18px at 25% 25%, rgba(255,255,255,.20), transparent 60%),
+        linear-gradient(180deg, rgba(255,177,90,.95), rgba(255,138,0,.85));
+      box-shadow: 0 12px 26px rgba(255,138,0,.22), 0 0 0 1px rgba(255,255,255,.10);
+      flex: 0 0 auto;
+    }
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+    }
+    .brand b{
+      font-size: 14px;
+      letter-spacing:.2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .brand span{
+      font-size: 12px;
+      color: var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .navRight{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 10px 12px;
+      background: rgba(0,0,0,.22);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      box-shadow: 0 10px 25px rgba(0,0,0,.25);
+      color: var(--muted);
+      font-size: 13px;
+      white-space:nowrap;
+      user-select:none;
+    }
+    .dot{ width:10px; height:10px; border-radius: 50%; background: rgba(255,255,255,.22); box-shadow: 0 0 0 2px rgba(255,255,255,.08); }
+    .dot.good{ background: var(--good); box-shadow: 0 0 0 2px rgba(46,229,157,.18); }
+    .dot.bad{  background: var(--bad);  box-shadow: 0 0 0 2px rgba(255,77,77,.18); }
+
+    .btn{
+      border: 0;
+      cursor:pointer;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-weight: 900;
+      letter-spacing:.2px;
+      color: #0b0b0d;
+      background: linear-gradient(180deg, var(--accent2), var(--accent1));
+      box-shadow: 0 14px 26px rgba(255,138,0,.22), 0 7px 0 rgba(0,0,0,.35);
+      transform: translateY(0);
+      transition: transform .08s ease, box-shadow .08s ease, filter .15s ease, opacity .15s ease;
+      user-select:none;
+    }
+    .btn:hover{ filter: brightness(1.04); }
+    .btn:active{
+      transform: translateY(6px);
+      box-shadow: 0 8px 18px rgba(255,138,0,.18), 0 1px 0 rgba(0,0,0,.35);
+    }
+    .btn[disabled]{ opacity:.55; cursor:not-allowed; filter:saturate(.6); }
+
+    .btn.secondary{
+      color: var(--text);
+      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.08));
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow: 0 12px 24px rgba(0,0,0,.28), 0 7px 0 rgba(0,0,0,.35);
+    }
+
+    /* Layout */
+    .grid{
+      display:grid;
+      grid-template-columns: 420px 1fr;
+      gap: 14px;
+      align-items:start;
+    }
+    @media (max-width: 1100px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .panel{
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      box-shadow: var(--shadowPanel);
+      overflow:hidden;
+    }
+    .panelHead{
+      padding: 14px 14px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      background: linear-gradient(180deg, rgba(0,0,0,.18), transparent);
+    }
+    .panelTitle{ display:flex; flex-direction:column; gap:4px; }
+    .panelTitle h2{
+      margin:0;
+      font-size: 16px;
+      font-weight: 900;
+      text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 10px rgba(255,138,0,.16);
+    }
+    .panelTitle p{ margin:0; color:var(--muted); font-size: 13px; line-height:1.35; }
+    .panelBody{ padding: 14px; position:relative; }
+
+    label{
+      display:block;
+      font-weight: 900;
+      font-size: 12.5px;
+      letter-spacing:.3px;
+      color: rgba(255,255,255,.90);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      text-shadow: 0 1px 0 rgba(0,0,0,.35), 0 0 10px rgba(255,138,0,.10);
+    }
+
+    textarea, input, select{
+      width:100%;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.26);
+      color: rgba(255,255,255,.92);
+      padding: 12px 12px;
+      font-family: var(--mono);
+      outline:none;
+    }
+    textarea{
+      min-height: 200px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+    textarea::placeholder{ color: rgba(255,255,255,.55); }
+
+    .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; align-items:center; }
+    .mini{ font-size: 12px; color: rgba(255,255,255,.66); line-height:1.4; margin-top: 10px; }
+
+    .toast{
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,138,0,.22);
+      background: rgba(255,138,0,.10);
+      box-shadow: 0 10px 22px rgba(255,138,0,.10);
+      display:none;
+      color: rgba(255,255,255,.90);
+      font-size: 13px;
+    }
+    .toast.show{ display:block; }
+
+    /* Builder right */
+    .tabs{
+      display:flex;
+      gap:8px;
+      padding: 10px 10px 0;
+      flex-wrap:wrap;
+    }
+    .tab{
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.20);
+      color: rgba(255,255,255,.82);
+      padding: 10px 12px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-weight: 900;
+      letter-spacing:.2px;
+      user-select:none;
+    }
+    .tab.active{
+      background: linear-gradient(180deg, rgba(255,177,90,.18), rgba(255,138,0,.10));
+      border-color: rgba(255,138,0,.25);
+      color: rgba(255,255,255,.94);
+      text-shadow: 0 1px 0 rgba(0,0,0,.35);
+    }
+
+    .builderArea{ padding: 10px; }
+    .card{
+      background: rgba(0,0,0,.22);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      box-shadow: 0 12px 26px rgba(0,0,0,.26);
+      overflow:hidden;
+    }
+    .cardHead{
+      padding: 12px 12px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      background: linear-gradient(180deg, rgba(0,0,0,.18), transparent);
+    }
+    .cardHead b{ font-size: 14px; }
+    .cardBody{ padding: 12px; }
+
+    .kv{
+      display:grid;
+      grid-template-columns: 140px 1fr;
+      gap:8px 10px;
+      align-items:center;
+      font-size: 13px;
+      color: rgba(255,255,255,.82);
+    }
+    .kv .k{ color: rgba(255,255,255,.60); font-family: var(--mono); font-size: 12px; }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,138,0,.22);
+      background: rgba(255,138,0,.10);
+      color: rgba(255,255,255,.90);
+      font-size: 12.5px;
+      font-weight: 900;
+      user-select:none;
+      white-space:nowrap;
+    }
+
+    .split{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 1100px){
+      .split{ grid-template-columns: 1fr; }
+    }
+
+    .codeBox{
+      position:relative;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      overflow:hidden;
+      background: rgba(0,0,0,.26);
+    }
+    .codeTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: linear-gradient(180deg, rgba(0,0,0,.20), transparent);
+    }
+    .codeTop b{
+      font-family: var(--mono);
+      font-size: 12.5px;
+      color: rgba(255,255,255,.82);
+    }
+    .codeTop .tools{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+    .miniBtn{
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.84);
+      border-radius: 12px;
+      padding: 8px 10px;
+      cursor:pointer;
+      font-weight: 900;
+      font-size: 12px;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .miniBtn:hover{ filter: brightness(1.05); }
+    .miniBtn:active{ transform: translateY(1px); }
+
+    pre{
+      margin:0;
+      padding: 10px 12px 12px;
+      font-family: var(--mono);
+      font-size: 12.25px;
+      line-height: 1.45;
+      color: rgba(255,255,255,.86);
+      overflow:auto;
+      max-height: 360px;
+      white-space: pre;
+    }
+
+    .previewWrap{
+      border-radius: 16px;
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
+    }
+    .previewBar{
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      background: linear-gradient(180deg, rgba(0,0,0,.20), transparent);
+    }
+    .previewBar b{ font-size: 13px; }
+    .iframeShell{
+      background: #000;
+      aspect-ratio: 9 / 16;
+      width: min(420px, 100%);
+      border-radius: 14px;
+      overflow:hidden;
+      box-shadow: 0 16px 40px rgba(0,0,0,.55);
+      border: 1px solid rgba(255,255,255,.10);
+      margin: 10px auto 12px;
+    }
+    iframe{ width:100%; height:100%; border:0; background:#000; }
+
+    /* Footer */
+    footer{
+      margin-top: 14px;
+      padding: 16px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
+      box-shadow: 0 12px 26px rgba(0,0,0,.30);
+      color: rgba(255,255,255,.72);
+    }
+    .footRow{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .footLinks{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .copy{
+      font-family: var(--mono);
+      font-size: 12px;
+      opacity: .85;
+    }
+
+    /* Modal */
+    .modalWrap{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 16px;
+      background: rgba(0,0,0,.62);
+      backdrop-filter: blur(10px);
+      z-index: 50;
+    }
+    .modal{
+      width: min(560px, 96vw);
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(18,18,22,.92), rgba(10,10,12,.84));
+      box-shadow: 0 18px 55px rgba(0,0,0,.60);
+      overflow:hidden;
+    }
+    .modalHead{
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .modalHead b{ font-size: 15px; letter-spacing:.2px; }
+    .x{
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.85);
+      border-radius: 12px;
+      padding: 8px 10px;
+      cursor:pointer;
+      font-weight: 900;
+    }
+    .modalBody{ padding: 14px; }
+    .twoCol{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 560px){
+      .twoCol{ grid-template-columns: 1fr; }
+    }
+    .warn{
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,138,0,.18);
+      background: rgba(255,138,0,.08);
+      color: rgba(255,255,255,.80);
+      font-size: 12.5px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <div class="logo">
+        <div class="mark" aria-hidden="true"></div>
+        <div class="brand">
+          <b>ChatTok Tools</b>
+          <span>Game Builder (GitHub Pages launch)</span>
+        </div>
+      </div>
+
+      <div class="navRight">
+        <div class="pill" title="Local sign-in status">
+          <span id="authDot" class="dot"></span>
+          <span id="authMsg">Signed out</span>
+        </div>
+        <button id="btnBack" class="btn secondary" type="button">← Back</button>
+        <button id="btnSignIn" class="btn secondary" type="button">Sign in</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT: Prompt + Controls -->
+      <div class="panel">
+        <div class="panelHead">
+          <div class="panelTitle">
+            <h2>Prompt & template selection</h2>
+            <p>We auto-pick a template from your description. You can override it in Advanced.</p>
+          </div>
+        </div>
+
+        <div class="panelBody">
+          <label for="promptBox">Your game idea</label>
+          <textarea id="promptBox" spellcheck="false" placeholder="Describe your TikTok LIVE game or overlay…"></textarea>
+
+          <div class="row" style="margin-top:12px;">
+            <span class="badge" id="detectedBadge">Detected: —</span>
+            <span class="badge" id="creditsBadge" title="You get 3 edits per game generation">Edits left: 3</span>
+          </div>
+
+          <div class="row">
+            <button id="btnDetect" class="btn secondary" type="button">Re-detect template</button>
+            <button id="btnGenerate" class="btn" type="button">Generate Files</button>
+          </div>
+
+          <div id="toast" class="toast"></div>
+
+          <div class="card" style="margin-top:12px;">
+            <div class="cardHead">
+              <b>Advanced (optional)</b>
+              <button id="btnToggleAdvanced" class="miniBtn" type="button">Show</button>
+            </div>
+            <div class="cardBody" id="advancedBody" style="display:none;">
+              <div class="mini" style="margin-top:0;">
+                Override template selection and tweak generation defaults. (Most people should ignore this.)
+              </div>
+
+              <div class="row" style="margin-top:10px;">
+                <div style="flex:1; min-width:240px;">
+                  <label for="templateOverride">Template override</label>
+                  <select id="templateOverride">
+                    <option value="auto">Auto (recommended)</option>
+                    <option value="trivia">Trivia / Quiz</option>
+                    <option value="wheel">Spin Wheel / Giveaway</option>
+                    <option value="arena">Arena Battle (likes/gifts boost)</option>
+                    <option value="race">Racing / Runner</option>
+                    <option value="overlay">Overlay Alerts (TTS / popups)</option>
+                    <option value="poll">Poll / Voting</option>
+                    <option value="kitchen">Crowd Kitchen</option>
+                    <option value="boss">Boss Fight (raid)</option>
+                  </select>
+                </div>
+
+                <div style="flex:1; min-width:240px;">
+                  <label for="projectName">Project name</label>
+                  <input id="projectName" placeholder="Example: Emoji Arena v1.0" />
+                </div>
+              </div>
+
+              <div class="row" style="margin-top:10px;">
+                <div style="flex:1; min-width:240px;">
+                  <label for="includeTikTokStub">TikTok input stub</label>
+                  <select id="includeTikTokStub">
+                    <option value="on">Include example TikTok hook (recommended)</option>
+                    <option value="off">No TikTok hook</option>
+                  </select>
+                </div>
+
+                <div style="flex:1; min-width:240px;">
+                  <label for="viewportMode">Viewport</label>
+                  <select id="viewportMode">
+                    <option value="portrait">Portrait 9:16 (TikTok)</option>
+                    <option value="responsive">Responsive (fits web too)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="warn">
+                <b>Heads up:</b> This GitHub Pages version generates solid starter games using built-in templates.
+                When you connect your real backend later, we can swap “template fill” for true AI file generation.
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:12px;">
+            <div class="cardHead">
+              <b>Edit your last build (max 3)</b>
+              <span class="mini" style="margin:0;color:rgba(255,255,255,.62)">Example: “Make the HUD bigger and add a join sound”</span>
+            </div>
+            <div class="cardBody">
+              <label for="editBox">Edit request</label>
+              <textarea id="editBox" style="min-height:110px;" spellcheck="false" placeholder="Describe changes you want (visual polish, sounds, logic tweaks, etc.)"></textarea>
+              <div class="row">
+                <button id="btnApplyEdit" class="btn secondary" type="button">Apply Edit</button>
+                <button id="btnResetEdits" class="btn secondary" type="button">Reset edits</button>
+              </div>
+              <div class="mini">
+                Edits modify the generated files using safe, template-aware rules (no blank screens, no “blob of color” outputs).
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Output / Preview -->
+      <div class="panel">
+        <div class="panelHead">
+          <div class="panelTitle">
+            <h2>Generated output</h2>
+            <p>Copy-paste the files or download them. Preview runs as a single embedded build.</p>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active" data-tab="preview">Preview</div>
+          <div class="tab" data-tab="files">Files</div>
+          <div class="tab" data-tab="details">Details</div>
+        </div>
+
+        <div class="builderArea">
+          <!-- PREVIEW -->
+          <div id="tab_preview" class="card">
+            <div class="previewBar">
+              <b>Live preview (9:16)</b>
+              <div class="tools">
+                <button id="btnRefreshPreview" class="miniBtn" type="button">Refresh preview</button>
+              </div>
+            </div>
+            <div class="cardBody">
+              <div class="iframeShell">
+                <iframe id="previewFrame" title="Game Preview"></iframe>
+              </div>
+              <div class="mini">
+                Preview is “combined” (HTML + CSS + JS) so it works on GitHub Pages without extra loaders.
+                Your exported files remain clean: <b>index.html</b> + <b>style.css</b> + <b>game.js</b>.
+              </div>
+            </div>
+          </div>
+
+          <!-- FILES -->
+          <div id="tab_files" class="card" style="display:none;">
+            <div class="cardHead">
+              <b>Copy / Download</b>
+              <div class="tools">
+                <button id="btnDownloadAll" class="miniBtn" type="button">Download all 3 files</button>
+              </div>
+            </div>
+            <div class="cardBody">
+              <div class="split">
+                <div class="codeBox">
+                  <div class="codeTop">
+                    <b>index.html</b>
+                    <div class="tools">
+                      <button class="miniBtn" data-copy="html" type="button">Copy</button>
+                      <button class="miniBtn" data-dl="html" type="button">Download</button>
+                    </div>
+                  </div>
+                  <pre id="code_html">// Generate to see output…</pre>
+                </div>
+
+                <div class="codeBox">
+                  <div class="codeTop">
+                    <b>style.css</b>
+                    <div class="tools">
+                      <button class="miniBtn" data-copy="css" type="button">Copy</button>
+                      <button class="miniBtn" data-dl="css" type="button">Download</button>
+                    </div>
+                  </div>
+                  <pre id="code_css">/* Generate to see output… */</pre>
+                </div>
+              </div>
+
+              <div class="codeBox" style="margin-top:10px;">
+                <div class="codeTop">
+                  <b>game.js</b>
+                  <div class="tools">
+                    <button class="miniBtn" data-copy="js" type="button">Copy</button>
+                    <button class="miniBtn" data-dl="js" type="button">Download</button>
+                  </div>
+                </div>
+                <pre id="code_js">// Generate to see output…</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- DETAILS -->
+          <div id="tab_details" class="card" style="display:none;">
+            <div class="cardHead">
+              <b>Build details</b>
+              <div class="tools">
+                <button id="btnSaveBuild" class="miniBtn" type="button">Save build</button>
+                <button id="btnLoadBuild" class="miniBtn" type="button">Load last</button>
+              </div>
+            </div>
+            <div class="cardBody">
+              <div class="kv">
+                <div class="k">project</div><div id="d_project">—</div>
+                <div class="k">template</div><div id="d_template">—</div>
+                <div class="k">viewport</div><div id="d_viewport">—</div>
+                <div class="k">tiktok hook</div><div id="d_tiktok">—</div>
+                <div class="k">generated</div><div id="d_time">—</div>
+              </div>
+
+              <div class="warn" style="margin-top:12px;">
+                <b>What’s “template auto-pick”?</b> We detect keywords like <em>trivia</em>, <em>wheel</em>, <em>race</em>, <em>arena</em>, <em>overlay</em>, etc.
+                If your prompt is vague, it chooses a safe “Arena/Overlay-style” template so the result is still fun and usable.
+              </div>
+
+              <div class="warn" style="margin-top:10px;">
+                <b>Local login note:</b> On GitHub Pages this is browser-only. No real user accounts yet.
+                When you connect your app backend later, we’ll move builds + accounts to your server.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="footRow">
+        <div class="footLinks">
+          <a href="index.html">Home</a>
+          <a href="about.html">About</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="terms.html">Terms</a>
+        </div>
+        <div class="copy">© <span id="yy"></span> ChatTok Tools. All rights reserved.</div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Sign-in modal (local-only) -->
+  <div id="authModalWrap" class="modalWrap" role="dialog" aria-modal="true" aria-label="Sign in">
+    <div class="modal">
+      <div class="modalHead">
+        <div>
+          <b>Sign in (local-only)</b>
+          <div class="mini" style="margin-top:4px;color:rgba(255,255,255,.70)">
+            This is a simple browser-stored login for the GitHub Pages launch.
+          </div>
+        </div>
+        <button id="btnCloseModal" class="x" type="button" aria-label="Close">✕</button>
+      </div>
+
+      <div class="modalBody">
+        <div class="twoCol">
+          <div>
+            <label for="emailBox">Email</label>
+            <input id="emailBox" type="email" autocomplete="email" placeholder="you@email.com" />
+          </div>
+          <div>
+            <label for="passBox">Password</label>
+            <input id="passBox" type="password" autocomplete="current-password" placeholder="••••••••" />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px;">
+          <button id="btnCreateAccount" class="btn secondary" type="button">Create account</button>
+          <button id="btnDoSignIn" class="btn" type="button">Sign in</button>
+          <button id="btnSignOut" class="btn secondary" type="button" style="margin-left:auto;">Sign out</button>
+        </div>
+
+        <div class="warn">
+          <b>Important:</b> This is not secure authentication. It stores a salted hash in <b>localStorage</b>
+          on this device only. When you connect to your app later, we’ll replace this with real sign-in.
+        </div>
+
+        <div id="authToast" class="toast" style="margin-top:12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // Local-only auth + Builder (template auto-pick)
+    // GitHub Pages safe: no server needed
+    // ============================================================
+
+    const KEYS = {
+      auth: "ct_tools_auth_v1",
+      draftPrompt: "ct_tools_draft_prompt_v1",
+      lastUser: "ct_tools_last_user_v1",
+      lastBuild: "ct_tools_last_build_v1",
+      editCredits: "ct_tools_edit_credits_v1"
+    };
+
+    const el = (id) => document.getElementById(id);
+
+    // auth UI
+    const authDot = el("authDot");
+    const authMsg = el("authMsg");
+    const btnSignIn = el("btnSignIn");
+    const btnBack = el("btnBack");
+
+    // builder UI
+    const promptBox = el("promptBox");
+    const editBox = el("editBox");
+    const detectedBadge = el("detectedBadge");
+    const creditsBadge = el("creditsBadge");
+    const toastEl = el("toast");
+
+    const templateOverride = el("templateOverride");
+    const projectName = el("projectName");
+    const includeTikTokStub = el("includeTikTokStub");
+    const viewportMode = el("viewportMode");
+
+    // output
+    const codeHtml = el("code_html");
+    const codeCss = el("code_css");
+    const codeJs  = el("code_js");
+    const previewFrame = el("previewFrame");
+
+    // details
+    const dProject = el("d_project");
+    const dTemplate = el("d_template");
+    const dViewport = el("d_viewport");
+    const dTiktok = el("d_tiktok");
+    const dTime = el("d_time");
+
+    // advanced toggle
+    const advancedBody = el("advancedBody");
+    const btnToggleAdvanced = el("btnToggleAdvanced");
+
+    // modal
+    const modalWrap = el("authModalWrap");
+    const btnCloseModal = el("btnCloseModal");
+    const emailBox = el("emailBox");
+    const passBox = el("passBox");
+    const btnCreateAccount = el("btnCreateAccount");
+    const btnDoSignIn = el("btnDoSignIn");
+    const btnSignOut = el("btnSignOut");
+    const authToast = el("authToast");
+
+    function toast(msg){
+      toastEl.textContent = msg;
+      toastEl.classList.add("show");
+      setTimeout(() => toastEl.classList.remove("show"), 2400);
+    }
+    function authToastMsg(msg){
+      authToast.textContent = msg;
+      authToast.classList.add("show");
+      setTimeout(() => authToast.classList.remove("show"), 2400);
+    }
+
+    function setDot(ok){
+      authDot.classList.remove("good","bad");
+      authDot.classList.add(ok ? "good" : "bad");
+    }
+
+    function openModal(){
+      modalWrap.style.display = "flex";
+      setTimeout(() => emailBox.focus(), 0);
+    }
+    function closeModal(){
+      modalWrap.style.display = "none";
+      passBox.value = "";
+    }
+
+    function normalizeEmail(v){ return String(v || "").trim().toLowerCase(); }
+
+    function getAuth(){
+      try{
+        const raw = localStorage.getItem(KEYS.auth);
+        if (!raw) return null;
+        const j = JSON.parse(raw);
+        if (!j || typeof j !== "object") return null;
+        if (!j.email || !j.hash || !j.salt) return null;
+        return j;
+      }catch{ return null; }
+    }
+
+    function setSignedIn(email){
+      setDot(true);
+      authMsg.textContent = "Signed in: " + email;
+    }
+    function setSignedOut(){
+      setDot(false);
+      authMsg.textContent = "Signed out";
+    }
+
+    function randomSalt(){
+      const arr = new Uint8Array(16);
+      crypto.getRandomValues(arr);
+      return Array.from(arr).map(b => b.toString(16).padStart(2,"0")).join("");
+    }
+    async function sha256Hex(text){
+      const enc = new TextEncoder().encode(text);
+      const buf = await crypto.subtle.digest("SHA-256", enc);
+      const bytes = new Uint8Array(buf);
+      return Array.from(bytes).map(b => b.toString(16).padStart(2,"0")).join("");
+    }
+    async function makeHash(email, password, salt){
+      return await sha256Hex(email + "::" + password + "::" + salt);
+    }
+
+    async function createAccount(){
+      const email = normalizeEmail(emailBox.value);
+      const pass = String(passBox.value || "");
+      if (!email || !email.includes("@")) { authToastMsg("Enter a valid email."); return; }
+      if (pass.length < 6) { authToastMsg("Password must be 6+ characters."); return; }
+
+      const salt = randomSalt();
+      const hash = await makeHash(email, pass, salt);
+
+      localStorage.setItem(KEYS.auth, JSON.stringify({ email, salt, hash, createdAt: Date.now() }));
+      localStorage.setItem(KEYS.lastUser, email);
+
+      setSignedIn(email);
+      authToastMsg("Account created (local).");
+      closeModal();
+
+      // initialize edit credits bucket for this user
+      ensureEditCredits(email);
+      syncCreditsBadge();
+    }
+
+    async function signIn(){
+      const existing = getAuth();
+      if (!existing) { authToastMsg("No local account found. Create one first."); return; }
+
+      const email = normalizeEmail(emailBox.value);
+      const pass = String(passBox.value || "");
+
+      if (email !== existing.email) { authToastMsg("Email does not match local account."); return; }
+
+      const hash = await makeHash(email, pass, existing.salt);
+      if (hash !== existing.hash) { authToastMsg("Wrong password."); return; }
+
+      localStorage.setItem(KEYS.lastUser, email);
+      setSignedIn(email);
+      authToastMsg("Signed in.");
+      closeModal();
+
+      ensureEditCredits(email);
+      syncCreditsBadge();
+    }
+
+    function signOut(){
+      setSignedOut();
+      authToastMsg("Signed out (local).");
+      closeModal();
+    }
+
+    // -----------------------------
+    // Edit credits per "generation"
+    // -----------------------------
+    function creditsStore(){
+      try{
+        const raw = localStorage.getItem(KEYS.editCredits);
+        return raw ? JSON.parse(raw) : {};
+      }catch{ return {}; }
+    }
+    function saveCreditsStore(obj){
+      localStorage.setItem(KEYS.editCredits, JSON.stringify(obj));
+    }
+    function ensureEditCredits(email){
+      const store = creditsStore();
+      if (!store[email]) store[email] = { left: 3, lastReset: Date.now() };
+      saveCreditsStore(store);
+    }
+    function getCreditsLeft(email){
+      const store = creditsStore();
+      return store[email]?.left ?? 0;
+    }
+    function setCreditsLeft(email, left){
+      const store = creditsStore();
+      store[email] = store[email] || { left: 3, lastReset: Date.now() };
+      store[email].left = Math.max(0, Math.min(3, left));
+      store[email].lastReset = Date.now();
+      saveCreditsStore(store);
+    }
+    function useOneCredit(email){
+      const left = getCreditsLeft(email);
+      if (left <= 0) return false;
+      setCreditsLeft(email, left - 1);
+      return true;
+    }
+    function resetCredits(email){
+      setCreditsLeft(email, 3);
+    }
+    function syncCreditsBadge(){
+      const a = getAuth();
+      if (!a?.email) { creditsBadge.textContent = "Edits left: —"; return; }
+      creditsBadge.textContent = "Edits left: " + getCreditsLeft(a.email);
+    }
+
+    // -----------------------------
+    // Template auto-detect
+    // -----------------------------
+    const TEMPLATE_LABELS = {
+      trivia: "Trivia / Quiz",
+      wheel: "Spin Wheel / Giveaway",
+      arena: "Arena Battle",
+      race: "Racing / Runner",
+      overlay: "Overlay Alerts (TTS / popups)",
+      poll: "Poll / Voting",
+      kitchen: "Crowd Kitchen",
+      boss: "Boss Fight (raid)",
+      auto: "Auto"
+    };
+
+    function detectTemplateFromPrompt(prompt){
+      const p = (prompt || "").toLowerCase();
+
+      // High-signal first
+      if (/\b(trivia|quiz|question|answers?|multiple choice|true\/false|category|categories)\b/.test(p)) return "trivia";
+      if (/\b(wheel|spin|giveaway|raffle|winner|slice|segments)\b/.test(p)) return "wheel";
+      if (/\b(race|racing|runner|track|lap|laps|finish line|boost|nitro)\b/.test(p)) return "race";
+      if (/\b(overlay|alert|alerts|tts|text to speech|pop[- ]?up|banner|notification)\b/.test(p)) return "overlay";
+      if (/\b(vote|voting|poll|survey|choose|pick between)\b/.test(p)) return "poll";
+      if (/\b(pizza|kitchen|cook|oven|toppings|chef)\b/.test(p)) return "kitchen";
+      if (/\b(boss|raid|hp|health bar|damage|crit|critical|heal|healing)\b/.test(p)) return "boss";
+      if (/\b(arena|battle|fight|pvp|eliminate|elimination|team vs|teams|clash)\b/.test(p)) return "arena";
+
+      // fallback: if mentions gifts/likes strongly, pick arena
+      if (/\b(gifts?|diamonds?|likes?)\b/.test(p)) return "arena";
+
+      // ultimate fallback
+      return "overlay";
+    }
+
+    function applyDetection(){
+      const override = templateOverride?.value || "auto";
+      const detected = (override !== "auto") ? override : detectTemplateFromPrompt(promptBox.value);
+      detectedBadge.textContent = "Detected: " + (TEMPLATE_LABELS[detected] || detected);
+      detectedBadge.dataset.template = detected;
+      return detected;
+    }
+
+    // -----------------------------
+    // Templates (starter games)
+    // - real-looking UI (no blobs)
+    // - safe: no external assets required
+    // - includes optional TikTok input stub
+    // -----------------------------
+    function tikTokHookStub(){
+      return `
+// ================================
+// TikTok LIVE Hook (EXAMPLE STUB)
+// ================================
+// This is a *safe placeholder* so the generated game has the wiring points.
+// When you run inside your real host (with your TikTok connector), call these:
+//
+// onChat({user, comment})
+// onGift({user, giftName, diamondCount})
+// onLike({user, likeCount})
+//
+// Replace this stub with your real connection logic.
+// --------------------------------
+window.onChat = window.onChat || function(payload){ console.log("chat", payload); };
+window.onGift = window.onGift || function(payload){ console.log("gift", payload); };
+window.onLike = window.onLike || function(payload){ console.log("like", payload); };
+`;
+    }
+
+    function baseHtmlShell(title){
+      return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>${escapeHtml(title)}</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app"></div>
+  <script src="game.js"></script>
+</body>
+</html>`;
+    }
+
+    function cssBase(){
+      return `:root{
+  --bg0:#07070a;
+  --bg1:#0b0b0d;
+  --panel: rgba(255,255,255,.06);
+  --panel2: rgba(255,255,255,.04);
+  --line: rgba(255,255,255,.10);
+  --text:#ffffff;
+  --muted: rgba(255,255,255,.70);
+  --accent1:#ff8a00;
+  --accent2:#ffb15a;
+  --good:#2ee59d;
+  --bad:#ff4d4d;
+  --shadow: 0 14px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08);
+  --r:18px;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  font-family: var(--sans);
+  color:var(--text);
+  background:
+    radial-gradient(1200px 700px at 20% 10%, rgba(255,138,0,.14), transparent 60%),
+    radial-gradient(900px 600px at 85% 25%, rgba(255,177,90,.08), transparent 55%),
+    radial-gradient(900px 600px at 30% 90%, rgba(255,138,0,.08), transparent 60%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
+  overflow:hidden;
+}
+
+#app{
+  width:min(540px, 100vw);
+  height:100vh;
+  margin:0 auto;
+  padding: 14px 12px 18px;
+  display:flex;
+  flex-direction:column;
+  gap: 10px;
+}
+
+.card{
+  background: linear-gradient(180deg, var(--panel), var(--panel2));
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  overflow:hidden;
+}
+
+.head{
+  padding: 12px 12px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  background: linear-gradient(180deg, rgba(0,0,0,.18), transparent);
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+.head h1{
+  margin:0;
+  font-size: 16px;
+  font-weight: 950;
+  letter-spacing:.2px;
+  text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 12px rgba(255,138,0,.16);
+}
+.head .sub{
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height:1.35;
+}
+
+.body{ padding: 12px; }
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,138,0,.22);
+  background: rgba(255,138,0,.10);
+  color: rgba(255,255,255,.90);
+  font-size: 12px;
+  font-weight: 900;
+  user-select:none;
+  white-space:nowrap;
+}
+
+.btn{
+  border:0;
+  cursor:pointer;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-weight: 950;
+  letter-spacing:.2px;
+  color: #0b0b0d;
+  background: linear-gradient(180deg, var(--accent2), var(--accent1));
+  box-shadow: 0 14px 26px rgba(255,138,0,.22), 0 7px 0 rgba(0,0,0,.35);
+}
+.btn:active{
+  transform: translateY(4px);
+  box-shadow: 0 9px 18px rgba(255,138,0,.18), 0 2px 0 rgba(0,0,0,.35);
+}
+
+.mini{ font-size: 12px; color: rgba(255,255,255,.66); line-height:1.4; }
+.row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.spacer{ flex:1; }
+`;
+    }
+
+    function tplTrivia(opts){
+      const title = opts.title || "Trivia Clash";
+      const hook = opts.includeTikTok ? tikTokHookStub() : "";
+      const html = baseHtmlShell(title);
+
+      const css = cssBase() + `
+/* Trivia layout */
+.qCard{ flex: 1; display:flex; flex-direction:column; }
+.qText{
+  font-size: 18px;
+  font-weight: 950;
+  line-height: 1.18;
+  margin: 0;
+  text-shadow: 0 2px 0 rgba(0,0,0,.35);
+}
+.choices{ margin-top: 10px; display:grid; grid-template-columns: 1fr; gap:10px; }
+.choice{
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.22);
+  border-radius: 16px;
+  padding: 12px 12px;
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+}
+.choice b{ font-family: var(--mono); font-size: 12px; opacity:.85; }
+.choice span{ font-size: 14px; font-weight: 850; line-height: 1.25; }
+.choice.good{ border-color: rgba(46,229,157,.25); background: rgba(46,229,157,.08); }
+.choice.bad{  border-color: rgba(255,77,77,.25); background: rgba(255,77,77,.08); }
+
+.hud{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+}
+.timer{
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.10);
+  overflow:hidden;
+  border: 1px solid rgba(255,255,255,.10);
+}
+.timer > i{
+  display:block;
+  height:100%;
+  width: 100%;
+  background: linear-gradient(90deg, rgba(255,177,90,.95), rgba(255,138,0,.95));
+  transform-origin: left center;
+}
+
+.leader{
+  display:grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 10px;
+  align-items:center;
+}
+.leader .name{ font-weight: 900; }
+.leader .pts{ font-family: var(--mono); opacity:.85; }
+.flash{
+  position: fixed;
+  inset: 0;
+  pointer-events:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  transition: opacity .18s ease;
+}
+.flash.show{ opacity:1; }
+.flashCard{
+  width: min(460px, 92vw);
+  border-radius: 22px;
+  border: 1px solid rgba(255,138,0,.22);
+  background: rgba(0,0,0,.55);
+  box-shadow: 0 18px 55px rgba(0,0,0,.65);
+  padding: 14px;
+  text-align:center;
+}
+.flashCard b{ display:block; font-size: 22px; }
+.flashCard span{ display:block; margin-top: 6px; color: rgba(255,255,255,.75); }
+`;
+
+      const js = `/* ${title} — game.js (Template: Trivia) */
+"use strict";
+${hook}
+
+const app = document.getElementById("app");
+
+const state = {
+  qIndex: 0,
+  timeLeft: 12,
+  timerMax: 12,
+  locked: false,
+  scores: new Map(), // user -> points
+  lastWinner: null
+};
+
+const questions = [
+  {
+    q: "Which action is strongest in TikTok LIVE games?",
+    choices: ["Likes", "Comments", "Gifts", "Follows"],
+    a: 2
+  },
+  {
+    q: "Best layout ratio for a TikTok LIVE overlay?",
+    choices: ["16:9", "4:3", "9:16", "1:1"],
+    a: 2
+  },
+  {
+    q: "A good win condition is…",
+    choices: ["Random every time", "Clear and visible", "Hidden", "Never ending"],
+    a: 1
+  }
+];
+
+function ui(){
+  app.innerHTML = \`
+    <div class="card">
+      <div class="head">
+        <div>
+          <h1>${escapeJs(title)}</h1>
+          <div class="sub">Type A, B, C, or D in chat • Likes charge the timer • Gifts = bonus points</div>
+        </div>
+        <span class="badge" id="roundBadge">Q \${state.qIndex+1}/\${questions.length}</span>
+      </div>
+      <div class="body">
+        <div class="hud">
+          <span class="badge" id="statusBadge">Waiting for answers…</span>
+          <span class="badge" id="topBadge">Top: —</span>
+        </div>
+        <div class="timer" style="margin-top:10px;"><i id="tbar"></i></div>
+      </div>
+    </div>
+
+    <div class="card qCard">
+      <div class="head">
+        <div>
+          <h1 style="font-size:14px;">Question</h1>
+          <div class="sub">First correct answer wins the point burst.</div>
+        </div>
+        <button class="btn" id="btnSkip" type="button">Skip</button>
+      </div>
+      <div class="body">
+        <p class="qText" id="qText"></p>
+        <div class="choices" id="choices"></div>
+        <div class="mini" style="margin-top:10px;">Host controls: click a choice to simulate, or use chat events (wired in your real TikTok connector).</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="head">
+        <div>
+          <h1 style="font-size:14px;">Leaderboard</h1>
+          <div class="sub">Top 5 players</div>
+        </div>
+        <span class="badge" id="countBadge">0 players</span>
+      </div>
+      <div class="body" id="leaderBody"></div>
+    </div>
+
+    <div class="flash" id="flash">
+      <div class="flashCard">
+        <b id="flashTitle">Correct!</b>
+        <span id="flashSub">—</span>
+      </div>
+    </div>
+  \`;
+
+  renderQuestion();
+  renderLeaderboard();
+  wire();
+}
+
+function renderQuestion(){
+  const q = questions[state.qIndex];
+  document.getElementById("qText").textContent = q.q;
+
+  const holder = document.getElementById("choices");
+  holder.innerHTML = "";
+  q.choices.forEach((txt, i) => {
+    const div = document.createElement("div");
+    div.className = "choice";
+    div.innerHTML = \`<b>\${String.fromCharCode(65+i)}.</b><span>\${txt}</span>\`;
+    div.addEventListener("click", () => handleAnswer({user:"HOST_TEST", answerIndex:i}));
+    holder.appendChild(div);
+  });
+
+  state.timeLeft = state.timerMax;
+  state.locked = false;
+  document.getElementById("statusBadge").textContent = "Waiting for answers…";
+}
+
+function renderLeaderboard(){
+  const list = [...state.scores.entries()].sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const body = document.getElementById("leaderBody");
+  body.innerHTML = list.length ? "" : \`<div class="mini">No scores yet. Type an answer in chat!</div>\`;
+
+  for (const [name, pts] of list){
+    const row = document.createElement("div");
+    row.className = "leader";
+    row.innerHTML = \`<div class="name">\${escapeHtml(name)}</div><div class="pts">\${pts} pts</div>\`;
+    body.appendChild(row);
+  }
+
+  document.getElementById("countBadge").textContent = state.scores.size + " players";
+  const top = list[0] ? (list[0][0] + " • " + list[0][1] + " pts") : "—";
+  document.getElementById("topBadge").textContent = "Top: " + top;
+}
+
+function wire(){
+  document.getElementById("btnSkip").addEventListener("click", () => nextQuestion("Skipped"));
+}
+
+function nextQuestion(reason){
+  state.qIndex = (state.qIndex + 1) % questions.length;
+  flash("Next!", reason || "New question");
+  setTimeout(renderQuestion, 450);
+}
+
+function flash(title, sub){
+  const f = document.getElementById("flash");
+  document.getElementById("flashTitle").textContent = title;
+  document.getElementById("flashSub").textContent = sub || "";
+  f.classList.add("show");
+  setTimeout(() => f.classList.remove("show"), 900);
+}
+
+// --- Chat parsing (simple) ---
+function parseAnswerText(text){
+  const t = String(text||"").trim().toLowerCase();
+  if (!t) return null;
+  if (t === "a" || t === "1") return 0;
+  if (t === "b" || t === "2") return 1;
+  if (t === "c" || t === "3") return 2;
+  if (t === "d" || t === "4") return 3;
+  return null;
+}
+
+// --- Core answer logic ---
+function handleAnswer({user, answerIndex}){
+  if (state.locked) return;
+  const q = questions[state.qIndex];
+  if (answerIndex == null) return;
+
+  const correct = (answerIndex === q.a);
+  if (!correct){
+    document.getElementById("statusBadge").textContent = "Wrong answer… keep trying!";
+    return;
+  }
+
+  state.locked = true;
+  const pts = (state.scores.get(user) || 0) + 1;
+  state.scores.set(user, pts);
+  document.getElementById("statusBadge").textContent = "Correct! " + user + " scored.";
+  renderLeaderboard();
+
+  // show correct answer briefly
+  const choices = document.querySelectorAll(".choice");
+  choices.forEach((c, i) => {
+    if (i === q.a) c.classList.add("good");
+    else c.classList.add("bad");
+  });
+
+  flash("Correct!", user + " +1 point");
+  setTimeout(() => nextQuestion("Answered correctly"), 1300);
+}
+
+// --- Timer (likes can boost it in a real live) ---
+function tick(){
+  const bar = document.getElementById("tbar");
+  if (!bar) return;
+
+  // If locked, freeze at full
+  if (state.locked){
+    bar.style.transform = "scaleX(1)";
+    return;
+  }
+
+  state.timeLeft -= 0.1;
+  if (state.timeLeft <= 0){
+    state.timeLeft = 0;
+    bar.style.transform = "scaleX(0)";
+    nextQuestion("Time's up");
+    return;
+  }
+
+  const pct = Math.max(0, Math.min(1, state.timeLeft / state.timerMax));
+  bar.style.transform = "scaleX(" + pct.toFixed(4) + ")";
+}
+setInterval(tick, 100);
+
+// ---- TikTok hook points ----
+window.onChat = function({user, comment}){
+  const ans = parseAnswerText(comment);
+  if (ans == null) return;
+  handleAnswer({user, answerIndex: ans});
+};
+
+window.onLike = function({user, likeCount}){
+  // likes gently refill timer
+  if (state.locked) return;
+  state.timeLeft = Math.min(state.timerMax, state.timeLeft + 0.7);
+};
+
+window.onGift = function({user, diamondCount}){
+  // gifts award bonus point burst
+  const bonus = diamondCount >= 100 ? 3 : diamondCount >= 20 ? 2 : 1;
+  const pts = (state.scores.get(user) || 0) + bonus;
+  state.scores.set(user, pts);
+  renderLeaderboard();
+  flash("Gift Bonus!", user + " +" + bonus + " pts");
+};
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+}
+
+ui();
+`;
+      return { html, css, js, meta: { template:"trivia" } };
+    }
+
+    function tplArena(opts){
+      const title = opts.title || "Emoji Arena";
+      const hook = opts.includeTikTok ? tikTokHookStub() : "";
+      const html = baseHtmlShell(title);
+      const css = cssBase() + `
+.stage{
+  position:relative;
+  flex: 1;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.10);
+  background:
+    radial-gradient(480px 380px at 30% 25%, rgba(255,138,0,.16), transparent 65%),
+    radial-gradient(420px 320px at 75% 65%, rgba(255,177,90,.10), transparent 65%),
+    rgba(0,0,0,.25);
+  overflow:hidden;
+}
+.gridGlow{
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(transparent 95%, rgba(255,255,255,.06) 95%),
+    linear-gradient(90deg, transparent 95%, rgba(255,255,255,.06) 95%);
+  background-size: 44px 44px;
+  opacity: .18;
+  pointer-events:none;
+}
+.p{
+  position:absolute;
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 26px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.30);
+  box-shadow: 0 18px 40px rgba(0,0,0,.45);
+}
+.p .tag{
+  position:absolute;
+  left: 50%;
+  top: 100%;
+  transform: translate(-50%, 6px);
+  font-size: 10px;
+  font-family: var(--mono);
+  opacity: .80;
+  white-space:nowrap;
+  max-width: 120px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.banner{
+  position:absolute;
+  left: 12px;
+  right: 12px;
+  top: 12px;
+  padding: 10px 10px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,138,0,.22);
+  background: rgba(0,0,0,.55);
+  box-shadow: 0 18px 55px rgba(0,0,0,.55);
+  display:flex;
+  gap:10px;
+  align-items:center;
+  justify-content:space-between;
+}
+.meter{
+  height: 10px;
+  flex: 1;
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 999px;
+  overflow:hidden;
+}
+.meter > i{
+  display:block;
+  height:100%;
+  width: 35%;
+  background: linear-gradient(90deg, rgba(255,177,90,.95), rgba(255,138,0,.95));
+}
+.pop{
+  position:absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(.94);
+  opacity:0;
+  transition: opacity .18s ease, transform .18s ease;
+  pointer-events:none;
+}
+.pop.show{
+  opacity:1;
+  transform: translate(-50%, -50%) scale(1);
+}
+.popCard{
+  width: min(420px, 92vw);
+  padding: 14px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,138,0,.22);
+  background: rgba(0,0,0,.62);
+  box-shadow: 0 18px 55px rgba(0,0,0,.65);
+  text-align:center;
+}
+.popCard b{ display:block; font-size: 22px; }
+.popCard span{ display:block; margin-top: 6px; color: rgba(255,255,255,.75); }
+`;
+      const js = `/* ${title} — game.js (Template: Arena) */
+"use strict";
+${hook}
+
+const app = document.getElementById("app");
+
+const state = {
+  players: new Map(), // user -> entity
+  boost: 0, // 0..1
+  lastPop: 0
+};
+
+function ui(){
+  app.innerHTML = \`
+    <div class="card">
+      <div class="head">
+        <div>
+          <h1>${escapeJs(title)}</h1>
+          <div class="sub">Type <b>!join</b> • Likes charge BOOST • Gifts trigger BLAST</div>
+        </div>
+        <span class="badge" id="countBadge">0 players</span>
+      </div>
+      <div class="body">
+        <div class="row">
+          <span class="badge">Goal: survive & score</span>
+          <span class="badge" id="boostBadge">BOOST: 0%</span>
+          <span class="spacer"></span>
+          <button class="btn" id="btnTestJoin" type="button">Test Join</button>
+          <button class="btn" id="btnTestBlast" type="button">Test Blast</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage" id="stage">
+      <div class="gridGlow"></div>
+      <div class="banner">
+        <span class="badge">Arena Live</span>
+        <div class="meter"><i id="meterBar"></i></div>
+        <span class="badge" id="topBadge">Top: —</span>
+      </div>
+      <div class="pop" id="pop">
+        <div class="popCard">
+          <b id="popTitle">—</b>
+          <span id="popSub">—</span>
+        </div>
+      </div>
+    </div>
+  \`;
+
+  document.getElementById("btnTestJoin").addEventListener("click", () => join("HOST_TEST_" + Math.floor(Math.random()*999)));
+  document.getElementById("btnTestBlast").addEventListener("click", () => blast("HOST_GIFT", 50));
+}
+
+function join(user){
+  if (state.players.has(user)) return;
+  const stage = document.getElementById("stage");
+
+  const node = document.createElement("div");
+  node.className = "p";
+  node.innerHTML = \`<div class="tag">\${escapeHtml(user)}</div>\`;
+
+  const emoji = pickEmoji(user);
+  node.insertAdjacentText("afterbegin", emoji);
+
+  const ent = {
+    user,
+    node,
+    x: 60 + Math.random()*(stage.clientWidth-120),
+    y: 120 + Math.random()*(stage.clientHeight-220),
+    vx: (Math.random()-.5)*2.2,
+    vy: (Math.random()-.5)*2.2,
+    score: 0,
+    hp: 100
+  };
+
+  state.players.set(user, ent);
+  stage.appendChild(node);
+
+  pop("Joined!", user);
+  syncHUD();
+}
+
+function syncHUD(){
+  document.getElementById("countBadge").textContent = state.players.size + " players";
+  document.getElementById("boostBadge").textContent = "BOOST: " + Math.round(state.boost*100) + "%";
+  document.getElementById("meterBar").style.width = Math.max(0, Math.min(100, state.boost*100)) + "%";
+
+  let top = null;
+  for (const e of state.players.values()){
+    if (!top || e.score > top.score) top = e;
+  }
+  document.getElementById("topBadge").textContent = "Top: " + (top ? (top.user + " (" + top.score + ")") : "—");
+}
+
+function blast(user, diamonds){
+  // A big gift triggers a blast that gives everyone a nudge
+  const power = diamonds >= 100 ? 3 : diamonds >= 20 ? 2 : 1;
+  for (const e of state.players.values()){
+    e.vx += (Math.random()-.5) * 4.5 * power;
+    e.vy += (Math.random()-.5) * 4.5 * power;
+    e.score += power;
+  }
+  pop("BLAST!", user + " power " + power);
+  syncHUD();
+}
+
+function pop(title, sub){
+  const now = Date.now();
+  if (now - state.lastPop < 220) return;
+  state.lastPop = now;
+
+  const p = document.getElementById("pop");
+  document.getElementById("popTitle").textContent = title;
+  document.getElementById("popSub").textContent = sub || "";
+  p.classList.add("show");
+  setTimeout(() => p.classList.remove("show"), 900);
+}
+
+function tick(){
+  const stage = document.getElementById("stage");
+  if (!stage) return;
+
+  const w = stage.clientWidth;
+  const h = stage.clientHeight;
+
+  for (const e of state.players.values()){
+    // boost makes everyone faster
+    const boostMul = 1 + state.boost * 1.2;
+
+    e.x += e.vx * boostMul;
+    e.y += e.vy * boostMul;
+
+    // bounce walls
+    if (e.x < 12){ e.x = 12; e.vx *= -1; }
+    if (e.x > w-66){ e.x = w-66; e.vx *= -1; }
+    if (e.y < 72){ e.y = 72; e.vy *= -1; }
+    if (e.y > h-78){ e.y = h-78; e.vy *= -1; }
+
+    e.vx *= 0.995;
+    e.vy *= 0.995;
+
+    e.node.style.transform = "translate(" + e.x.toFixed(1) + "px," + e.y.toFixed(1) + "px)";
+  }
+  requestAnimationFrame(tick);
+}
+
+function pickEmoji(user){
+  const pool = ["🗽","🔥","⚔️","🛡️","💥","👑","🐉","🧨","⚡","🎯"];
+  let n = 0;
+  for (let i=0;i<user.length;i++) n = (n + user.charCodeAt(i)*17) >>> 0;
+  return pool[n % pool.length];
+}
+
+// ---- TikTok hook points ----
+window.onChat = function({user, comment}){
+  const t = String(comment||"").trim().toLowerCase();
+  if (!t) return;
+
+  if (t.startsWith("!join")){
+    join(user);
+    return;
+  }
+
+  if (t.startsWith("!boost")){
+    state.boost = Math.min(1, state.boost + 0.18);
+    pop("BOOST!", user);
+    syncHUD();
+    return;
+  }
+};
+
+window.onLike = function({user, likeCount}){
+  // likes slowly charge boost
+  state.boost = Math.min(1, state.boost + 0.02);
+  syncHUD();
+};
+
+window.onGift = function({user, diamondCount}){
+  blast(user, Number(diamondCount||1));
+};
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+}
+
+ui();
+requestAnimationFrame(tick);
+`;
+      return { html, css, js, meta: { template:"arena" } };
+    }
+
+    function tplWheel(opts){
+      const title = opts.title || "Spin Wheel";
+      const hook = opts.includeTikTok ? tikTokHookStub() : "";
+      const html = baseHtmlShell(title);
+      const css = cssBase() + `
+.stage{ flex:1; display:flex; flex-direction:column; gap:10px; }
+.canvasWrap{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.22);
+  overflow:hidden;
+  position:relative;
+}
+canvas{
+  width: min(420px, 100%);
+  aspect-ratio: 1 / 1;
+}
+.pointer{
+  position:absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0; height:0;
+  border-left: 16px solid transparent;
+  border-right: 16px solid transparent;
+  border-top: 26px solid rgba(255,177,90,.95);
+  filter: drop-shadow(0 10px 10px rgba(0,0,0,.45));
+}
+.winner{
+  position:absolute;
+  left: 12px; right: 12px;
+  bottom: 12px;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,138,0,.22);
+  background: rgba(0,0,0,.55);
+  box-shadow: 0 18px 55px rgba(0,0,0,.55);
+  display:none;
+}
+.winner.show{ display:block; }
+.winner b{ font-size: 18px; display:block; }
+.winner span{ color: rgba(255,255,255,.75); display:block; margin-top: 4px; }
+`;
+      const js = `/* ${title} — game.js (Template: Wheel) */
+"use strict";
+${hook}
+
+const app = document.getElementById("app");
+
+const state = {
+  entrants: [],
+  spinning: false,
+  angle: 0,
+  vel: 0,
+  winner: null
+};
+
+function ui(){
+  app.innerHTML = \`
+    <div class="card">
+      <div class="head">
+        <div>
+          <h1>${escapeJs(title)}</h1>
+          <div class="sub">Type <b>!join</b> • Host clicks SPIN • Gifts can add extra entries</div>
+        </div>
+        <span class="badge" id="countBadge">0 entrants</span>
+      </div>
+      <div class="body">
+        <div class="row">
+          <button class="btn" id="btnSpin" type="button">SPIN</button>
+          <button class="btn" id="btnTestJoin" type="button">Test Join</button>
+          <span class="spacer"></span>
+          <span class="badge" id="hintBadge">Type !join to enter</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="canvasWrap">
+        <div class="pointer"></div>
+        <canvas id="wheel" width="600" height="600"></canvas>
+        <div class="winner" id="winCard">
+          <b id="winTitle">Winner!</b>
+          <span id="winSub">—</span>
+        </div>
+      </div>
+      <div class="mini">Built-in wheel template — readable slices, no blank screens.</div>
+    </div>
+  \`;
+
+  document.getElementById("btnSpin").addEventListener("click", spin);
+  document.getElementById("btnTestJoin").addEventListener("click", () => addEntrant("HOST_TEST_" + Math.floor(Math.random()*999)));
+  draw();
+}
+
+function addEntrant(user){
+  if (!user) return;
+  const name = String(user).trim();
+  if (!name) return;
+
+  if (!state.entrants.includes(name)) state.entrants.push(name);
+  document.getElementById("countBadge").textContent = state.entrants.length + " entrants";
+  hideWinner();
+  draw();
+}
+
+function spin(){
+  if (state.spinning) return;
+  if (state.entrants.length < 2){
+    showWinner("Need more players", "At least 2 entrants to spin.");
+    return;
+  }
+  hideWinner();
+  state.spinning = true;
+  state.winner = null;
+  state.vel = 0.28 + Math.random()*0.25; // initial speed
+}
+
+function tick(){
+  if (!state.spinning){
+    requestAnimationFrame(tick);
+    return;
+  }
+
+  state.angle += state.vel;
+  state.vel *= 0.985;
+
+  if (state.vel < 0.003){
+    state.spinning = false;
+    state.vel = 0;
+    pickWinner();
+  }
+
+  draw();
+  requestAnimationFrame(tick);
+}
+
+function pickWinner(){
+  const n = state.entrants.length;
+  const slice = (Math.PI * 2) / n;
+
+  // pointer at top: angle 0 points to the right, so adjust by -pi/2
+  const a = (state.angle - Math.PI/2) % (Math.PI*2);
+  const idx = (n - 1 - Math.floor((a < 0 ? a + Math.PI*2 : a) / slice)) % n;
+
+  state.winner = state.entrants[idx];
+  showWinner("Winner!", state.winner);
+}
+
+function showWinner(title, sub){
+  const card = document.getElementById("winCard");
+  document.getElementById("winTitle").textContent = title;
+  document.getElementById("winSub").textContent = sub || "";
+  card.classList.add("show");
+}
+function hideWinner(){
+  const card = document.getElementById("winCard");
+  if (card) card.classList.remove("show");
+}
+
+function draw(){
+  const c = document.getElementById("wheel");
+  if (!c) return;
+  const g = c.getContext("2d");
+
+  const w = c.width, h = c.height;
+  g.clearRect(0,0,w,h);
+
+  // background
+  g.save();
+  g.translate(w/2, h/2);
+  g.beginPath();
+  g.arc(0,0, 280, 0, Math.PI*2);
+  g.fillStyle = "rgba(0,0,0,.35)";
+  g.fill();
+  g.lineWidth = 10;
+  g.strokeStyle = "rgba(255,177,90,.35)";
+  g.stroke();
+  g.restore();
+
+  const entrants = state.entrants.length ? state.entrants : ["Type !join", "To enter", "Spin when ready"];
+  const n = entrants.length;
+  const slice = (Math.PI * 2) / n;
+
+  g.save();
+  g.translate(w/2, h/2);
+  g.rotate(state.angle);
+
+  for (let i=0;i<n;i++){
+    const start = i*slice;
+    const end = start + slice;
+
+    // alternating slice fill
+    g.beginPath();
+    g.moveTo(0,0);
+    g.arc(0,0, 270, start, end);
+    g.closePath();
+    g.fillStyle = i%2===0 ? "rgba(255,138,0,.22)" : "rgba(255,177,90,.14)";
+    g.fill();
+
+    g.lineWidth = 3;
+    g.strokeStyle = "rgba(255,255,255,.12)";
+    g.stroke();
+
+    // text
+    const label = entrants[i].length > 18 ? entrants[i].slice(0,18) + "…" : entrants[i];
+    g.save();
+    g.rotate(start + slice/2);
+    g.translate(0, -185);
+    g.rotate(Math.PI/2);
+
+    g.font = "900 22px ui-monospace, Menlo, Monaco, Consolas, monospace";
+    g.fillStyle = "rgba(255,255,255,.92)";
+    g.shadowColor = "rgba(0,0,0,.55)";
+    g.shadowBlur = 6;
+    g.fillText(label, -g.measureText(label).width/2, 8);
+    g.restore();
+  }
+
+  g.restore();
+}
+
+// ---- TikTok hook points ----
+window.onChat = function({user, comment}){
+  const t = String(comment||"").trim().toLowerCase();
+  if (!t) return;
+  if (t.startsWith("!join")) addEntrant(user);
+};
+
+window.onGift = function({user, diamondCount}){
+  // Gifts can add extra entries (simple)
+  const n = Number(diamondCount||1);
+  const extra = n >= 100 ? 3 : n >= 20 ? 2 : 1;
+  for (let i=0;i<extra;i++) addEntrant(user + "_x" + (i+1));
+};
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+}
+
+ui();
+requestAnimationFrame(tick);
+`;
+      return { html, css, js, meta: { template:"wheel" } };
+    }
+
+    function tplOverlay(opts){
+      const title = opts.title || "Live Overlay Alerts";
+      const hook = opts.includeTikTok ? tikTokHookStub() : "";
+      const html = baseHtmlShell(title);
+      const css = cssBase() + `
+.stage{
+  flex:1;
+  position:relative;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.10);
+  background:
+    radial-gradient(520px 380px at 30% 20%, rgba(255,138,0,.16), transparent 65%),
+    radial-gradient(420px 320px at 80% 70%, rgba(255,177,90,.10), transparent 65%),
+    rgba(0,0,0,.24);
+  overflow:hidden;
+}
+.stack{
+  position:absolute;
+  right: 12px;
+  top: 12px;
+  display:flex;
+  flex-direction:column;
+  gap: 10px;
+  width: min(340px, 92%);
+}
+.flag{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,138,0,.22);
+  background: rgba(0,0,0,.60);
+  box-shadow: 0 18px 55px rgba(0,0,0,.55);
+  transform: translateX(110%);
+  opacity:0;
+  transition: transform .22s ease, opacity .22s ease;
+}
+.flag.show{ transform: translateX(0); opacity:1; }
+.pfp{
+  width: 46px; height:46px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255,177,90,.35), rgba(255,138,0,.18));
+  border: 1px solid rgba(255,255,255,.12);
+  display:flex; align-items:center; justify-content:center;
+  font-weight: 950;
+  font-family: var(--mono);
+}
+.flag b{ display:block; font-size: 14px; }
+.flag span{ display:block; margin-top: 2px; color: rgba(255,255,255,.72); font-size: 12px; line-height:1.3; }
+.center{
+  position:absolute;
+  left: 12px;
+  bottom: 12px;
+  right: 12px;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.38);
+}
+.big{
+  font-size: 20px;
+  font-weight: 950;
+  margin: 0;
+  text-shadow: 0 2px 0 rgba(0,0,0,.35);
+}
+`;
+      const js = `/* ${title} — game.js (Template: Overlay) */
+"use strict";
+${hook}
+
+const app = document.getElementById("app");
+
+function ui(){
+  app.innerHTML = \`
+    <div class="card">
+      <div class="head">
+        <div>
+          <h1>${escapeJs(title)}</h1>
+          <div class="sub">Chat / gifts / likes become pop-out flags. Built for clean TikTok overlays.</div>
+        </div>
+        <span class="badge" id="modeBadge">Overlay Mode</span>
+      </div>
+      <div class="body">
+        <div class="row">
+          <button class="btn" id="btnTestChat" type="button">Test Chat</button>
+          <button class="btn" id="btnTestGift" type="button">Test Gift</button>
+          <button class="btn" id="btnTestLike" type="button">Test Like</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage" id="stage">
+      <div class="stack" id="stack"></div>
+      <div class="center">
+        <p class="big">Type <b>!join</b> to enter • Gifts trigger big effects</p>
+        <div class="mini">Wire this to your real TikTok connector by calling window.onChat / onGift / onLike</div>
+      </div>
+    </div>
+  \`;
+
+  document.getElementById("btnTestChat").addEventListener("click", () => pushFlag({type:"chat", user:"HOST_TEST", text:"This overlay looks clean 🔥"}));
+  document.getElementById("btnTestGift").addEventListener("click", () => pushFlag({type:"gift", user:"HOST_GIFTER", text:"Sent a BIG gift!"}));
+  document.getElementById("btnTestLike").addEventListener("click", () => pushFlag({type:"like", user:"HOST_LIKER", text:"Spam likes x50"}));
+}
+
+function pushFlag({type, user, text}){
+  const stack = document.getElementById("stack");
+  if (!stack) return;
+
+  const node = document.createElement("div");
+  node.className = "flag";
+  node.innerHTML = \`
+    <div class="pfp">\${initials(user)}</div>
+    <div>
+      <b>\${escapeHtml(user)} • \${type.toUpperCase()}</b>
+      <span>\${escapeHtml(text || "")}</span>
+    </div>
+  \`;
+
+  stack.prepend(node);
+  requestAnimationFrame(() => node.classList.add("show"));
+
+  setTimeout(() => {
+    node.classList.remove("show");
+    setTimeout(() => node.remove(), 250);
+  }, 2600);
+
+  // keep only 4
+  while (stack.children.length > 4) stack.lastElementChild.remove();
+}
+
+// ---- TikTok hook points ----
+window.onChat = function({user, comment}){
+  pushFlag({type:"chat", user, text: comment});
+};
+
+window.onGift = function({user, giftName, diamondCount}){
+  const txt = giftName ? ("Sent " + giftName + " (" + diamondCount + ")") : ("Sent gift (" + diamondCount + ")");
+  pushFlag({type:"gift", user, text: txt});
+};
+
+window.onLike = function({user, likeCount}){
+  pushFlag({type:"like", user, text: "Likes x" + (likeCount || 1)});
+};
+
+function initials(name){
+  const s = String(name||"").trim();
+  if (!s) return "??";
+  const parts = s.split(/\\s+/).slice(0,2);
+  return parts.map(p => p[0]?.toUpperCase() || "?").join("");
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+}
+
+ui();
+`;
+      return { html, css, js, meta: { template:"overlay" } };
+    }
+
+    function tplRace(opts){
+      const title = opts.title || "Live Runner Race";
+      const hook = opts.includeTikTok ? tikTokHookStub() : "";
+      const html = baseHtmlShell(title);
+      const css = cssBase() + `
+.track{
+  flex:1;
+  position:relative;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.10);
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.18)),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 8px, transparent 8px 22px);
+  overflow:hidden;
+}
+.lane{
+  position:absolute;
+  left: 0; right: 0;
+  height: 60px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.runner{
+  position:absolute;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 26px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.30);
+  box-shadow: 0 18px 40px rgba(0,0,0,.45);
+}
+.runner .tag{
+  position:absolute;
+  left: 50%;
+  top: 100%;
+  transform: translate(-50%, 6px);
+  font-size: 10px;
+  font-family: var(--mono);
+  opacity: .80;
+  white-space:nowrap;
+  max-width: 140px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.finish{
+  position:absolute;
+  right: 28px;
+  top: 0; bottom:0;
+  width: 10px;
+  background: linear-gradient(180deg, rgba(255,177,90,.95), rgba(255,138,0,.95));
+  opacity:.8;
+  box-shadow: 0 0 18px rgba(255,138,0,.35);
+}
+`;
+      const js = `/* ${title} — game.js (Template: Race) */
+"use strict";
+${hook}
+
+const app = document.getElementById("app");
+
+const state = {
+  runners: new Map(), // user -> runner
+  finishX: 320,
+  started: false
+};
+
+function ui(){
+  app.innerHTML = \`
+    <div class="card">
+      <div class="head">
+        <div>
+          <h1>${escapeJs(title)}</h1>
+          <div class="sub">Type <b>!join</b> • Likes = speed • Gifts = turbo</div>
+        </div>
+        <span class="badge" id="countBadge">0 runners</span>
+      </div>
+      <div class="body">
+        <div class="row">
+          <button class="btn" id="btnStart" type="button">Start</button>
+          <button class="btn" id="btnTestJoin" type="button">Test Join</button>
+          <span class="spacer"></span>
+          <span class="badge" id="statusBadge">Waiting…</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="track" id="track">
+      <div class="finish" id="finish"></div>
+    </div>
+  \`;
+
+  document.getElementById("btnStart").addEventListener("click", startRace);
+  document.getElementById("btnTestJoin").addEventListener("click", () => join("HOST_TEST_" + Math.floor(Math.random()*999)));
+
+  layout();
+  window.addEventListener("resize", layout);
+}
+
+function layout(){
+  const t = document.getElementById("track");
+  if (!t) return;
+  const w = t.clientWidth;
+  state.finishX = w - 80;
+  document.getElementById("finish").style.right = "36px";
+}
+
+function join(user){
+  if (state.runners.has(user)) return;
+
+  const track = document.getElementById("track");
+  const laneIndex = state.runners.size % 6;
+
+  const r = document.createElement("div");
+  r.className = "runner";
+  r.innerHTML = pickEmoji(user) + \`<div class="tag">\${escapeHtml(user)}</div>\`;
+
+  const ent = {
+    user,
+    node: r,
+    x: 18,
+    lane: laneIndex,
+    speed: 0,
+    turbo: 0
+  };
+
+  state.runners.set(user, ent);
+  track.appendChild(r);
+
+  document.getElementById("countBadge").textContent = state.runners.size + " runners";
+  updatePositions();
+}
+
+function startRace(){
+  if (state.runners.size < 2){
+    document.getElementById("statusBadge").textContent = "Need 2+ runners";
+    return;
+  }
+  state.started = true;
+  document.getElementById("statusBadge").textContent = "GO!";
+}
+
+function updatePositions(){
+  const track = document.getElementById("track");
+  const h = track.clientHeight;
+  const laneH = 64;
+
+  for (const ent of state.runners.values()){
+    const y = 18 + ent.lane * laneH;
+    ent.node.style.transform = "translate(" + ent.x.toFixed(1) + "px," + y.toFixed(1) + "px)";
+  }
+}
+
+function tick(){
+  if (!state.started){
+    requestAnimationFrame(tick);
+    return;
+  }
+
+  let winner = null;
+
+  for (const ent of state.runners.values()){
+    // decay
+    ent.speed *= 0.96;
+    ent.turbo *= 0.92;
+
+    // move
+    ent.x += (0.7 + ent.speed + ent.turbo);
+
+    if (ent.x >= state.finishX && !winner) winner = ent;
+  }
+
+  updatePositions();
+
+  if (winner){
+    state.started = false;
+    document.getElementById("statusBadge").textContent = "Winner: " + winner.user;
+    // reset after a moment
+    setTimeout(() => {
+      for (const ent of state.runners.values()){
+        ent.x = 18; ent.speed = 0; ent.turbo = 0;
+      }
+      updatePositions();
+      document.getElementById("statusBadge").textContent = "Waiting…";
+    }, 1700);
+  } else {
+    requestAnimationFrame(tick);
+  }
+}
+
+// ---- TikTok hook points ----
+window.onChat = function({user, comment}){
+  const t = String(comment||"").trim().toLowerCase();
+  if (t.startsWith("!join")) join(user);
+};
+
+window.onLike = function({user, likeCount}){
+  const ent = state.runners.get(user);
+  if (!ent) return;
+  ent.speed = Math.min(6, ent.speed + 0.35);
+};
+
+window.onGift = function({user, diamondCount}){
+  const ent = state.runners.get(user);
+  if (!ent) return;
+  const n = Number(diamondCount||1);
+  ent.turbo = Math.min(12, ent.turbo + (n >= 100 ? 7 : n >= 20 ? 4 : 2));
+};
+
+function pickEmoji(user){
+  const pool = ["🏁","🚀","🔥","⚡","🗽","🐉","🎯","💥","🧨","👑"];
+  let n = 0;
+  for (let i=0;i<user.length;i++) n = (n + user.charCodeAt(i)*13) >>> 0;
+  return pool[n % pool.length];
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+}
+
+ui();
+requestAnimationFrame(tick);
+`;
+      return { html, css, js, meta: { template:"race" } };
+    }
+
+    function tplPoll(opts){
+      const title = opts.title || "LIVE Poll Battle";
+      const hook = opts.includeTikTok ? tikTokHookStub() : "";
+      const html = baseHtmlShell(title);
+      const css = cssBase() + `
+.poll{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.bar{
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.22);
+  overflow:hidden;
+}
+.barTop{
+  padding: 12px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.barTop b{ font-size: 14px; }
+.meter{
+  height: 18px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.06);
+  position:relative;
+}
+.meter i{
+  position:absolute;
+  inset:0;
+  width: 50%;
+  background: linear-gradient(90deg, rgba(255,177,90,.95), rgba(255,138,0,.95));
+}
+.opts{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:10px;
+}
+.opt{
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.22);
+  padding: 12px;
+}
+.opt b{ display:block; font-size: 14px; }
+.opt span{ color: rgba(255,255,255,.72); font-size: 12px; display:block; margin-top:4px; }
+`;
+      const js = `/* ${title} — game.js (Template: Poll) */
+"use strict";
+${hook}
+
+const app = document.getElementById("app");
+
+const state = {
+  a: 0,
+  b: 0,
+  title: "Pick the winner!",
+  optA: "A (type A)",
+  optB: "B (type B)"
+};
+
+function ui(){
+  app.innerHTML = \`
+    <div class="card">
+      <div class="head">
+        <div>
+          <h1>${escapeJs(title)}</h1>
+          <div class="sub">Chat votes: type A or B • Likes add 1 vote • Gifts add vote burst</div>
+        </div>
+        <span class="badge" id="totalBadge">0 votes</span>
+      </div>
+      <div class="body">
+        <div class="row">
+          <button class="btn" id="btnReset" type="button">Reset</button>
+          <button class="btn" id="btnTestA" type="button">Test A</button>
+          <button class="btn" id="btnTestB" type="button">Test B</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="poll">
+      <div class="bar">
+        <div class="barTop">
+          <b id="qTitle">\${escapeHtml(state.title)}</b>
+          <span class="badge" id="pctBadge">50% / 50%</span>
+        </div>
+        <div class="meter"><i id="fill"></i></div>
+      </div>
+
+      <div class="opts">
+        <div class="opt">
+          <b id="aName">\${escapeHtml(state.optA)}</b>
+          <span id="aVotes">0 votes</span>
+        </div>
+        <div class="opt">
+          <b id="bName">\${escapeHtml(state.optB)}</b>
+          <span id="bVotes">0 votes</span>
+        </div>
+      </div>
+
+      <div class="mini">Tip: You can change the two options directly in game.js later for your show theme.</div>
+    </div>
+  \`;
+
+  document.getElementById("btnReset").addEventListener("click", reset);
+  document.getElementById("btnTestA").addEventListener("click", () => vote("A", "HOST_TEST"));
+  document.getElementById("btnTestB").addEventListener("click", () => vote("B", "HOST_TEST"));
+
+  render();
+}
+
+function reset(){
+  state.a = 0; state.b = 0;
+  render();
+}
+
+function vote(which, user){
+  if (which === "A") state.a++;
+  else if (which === "B") state.b++;
+  render();
+}
+
+function render(){
+  const total = state.a + state.b;
+  const aPct = total ? (state.a / total) : 0.5;
+  const bPct = 1 - aPct;
+
+  document.getElementById("totalBadge").textContent = total + " votes";
+  document.getElementById("aVotes").textContent = state.a + " votes";
+  document.getElementById("bVotes").textContent = state.b + " votes";
+  document.getElementById("fill").style.width = Math.round(aPct * 100) + "%";
+  document.getElementById("pctBadge").textContent = Math.round(aPct*100) + "% / " + Math.round(bPct*100) + "%";
+}
+
+// ---- TikTok hook points ----
+window.onChat = function({user, comment}){
+  const t = String(comment||"").trim().toLowerCase();
+  if (t === "a" || t === "1") vote("A", user);
+  if (t === "b" || t === "2") vote("B", user);
+};
+
+window.onLike = function({user, likeCount}){
+  // likes add a gentle vote to A by default (you can change this)
+  vote("A", user);
+};
+
+window.onGift = function({user, diamondCount}){
+  const n = Number(diamondCount||1);
+  const burst = n >= 100 ? 10 : n >= 20 ? 5 : 2;
+  for (let i=0;i<burst;i++) vote("B", user);
+};
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+}
+
+ui();
+`;
+      return { html, css, js, meta: { template:"poll" } };
+    }
+
+    function tplKitchen(opts){
+      // lightweight starter kitchen (not full pizza sim, but a solid visual base)
+      const title = opts.title || "Crowd Kitchen";
+      const hook = opts.includeTikTok ? tikTokHookStub() : "";
+      const html = baseHtmlShell(title);
+      const css = cssBase() + `
+.kitchen{
+  flex:1;
+  position:relative;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.22);
+  overflow:hidden;
+}
+.topLine{
+  position:absolute; left:12px; right:12px; top:12px;
+  display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+}
+.oven{
+  position:absolute;
+  left: 50%;
+  top: 56%;
+  transform: translate(-50%, -50%);
+  width: 320px;
+  height: 240px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.30));
+  box-shadow: 0 18px 55px rgba(0,0,0,.55);
+  overflow:hidden;
+}
+.ovenHead{
+  padding: 10px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  display:flex; gap:10px; align-items:center; justify-content:space-between;
+}
+.gauge{
+  width: 120px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.10);
+  overflow:hidden;
+}
+.gauge i{
+  display:block; height:100%; width: 20%;
+  background: linear-gradient(90deg, rgba(255,177,90,.95), rgba(255,138,0,.95));
+}
+.door{
+  position:absolute;
+  left: 22px; right: 22px;
+  top: 70px; bottom: 22px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.30);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.pizza{
+  width: 160px; height: 160px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255,255,255,.12), transparent 45%),
+    radial-gradient(circle at 60% 55%, rgba(255,255,255,.10), transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(255,177,90,.35), rgba(255,138,0,.10));
+  border: 1px solid rgba(255,255,255,.14);
+  position:relative;
+  box-shadow: inset 0 0 0 10px rgba(0,0,0,.18);
+}
+.topping{
+  position:absolute;
+  width: 20px; height:20px;
+  border-radius: 6px;
+  background: rgba(255,77,77,.75);
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 10px 18px rgba(0,0,0,.35);
+}
+.chef{
+  position:absolute;
+  left: 12px;
+  bottom: 12px;
+  width: 180px;
+  height: 110px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.32);
+  padding: 10px;
+}
+.chef b{ display:block; font-size: 14px; }
+.chef span{ display:block; margin-top:4px; color: rgba(255,255,255,.72); font-size: 12px; line-height:1.3; }
+`;
+      const js = `/* ${title} — game.js (Template: Kitchen) */
+"use strict";
+${hook}
+
+const app = document.getElementById("app");
+
+const state = {
+  toppings: [],
+  temp: 280,
+  target: 425,
+  baking: false
+};
+
+function ui(){
+  app.innerHTML = \`
+    <div class="card">
+      <div class="head">
+        <div>
+          <h1>${escapeJs(title)}</h1>
+          <div class="sub">Chat adds toppings • Likes raise temp • Gifts bake faster</div>
+        </div>
+        <span class="badge" id="tempBadge">280°F</span>
+      </div>
+      <div class="body">
+        <div class="row">
+          <button class="btn" id="btnAdd" type="button">Test Topping</button>
+          <button class="btn" id="btnBake" type="button">Bake</button>
+          <span class="spacer"></span>
+          <span class="badge" id="statusBadge">Waiting…</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="kitchen" id="kitchen">
+      <div class="topLine">
+        <span class="badge">Target: 425°F</span>
+        <span class="badge" id="tCount">Toppings: 0</span>
+      </div>
+
+      <div class="oven">
+        <div class="ovenHead">
+          <span class="badge">OVEN</span>
+          <div class="gauge"><i id="gFill"></i></div>
+          <span class="badge" id="gTemp">280°F</span>
+        </div>
+        <div class="door">
+          <div class="pizza" id="pizza"></div>
+        </div>
+      </div>
+
+      <div class="chef">
+        <b>Chef Miko</b>
+        <span id="chefLine">“Type !topping to add!”</span>
+      </div>
+    </div>
+  \`;
+
+  document.getElementById("btnAdd").addEventListener("click", () => addTopping("HOST_TEST"));
+  document.getElementById("btnBake").addEventListener("click", bake);
+
+  render();
+}
+
+function addTopping(user){
+  if (state.baking) return;
+  state.toppings.push({ x: 18 + Math.random()*124, y: 18 + Math.random()*124 });
+  line("Added topping for " + user + "!");
+  render();
+}
+
+function bake(){
+  if (state.baking) return;
+  if (state.toppings.length < 1){
+    line("Add at least 1 topping first!");
+    return;
+  }
+  state.baking = true;
+  line("Baking… raise the temp!");
+  document.getElementById("statusBadge").textContent = "Baking…";
+}
+
+function line(text){
+  document.getElementById("chefLine").textContent = "“" + text + "”";
+}
+
+function render(){
+  const p = document.getElementById("pizza");
+  if (!p) return;
+  p.innerHTML = "";
+  state.toppings.forEach(t => {
+    const d = document.createElement("div");
+    d.className = "topping";
+    d.style.left = t.x + "px";
+    d.style.top = t.y + "px";
+    p.appendChild(d);
+  });
+  document.getElementById("tCount").textContent = "Toppings: " + state.toppings.length;
+  document.getElementById("tempBadge").textContent = Math.round(state.temp) + "°F";
+  document.getElementById("gTemp").textContent = Math.round(state.temp) + "°F";
+
+  const pct = Math.max(0, Math.min(1, (state.temp - 250) / (state.target - 250)));
+  document.getElementById("gFill").style.width = Math.round(pct*100) + "%";
+}
+
+function tick(){
+  if (state.baking){
+    // passive heat up
+    state.temp += 0.35;
+
+    if (state.temp >= state.target){
+      state.temp = state.target;
+      state.baking = false;
+      document.getElementById("statusBadge").textContent = "DONE!";
+      line("Ta-da! Pizza complete!");
+      setTimeout(() => {
+        // new round
+        state.temp = 280;
+        state.toppings = [];
+        document.getElementById("statusBadge").textContent = "Waiting…";
+        line("New round! Type !topping");
+        render();
+      }, 1400);
+    }
+  } else {
+    // cool down slightly
+    state.temp = Math.max(260, state.temp - 0.06);
+  }
+  render();
+  requestAnimationFrame(tick);
+}
+
+// ---- TikTok hook points ----
+window.onChat = function({user, comment}){
+  const t = String(comment||"").trim().toLowerCase();
+  if (t.includes("!topping")) addTopping(user);
+};
+
+window.onLike = function({user, likeCount}){
+  if (!state.baking) return;
+  state.temp += 1.0;
+};
+
+window.onGift = function({user, diamondCount}){
+  if (!state.baking) return;
+  const n = Number(diamondCount||1);
+  state.temp += (n >= 100 ? 18 : n >= 20 ? 10 : 6);
+};
+
+ui();
+requestAnimationFrame(tick);
+`;
+      return { html, css, js, meta: { template:"kitchen" } };
+    }
+
+    function tplBoss(opts){
+      const title = opts.title || "Boss Raid";
+      const hook = opts.includeTikTok ? tikTokHookStub() : "";
+      const html = baseHtmlShell(title);
+      const css = cssBase() + `
+.raid{
+  flex:1;
+  position:relative;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.10);
+  background:
+    radial-gradient(520px 380px at 40% 20%, rgba(255,138,0,.16), transparent 65%),
+    radial-gradient(420px 320px at 80% 75%, rgba(255,177,90,.10), transparent 65%),
+    rgba(0,0,0,.22);
+  overflow:hidden;
+}
+.boss{
+  position:absolute;
+  left: 50%;
+  top: 45%;
+  transform: translate(-50%, -50%);
+  width: 220px;
+  height: 220px;
+  border-radius: 26px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.34);
+  box-shadow: 0 18px 55px rgba(0,0,0,.55);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 88px;
+}
+.hpWrap{
+  position:absolute;
+  left: 12px; right: 12px;
+  top: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.40);
+  padding: 10px;
+  box-shadow: 0 18px 55px rgba(0,0,0,.45);
+}
+.hpTop{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.hp{
+  margin-top: 8px;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.10);
+  overflow:hidden;
+}
+.hp i{
+  display:block;
+  height:100%;
+  width: 100%;
+  background: linear-gradient(90deg, rgba(255,77,77,.95), rgba(255,138,0,.95));
+}
+.feed{
+  position:absolute;
+  left: 12px;
+  bottom: 12px;
+  width: min(340px, 92%);
+  display:flex;
+  flex-direction:column;
+  gap: 10px;
+}
+.hit{
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.55);
+}
+.hit b{ display:block; font-size: 13px; }
+.hit span{ display:block; margin-top: 2px; color: rgba(255,255,255,.72); font-size: 12px; }
+`;
+      const js = `/* ${title} — game.js (Template: Boss) */
+"use strict";
+${hook}
+
+const app = document.getElementById("app");
+
+const state = {
+  hpMax: 500,
+  hp: 500,
+  top: new Map(), // user -> dmg
+};
+
+function ui(){
+  app.innerHTML = \`
+    <div class="card">
+      <div class="head">
+        <div>
+          <h1>${escapeJs(title)}</h1>
+          <div class="sub">Chat: !hit • Likes chip damage • Gifts = big hits</div>
+        </div>
+        <span class="badge" id="topBadge">Top: —</span>
+      </div>
+      <div class="body">
+        <div class="row">
+          <button class="btn" id="btnHit" type="button">Test Hit</button>
+          <button class="btn" id="btnReset" type="button">Reset Boss</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="raid">
+      <div class="hpWrap">
+        <div class="hpTop">
+          <span class="badge">BOSS HP</span>
+          <span class="badge" id="hpTxt">\${state.hp}/\${state.hpMax}</span>
+        </div>
+        <div class="hp"><i id="hpFill"></i></div>
+      </div>
+
+      <div class="boss" id="boss">🐉</div>
+
+      <div class="feed" id="feed"></div>
+    </div>
+  \`;
+
+  document.getElementById("btnHit").addEventListener("click", () => hit("HOST_TEST", 8));
+  document.getElementById("btnReset").addEventListener("click", resetBoss);
+
+  render();
+}
+
+function resetBoss(){
+  state.hp = state.hpMax;
+  state.top.clear();
+  pushFeed("Reset", "Boss restored to full HP");
+  render();
+}
+
+function hit(user, dmg){
+  if (state.hp <= 0) return;
+
+  state.hp = Math.max(0, state.hp - dmg);
+  state.top.set(user, (state.top.get(user) || 0) + dmg);
+
+  pushFeed(user, "Hit for " + dmg + " dmg");
+  render();
+
+  if (state.hp <= 0){
+    pushFeed("BOSS DEFEATED!", "Top raider: " + (getTop()?.user || "—"));
+  }
+}
+
+function getTop(){
+  let best = null;
+  for (const [user, dmg] of state.top.entries()){
+    if (!best || dmg > best.dmg) best = { user, dmg };
+  }
+  return best;
+}
+
+function pushFeed(title, sub){
+  const f = document.getElementById("feed");
+  if (!f) return;
+
+  const node = document.createElement("div");
+  node.className = "hit";
+  node.innerHTML = \`<b>\${escapeHtml(title)}</b><span>\${escapeHtml(sub || "")}</span>\`;
+  f.prepend(node);
+
+  while (f.children.length > 4) f.lastElementChild.remove();
+}
+
+function render(){
+  const pct = state.hp / state.hpMax;
+  document.getElementById("hpTxt").textContent = state.hp + "/" + state.hpMax;
+  document.getElementById("hpFill").style.width = Math.round(pct * 100) + "%";
+
+  const top = getTop();
+  document.getElementById("topBadge").textContent = "Top: " + (top ? (top.user + " (" + top.dmg + ")") : "—");
+}
+
+// ---- TikTok hook points ----
+window.onChat = function({user, comment}){
+  const t = String(comment||"").trim().toLowerCase();
+  if (t.startsWith("!hit")) hit(user, 7);
+};
+
+window.onLike = function({user, likeCount}){
+  hit(user, 1);
+};
+
+window.onGift = function({user, diamondCount}){
+  const n = Number(diamondCount||1);
+  hit(user, n >= 100 ? 30 : n >= 20 ? 14 : 7);
+};
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+}
+
+ui();
+`;
+      return { html, css, js, meta: { template:"boss" } };
+    }
+
+    function escapeHtml(s){
+      return String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+    }
+    function escapeJs(s){
+      return String(s).replace(/\\/g,"\\\\").replace(/`/g,"\\`").replace(/\\$/g,"\\$").replace(/\\n/g,"\\n");
+    }
+
+    function buildFromTemplate(templateKey, opts){
+      switch(templateKey){
+        case "trivia": return tplTrivia(opts);
+        case "wheel": return tplWheel(opts);
+        case "arena": return tplArena(opts);
+        case "race": return tplRace(opts);
+        case "overlay": return tplOverlay(opts);
+        case "poll": return tplPoll(opts);
+        case "kitchen": return tplKitchen(opts);
+        case "boss": return tplBoss(opts);
+        default: return tplOverlay(opts);
+      }
+    }
+
+    // -----------------------------
+    // Build pipeline
+    // -----------------------------
+    let currentBuild = null;
+
+    function getSelectedTemplate(){
+      const override = templateOverride?.value || "auto";
+      if (override !== "auto") return override;
+      return detectedBadge.dataset.template || applyDetection();
+    }
+
+    function getBuildOptions(){
+      const title = String(projectName.value || "").trim() || "ChatTok Game";
+      return {
+        title,
+        includeTikTok: (includeTikTokStub.value === "on"),
+        viewport: viewportMode.value
+      };
+    }
+
+    function generate(){
+      const a = getAuth();
+      if (!a?.email){
+        toast("Sign in first (local-only).");
+        openModal();
+        return;
+      }
+
+      const prompt = String(promptBox.value || "").trim();
+      if (!prompt){
+        toast("Paste a short prompt first.");
+        promptBox.focus();
+        return;
+      }
+
+      // auto detect if needed
+      const detected = applyDetection();
+      const tpl = getSelectedTemplate();
+
+      const opts = getBuildOptions();
+      const build = buildFromTemplate(tpl, opts);
+
+      // store prompt + meta
+      currentBuild = {
+        prompt,
+        templateDetected: detected,
+        templateUsed: tpl,
+        opts,
+        files: build,
+        generatedAt: Date.now(),
+        editsApplied: []
+      };
+
+      // show files
+      codeHtml.textContent = build.html;
+      codeCss.textContent = build.css;
+      codeJs.textContent  = build.js;
+
+      // details
+      dProject.textContent = opts.title;
+      dTemplate.textContent = TEMPLATE_LABELS[tpl] || tpl;
+      dViewport.textContent = opts.viewport;
+      dTiktok.textContent = opts.includeTikTok ? "included" : "off";
+      dTime.textContent = new Date(currentBuild.generatedAt).toLocaleString();
+
+      // preview
+      refreshPreview();
+
+      // reset edit credits for this generation
+      resetCredits(a.email);
+      syncCreditsBadge();
+
+      toast("Generated: " + (TEMPLATE_LABELS[tpl] || tpl));
+    }
+
+    function combinedPreviewHtml(build){
+      // For preview: embed CSS + JS directly so it always runs.
+      // Keep the exported files separate.
+      const safeTitle = escapeHtml(build.opts.title || "Preview");
+      return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>${safeTitle} (Preview)</title>
+<style>${build.files.css}</style>
+</head>
+<body>
+<div id="app"></div>
+<script>${build.files.js}<\/script>
+</body>
+</html>`;
+    }
+
+    function refreshPreview(){
+      if (!currentBuild){
+        previewFrame.srcdoc = `<!doctype html><meta charset="utf-8"><body style="margin:0;font-family:system-ui;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;">
+          <div style="text-align:center;opacity:.85;max-width:320px">
+            <b>Generate files to preview.</b><br><span style="font-size:12px;opacity:.7">Your 9:16 preview will appear here.</span>
+          </div>
+        </body>`;
+        return;
+      }
+      previewFrame.srcdoc = combinedPreviewHtml(currentBuild);
+    }
+
+    // -----------------------------
+    // Template-aware edit system (3 edits)
+    // - intentionally conservative: "polish" & "excitement"
+    // - avoids breaking structure
+    // -----------------------------
+    function applyEdit(){
+      const a = getAuth();
+      if (!a?.email){
+        toast("Sign in first (local-only).");
+        openModal();
+        return;
+      }
+      if (!currentBuild){
+        toast("Generate files first, then apply edits.");
+        return;
+      }
+
+      const editText = String(editBox.value || "").trim();
+      if (!editText){
+        toast("Type an edit request first.");
+        editBox.focus();
+        return;
+      }
+
+      if (!useOneCredit(a.email)){
+        syncCreditsBadge();
+        toast("No edits left for this build (max 3). Generate again to reset.");
+        return;
+      }
+
+      // Apply a few safe transformations
+      const e = editText.toLowerCase();
+
+      // 1) Make fonts bigger / more readable
+      if (/(bigger|larger|readable|easy to read|font)/.test(e)){
+        currentBuild.files.css += `
+
+/* EDIT: readability boost */
+:root{ --r:20px; }
+.head h1{ font-size: 18px; }
+.badge{ font-size: 13px; padding: 9px 11px; }
+.btn{ padding: 13px 16px; border-radius: 16px; }
+`;
+      }
+
+      // 2) Add join sound / win sound (simple beep via WebAudio)
+      if (/(sound|sfx|effect|audio|ding|join sound|winner sound)/.test(e)){
+        if (!currentBuild.files.js.includes("function playSfx(")){
+          currentBuild.files.js += `
+
+/* EDIT: lightweight sound effects (WebAudio) */
+function playSfx(type){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = "triangle";
+    const now = ctx.currentTime;
+    const freq = type === "win" ? 620 : type === "join" ? 420 : 520;
+    o.frequency.setValueAtTime(freq, now);
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.12, now + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+    o.start(now);
+    o.stop(now + 0.24);
+    setTimeout(() => ctx.close(), 300);
+  }catch{}
+}
+`;
+        }
+        // Try to wire join/win if obvious hooks exist
+        currentBuild.files.js = currentBuild.files.js
+          .replace(/pop\("Joined!"/g, 'playSfx("join");\n  pop("Joined!"')
+          .replace(/showWinner\("Winner!"/g, 'playSfx("win");\n  showWinner("Winner!"');
+      }
+
+      // 3) More excitement (extra glow + punch)
+      if (/(excite|exciting|flashy|punch|glow|animate|celebration|celebrate)/.test(e)){
+        currentBuild.files.css += `
+
+/* EDIT: extra glow + punch */
+.card{ box-shadow: 0 18px 55px rgba(0,0,0,.62), 0 0 0 1px rgba(255,255,255,.08), 0 0 28px rgba(255,138,0,.14); }
+.btn{ box-shadow: 0 16px 34px rgba(255,138,0,.24), 0 7px 0 rgba(0,0,0,.35); }
+@keyframes ct_pulse{ 0%,100%{ transform: scale(1);} 50%{ transform: scale(1.04);} }
+.badge{ animation: ct_pulse 2.2s ease-in-out infinite; }
+`;
+      }
+
+      currentBuild.editsApplied.push({ at: Date.now(), text: editText });
+      codeHtml.textContent = currentBuild.files.html;
+      codeCss.textContent = currentBuild.files.css;
+      codeJs.textContent  = currentBuild.files.js;
+      refreshPreview();
+
+      syncCreditsBadge();
+      toast("Edit applied. (" + getCreditsLeft(a.email) + " left)");
+    }
+
+    function resetEdits(){
+      // Re-generate from scratch using same template/options + prompt, and reset credits
+      if (!currentBuild){
+        toast("Nothing to reset yet.");
+        return;
+      }
+      const a = getAuth();
+      if (!a?.email){
+        toast("Sign in first (local-only).");
+        openModal();
+        return;
+      }
+
+      const tpl = currentBuild.templateUsed;
+      const build = buildFromTemplate(tpl, currentBuild.opts);
+
+      currentBuild.files = build;
+      currentBuild.editsApplied = [];
+      currentBuild.generatedAt = Date.now();
+
+      codeHtml.textContent = build.html;
+      codeCss.textContent = build.css;
+      codeJs.textContent  = build.js;
+
+      dTime.textContent = new Date(currentBuild.generatedAt).toLocaleString();
+
+      resetCredits(a.email);
+      syncCreditsBadge();
+      refreshPreview();
+
+      toast("Edits reset.");
+    }
+
+    // -----------------------------
+    // Save / Load build
+    // -----------------------------
+    function saveBuild(){
+      if (!currentBuild){ toast("Generate first."); return; }
+      localStorage.setItem(KEYS.lastBuild, JSON.stringify(currentBuild));
+      toast("Build saved locally.");
+    }
+    function loadBuild(){
+      try{
+        const raw = localStorage.getItem(KEYS.lastBuild);
+        if (!raw) { toast("No saved build found."); return; }
+        const b = JSON.parse(raw);
+        if (!b?.files?.html) { toast("Saved build invalid."); return; }
+
+        currentBuild = b;
+
+        promptBox.value = b.prompt || "";
+        projectName.value = b.opts?.title || "";
+        includeTikTokStub.value = b.opts?.includeTikTok ? "on" : "off";
+        viewportMode.value = b.opts?.viewport || "portrait";
+        templateOverride.value = "auto";
+
+        detectedBadge.textContent = "Detected: " + (TEMPLATE_LABELS[b.templateUsed] || b.templateUsed);
+        detectedBadge.dataset.template = b.templateUsed;
+
+        codeHtml.textContent = b.files.html;
+        codeCss.textContent = b.files.css;
+        codeJs.textContent  = b.files.js;
+
+        dProject.textContent = b.opts?.title || "—";
+        dTemplate.textContent = TEMPLATE_LABELS[b.templateUsed] || b.templateUsed;
+        dViewport.textContent = b.opts?.viewport || "—";
+        dTiktok.textContent = b.opts?.includeTikTok ? "included" : "off";
+        dTime.textContent = b.generatedAt ? new Date(b.generatedAt).toLocaleString() : "—";
+
+        refreshPreview();
+        toast("Loaded last build.");
+      }catch{
+        toast("Could not load saved build.");
+      }
+    }
+
+    // -----------------------------
+    // Copy / Download helpers
+    // -----------------------------
+    async function copyText(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        toast("Copied to clipboard.");
+      }catch{
+        toast("Copy failed (browser blocked).");
+      }
+    }
+
+    function downloadText(filename, text){
+      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 500);
+    }
+
+    function downloadAll(){
+      if (!currentBuild){ toast("Generate first."); return; }
+      downloadText("index.html", currentBuild.files.html);
+      setTimeout(() => downloadText("style.css", currentBuild.files.css), 120);
+      setTimeout(() => downloadText("game.js", currentBuild.files.js), 240);
+      toast("Downloading 3 files…");
+    }
+
+    // -----------------------------
+    // Tabs
+    // -----------------------------
+    function setTab(name){
+      document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === name));
+      ["preview","files","details"].forEach(k => {
+        el("tab_"+k).style.display = (k === name) ? "" : "none";
+      });
+    }
+
+    // -----------------------------
+    // Init
+    // -----------------------------
+    function init(){
+      el("yy").textContent = String(new Date().getFullYear());
+
+      // preload last email
+      try{
+        const last = localStorage.getItem(KEYS.lastUser);
+        if (last) emailBox.value = last;
+      }catch{}
+
+      const a = getAuth();
+      if (a?.email){
+        setSignedIn(a.email);
+        ensureEditCredits(a.email);
+      } else {
+        setSignedOut();
+        // If they land here signed out, send them home after a beat
+        toast("You’re signed out. Sign in to generate games.");
+      }
+      syncCreditsBadge();
+
+      // bring over draft prompt from landing
+      try{
+        const draft = localStorage.getItem(KEYS.draftPrompt);
+        if (draft && !promptBox.value.trim()) promptBox.value = draft;
+      }catch{}
+
+      // sensible defaults
+      if (!projectName.value.trim()) projectName.value = "ChatTok Game";
+      applyDetection();
+      refreshPreview();
+    }
+
+    // Events
+    btnBack.addEventListener("click", () => window.location.href = "index.html");
+    btnSignIn.addEventListener("click", openModal);
+
+    btnCloseModal.addEventListener("click", closeModal);
+    modalWrap.addEventListener("click", (e) => { if (e.target === modalWrap) closeModal(); });
+
+    btnCreateAccount.addEventListener("click", createAccount);
+    btnDoSignIn.addEventListener("click", signIn);
+    btnSignOut.addEventListener("click", signOut);
+
+    el("btnDetect").addEventListener("click", () => { applyDetection(); toast("Template detected."); });
+    el("btnGenerate").addEventListener("click", generate);
+    el("btnApplyEdit").addEventListener("click", applyEdit);
+    el("btnResetEdits").addEventListener("click", resetEdits);
+
+    btnToggleAdvanced.addEventListener("click", () => {
+      const open = advancedBody.style.display !== "none";
+      advancedBody.style.display = open ? "none" : "";
+      btnToggleAdvanced.textContent = open ? "Show" : "Hide";
+    });
+
+    el("btnRefreshPreview").addEventListener("click", refreshPreview);
+    el("btnSaveBuild").addEventListener("click", saveBuild);
+    el("btnLoadBuild").addEventListener("click", loadBuild);
+    el("btnDownloadAll").addEventListener("click", downloadAll);
+
+    document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => setTab(t.dataset.tab)));
+
+    document.querySelectorAll("[data-copy]").forEach(b => b.addEventListener("click", () => {
+      if (!currentBuild) return toast("Generate first.");
+      const k = b.getAttribute("data-copy");
+      if (k === "html") return copyText(currentBuild.files.html);
+      if (k === "css") return copyText(currentBuild.files.css);
+      if (k === "js")  return copyText(currentBuild.files.js);
+    }));
+
+    document.querySelectorAll("[data-dl]").forEach(b => b.addEventListener("click", () => {
+      if (!currentBuild) return toast("Generate first.");
+      const k = b.getAttribute("data-dl");
+      if (k === "html") return downloadText("index.html", currentBuild.files.html);
+      if (k === "css") return downloadText("style.css", currentBuild.files.css);
+      if (k === "js")  return downloadText("game.js", currentBuild.files.js);
+    }));
+
+    // re-detect when prompt changes (debounced)
+    let tmo = null;
+    promptBox.addEventListener("input", () => {
+      clearTimeout(tmo);
+      tmo = setTimeout(applyDetection, 250);
+      try{ localStorage.setItem(KEYS.draftPrompt, promptBox.value); }catch{}
+    });
+
+    init();
+  </script>
+</body>
+</html>
 
