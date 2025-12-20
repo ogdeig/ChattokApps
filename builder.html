@@ -2,557 +2,702 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>ChatTok Tools — Builder</title>
-  <meta name="theme-color" content="#0b0b0d" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>ChatTok Builder</title>
 
   <style>
     :root{
-      --bg0:#07070a;
-      --bg1:#0b0b0d;
-
+      --bg0:#070707;
+      --bg1:#0b0b0b;
       --panel: rgba(255,255,255,.06);
       --panel2: rgba(255,255,255,.04);
       --line: rgba(255,255,255,.10);
-
       --text:#ffffff;
       --muted: rgba(255,255,255,.72);
 
-      --accent1:#ff8a00;
-      --accent2:#ffb15a;
+      --orange:#ff7a18;
+      --orange2:#ff9c3a;
 
       --good:#2ee59d;
       --bad:#ff4d4d;
 
-      --shadowPanel: 0 14px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08);
       --r: 18px;
       --r2: 14px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      --shadow: 0 18px 50px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
     }
 
     *{ box-sizing:border-box; }
-    html,body{ height:100%; }
     body{
       margin:0;
       font-family: var(--sans);
-      color:var(--text);
+      color: var(--text);
+      min-height: 100vh;
       background:
-        radial-gradient(1200px 700px at 18% 12%, rgba(255,138,0,.14), transparent 60%),
-        radial-gradient(900px 600px at 82% 22%, rgba(255,177,90,.08), transparent 55%),
-        radial-gradient(900px 600px at 30% 90%, rgba(255,138,0,.08), transparent 60%),
+        radial-gradient(900px 600px at 20% 10%, rgba(255,122,24,.18), transparent 55%),
+        radial-gradient(900px 600px at 80% 20%, rgba(255,156,58,.12), transparent 55%),
         linear-gradient(180deg, var(--bg0), var(--bg1));
-      overflow-x:hidden;
     }
 
-    a{ color: rgba(255,177,90,.95); text-decoration:none; }
+    a{ color: var(--orange2); text-decoration:none; }
     a:hover{ text-decoration:underline; }
 
-    .wrap{ max-width: 1260px; margin: 0 auto; padding: 18px 14px 48px; }
-
-    /* top bar */
-    .nav{
+    .topbar{
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(0,0,0,.72), rgba(0,0,0,.25));
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar-inner{
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 14px 16px;
       display:flex;
       align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom: 12px;
-      flex-wrap:wrap;
-    }
-    .logo{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
-    .mark{
-      width: 40px;
-      height: 40px;
-      border-radius: 14px;
-      background:
-        radial-gradient(18px 18px at 25% 25%, rgba(255,255,255,.20), transparent 60%),
-        linear-gradient(180deg, rgba(255,177,90,.95), rgba(255,138,0,.85));
-      box-shadow: 0 12px 26px rgba(255,138,0,.22), 0 0 0 1px rgba(255,255,255,.10);
-      flex: 0 0 auto;
+      justify-content: space-between;
+      gap: 12px;
     }
     .brand{
       display:flex;
-      flex-direction:column;
-      gap:2px;
-      min-width:0;
+      align-items:center;
+      gap: 10px;
+      min-width: 260px;
     }
-    .brand b{
-      font-size: 14px;
-      letter-spacing:.2px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+    .logo{
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      background: radial-gradient(circle at 30% 30%, var(--orange2), var(--orange));
+      box-shadow: 0 12px 30px rgba(255,122,24,.35);
     }
-    .brand span{
-      font-size: 12px;
-      color: var(--muted);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .navRight{
+    .brand .title{
       display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-      justify-content:flex-end;
+      flex-direction:column;
+      line-height: 1.1;
     }
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 10px 12px;
-      background: rgba(0,0,0,.22);
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      box-shadow: 0 10px 25px rgba(0,0,0,.25);
-      color: var(--muted);
-      font-size: 13px;
-      white-space:nowrap;
-      user-select:none;
-    }
-    .dot{ width:10px; height:10px; border-radius: 50%; background: rgba(255,255,255,.22); box-shadow: 0 0 0 2px rgba(255,255,255,.08); }
-    .dot.good{ background: var(--good); box-shadow: 0 0 0 2px rgba(46,229,157,.18); }
-    .dot.bad{  background: var(--bad);  box-shadow: 0 0 0 2px rgba(255,77,77,.18); }
+    .brand .title strong{ font-size: 14px; letter-spacing:.2px; }
+    .brand .title span{ font-size: 12px; color: var(--muted); margin-top: 2px; }
 
-    .btn{
-      border: 0;
-      cursor:pointer;
-      padding: 12px 14px;
-      border-radius: 14px;
-      font-weight: 900;
-      letter-spacing:.2px;
-      color: #0b0b0d;
-      background: linear-gradient(180deg, var(--accent2), var(--accent1));
-      box-shadow: 0 14px 26px rgba(255,138,0,.22), 0 7px 0 rgba(0,0,0,.35);
-      transform: translateY(0);
-      transition: transform .08s ease, box-shadow .08s ease, filter .15s ease, opacity .15s ease;
-      user-select:none;
-    }
-    .btn:hover{ filter: brightness(1.04); }
-    .btn:active{
-      transform: translateY(6px);
-      box-shadow: 0 8px 18px rgba(255,138,0,.18), 0 1px 0 rgba(0,0,0,.35);
-    }
-    .btn[disabled]{ opacity:.55; cursor:not-allowed; filter:saturate(.6); }
-    .btn.secondary{
-      color: var(--text);
-      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.08));
-      border: 1px solid rgba(255,255,255,.14);
-      box-shadow: 0 12px 24px rgba(0,0,0,.28), 0 7px 0 rgba(0,0,0,.35);
-    }
+    .wrap{ max-width:1200px; margin:0 auto; padding:16px; }
 
     .grid{
       display:grid;
-      grid-template-columns: 1.05fr .95fr;
+      grid-template-columns: 420px 1fr;
       gap: 14px;
       align-items:start;
     }
     @media (max-width: 980px){
       .grid{ grid-template-columns: 1fr; }
+      .brand{ min-width: 0; }
     }
 
-    .panel{
+    .card{
       background: linear-gradient(180deg, var(--panel), var(--panel2));
       border: 1px solid var(--line);
       border-radius: var(--r);
-      box-shadow: var(--shadowPanel);
-      overflow:hidden;
+      box-shadow: var(--shadow);
+      overflow: hidden;
     }
-    .panelHead{
-      padding: 16px 16px 12px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      background: linear-gradient(180deg, rgba(0,0,0,.18), transparent);
+    .card-h{
+      padding: 14px 14px 10px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
       display:flex;
       align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
+      justify-content: space-between;
+      gap: 10px;
     }
-    .panelTitle{ display:flex; flex-direction:column; gap:4px; }
-    .panelTitle h2{
+    .card-h h2{
       margin:0;
-      font-size: 18px;
-      font-weight: 950;
+      font-size: 14px;
       letter-spacing:.2px;
-      text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 12px rgba(255,138,0,.16);
     }
-    .panelTitle p{
-      margin:0;
+    .card-h p{
+      margin:6px 0 0 0;
+      font-size: 12px;
       color: var(--muted);
-      font-size: 12.5px;
-      line-height: 1.35;
-      max-width: 70ch;
     }
-    .panelBody{ padding: 16px; }
+    .card-b{ padding: 14px; }
 
-    label{
+    .row{ display:flex; gap:10px; flex-wrap:wrap; }
+    .row > *{ flex:1 1 auto; }
+
+    label.k{
       display:block;
-      font-weight: 900;
-      font-size: 12.5px;
-      letter-spacing:.3px;
-      color: rgba(255,255,255,.90);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      text-shadow: 0 1px 0 rgba(0,0,0,.35), 0 0 10px rgba(255,138,0,.10);
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0 0 8px 2px;
     }
 
-    textarea, input{
+    .input, .ta{
       width:100%;
       border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.26);
-      color: rgba(255,255,255,.92);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.35);
+      color: var(--text);
+      outline: none;
       padding: 12px 12px;
-      font-family: var(--mono);
-      outline:none;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.25);
     }
-    textarea{ min-height: 170px; resize: vertical; line-height: 1.45; }
-    textarea::placeholder{ color: rgba(255,255,255,.55); }
-    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top: 12px; }
-    .hint{ color: rgba(255,255,255,.70); font-size: 12.5px; line-height: 1.45; margin-top: 10px; }
+    .input:focus, .ta:focus{
+      border-color: rgba(255,156,58,.55);
+      box-shadow: 0 0 0 3px rgba(255,122,24,.20);
+    }
+    .ta{
+      min-height: 140px;
+      resize: vertical;
+      font-family: var(--sans);
+      line-height: 1.35;
+    }
 
-    .badge{
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding: 11px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      cursor: pointer;
+      user-select:none;
+      transition: transform .05s ease, background .15s ease, border-color .15s ease;
+      font-weight: 650;
+      letter-spacing:.2px;
+      min-width: 160px;
+    }
+    .btn:hover{ background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.14); }
+    .btn:active{ transform: translateY(1px); }
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(255,156,58,.95), rgba(255,122,24,.92));
+      border-color: rgba(255,156,58,.75);
+      color: #1a0c02;
+      box-shadow: 0 14px 30px rgba(255,122,24,.18);
+    }
+    .btn.primary:hover{ filter: brightness(1.03); }
+    .btn:disabled{
+      opacity: .45;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .pill{
       display:inline-flex;
       align-items:center;
       gap:8px;
-      padding: 9px 11px;
+      padding: 8px 10px;
       border-radius: 999px;
-      border: 1px solid rgba(255,138,0,.22);
-      background: rgba(255,138,0,.10);
-      color: rgba(255,255,255,.90);
-      font-size: 12.5px;
-      font-weight: 900;
-      user-select:none;
-      white-space:nowrap;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(255,255,255,.82);
+      font-size: 12px;
+      white-space: nowrap;
     }
+    .dot{ width:8px; height:8px; border-radius:50%; background: rgba(255,255,255,.35); }
+    .dot.good{ background: rgba(46,229,157,.95); box-shadow: 0 0 0 3px rgba(46,229,157,.18); }
+    .dot.bad{ background: rgba(255,77,77,.95); box-shadow: 0 0 0 3px rgba(255,77,77,.18); }
+    .dot.warn{ background: rgba(255,156,58,.95); box-shadow: 0 0 0 3px rgba(255,156,58,.18); }
 
-    .twoCol{
-      display:grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap:10px;
-      margin-top: 12px;
-    }
-    @media (max-width: 760px){
-      .twoCol{ grid-template-columns: 1fr; }
-    }
-
-    .miniInput{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-
-    .outBox{
-      min-height: 240px;
-      white-space: pre;
-      font-size: 12.5px;
-    }
-
-    .tabs{
+    .hint{
       display:flex;
       gap:10px;
-      flex-wrap:wrap;
-      margin-bottom: 12px;
-    }
-    .tabBtn{
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.22);
-      color: rgba(255,255,255,.85);
-      font-weight: 900;
-      padding: 9px 11px;
-      border-radius: 999px;
-      cursor:pointer;
-      user-select:none;
-    }
-    .tabBtn.active{
-      border-color: rgba(255,138,0,.35);
-      background: rgba(255,138,0,.10);
-      color: rgba(255,255,255,.95);
-      box-shadow: 0 10px 22px rgba(255,138,0,.10);
-    }
-    .pane{ display:none; }
-    .pane.active{ display:block; }
-
-    .toast{
-      margin-top: 12px;
+      align-items:flex-start;
       padding: 10px 12px;
       border-radius: 14px;
-      border: 1px solid rgba(255,138,0,.22);
-      background: rgba(255,138,0,.10);
-      box-shadow: 0 10px 22px rgba(255,138,0,.10);
-      display:none;
-      color: rgba(255,255,255,.90);
-      font-size: 13px;
+      background: rgba(0,0,0,.28);
+      border: 1px solid rgba(255,255,255,.08);
+      color: rgba(255,255,255,.80);
+      font-size: 12px;
+      line-height: 1.35;
     }
-    .toast.show{ display:block; }
+    .hint .i{
+      width: 20px; height: 20px;
+      border-radius: 8px;
+      display:flex; align-items:center; justify-content:center;
+      background: rgba(255,156,58,.14);
+      border: 1px solid rgba(255,156,58,.25);
+      color: rgba(255,156,58,.95);
+      font-weight: 900;
+      flex: 0 0 auto;
+    }
 
-    footer{
-      margin-top: 14px;
-      padding: 16px 14px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      box-shadow: 0 12px 26px rgba(0,0,0,.30);
-      color: rgba(255,255,255,.72);
-    }
-    .footRow{
+    .steps{
       display:flex;
-      gap:12px;
-      align-items:center;
-      justify-content:space-between;
-      flex-wrap:wrap;
+      flex-direction:column;
+      gap:10px;
     }
-    .copy{
+    .step{
+      border-radius: var(--r2);
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.22);
+      padding: 12px;
+    }
+    .step-top{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap:10px;
+      margin-bottom: 10px;
+    }
+    .step-top .left{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width: 0;
+    }
+    .badge{
+      width: 26px; height: 26px;
+      border-radius: 10px;
+      display:flex; align-items:center; justify-content:center;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(255,255,255,.85);
+      font-weight: 900;
+      flex: 0 0 auto;
+    }
+    .step h3{
+      margin:0;
+      font-size: 13px;
+      letter-spacing:.2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .step p{
+      margin:6px 0 0 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .split{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 980px){
+      .split{ grid-template-columns: 1fr; }
+    }
+
+    .codebox{
+      width:100%;
+      min-height: 250px;
+      resize: vertical;
       font-family: var(--mono);
       font-size: 12px;
-      opacity: .85;
+      line-height: 1.35;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.35);
+      color: rgba(255,255,255,.92);
+      outline:none;
+      white-space: pre;
+      overflow:auto;
     }
+
+    .mini-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      margin-top: 10px;
+    }
+    .mini{
+      min-width: 120px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.92);
+      cursor:pointer;
+      font-weight: 650;
+    }
+    .mini:hover{ background: rgba(255,255,255,.09); }
+
+    .micRow{
+      display:flex;
+      gap:10px;
+      align-items: stretch;
+    }
+    .micBtn{
+      width: 54px;
+      flex: 0 0 auto;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.92);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: 18px;
+    }
+    .micBtn:hover{ background: rgba(255,255,255,.10); }
+    .micBtn.on{
+      background: rgba(255,156,58,.16);
+      border-color: rgba(255,156,58,.28);
+      box-shadow: 0 0 0 3px rgba(255,122,24,.15);
+    }
+
+    footer{
+      max-width: 1200px;
+      margin: 18px auto 0 auto;
+      padding: 18px 16px 26px 16px;
+      color: rgba(255,255,255,.60);
+      font-size: 12px;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+    footer .frow{
+      display:flex;
+      gap: 12px;
+      align-items:center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    footer .links{ display:flex; gap: 12px; flex-wrap:wrap; }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="nav">
-      <div class="logo">
-        <div class="mark" aria-hidden="true"></div>
-        <div class="brand">
-          <b>ChatTok Tools</b>
-          <span>Builder — generates index.html, style.css, game.js (no preview)</span>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div class="title">
+          <strong>ChatTok Game Builder</strong>
+          <span>Step-by-step generator (HTML → CSS → game.js)</span>
         </div>
       </div>
 
-      <div class="navRight">
-        <div class="pill" title="Account">
-          <span id="authDot" class="dot"></span>
-          <span id="authMsg">Signed out</span>
-        </div>
-        <div class="pill" title="Template selection">
-          <span class="dot good"></span>
-          <span>Template: <span id="templateHint">auto</span></span>
-        </div>
-        <a class="btn secondary" href="index.html">Back to Landing</a>
+      <div class="row" style="justify-content:flex-end;align-items:center;">
+        <span class="pill" id="statusPill">
+          <span class="dot warn" id="statusDot"></span>
+          <span id="statusText">Ready</span>
+        </span>
       </div>
     </div>
-
-    <div class="grid">
-      <!-- LEFT: Builder inputs -->
-      <section class="panel">
-        <div class="panelHead">
-          <div class="panelTitle">
-            <h2>Game Description</h2>
-            <p>
-              Write 1–5 sentences. Include how players join, what chat does, and how someone wins.
-              We’ll auto-pick a template and produce the 3 files.
-            </p>
-          </div>
-
-          <div class="row">
-            <span class="badge">GitHub Pages friendly</span>
-            <span class="badge">Auto-template hint</span>
-            <span class="badge">No preview</span>
-          </div>
-        </div>
-
-        <div class="panelBody">
-          <label for="ideaBox">Prompt / Idea</label>
-          <textarea id="ideaBox" placeholder="Example:
-A TikTok LIVE spin wheel where viewers join by typing !join. Each person gets their profile picture on the wheel, and when the host types !spin it spins with sound and picks a winner. Gifts create special effects."></textarea>
-
-          <div class="twoCol">
-            <div class="miniInput">
-              <label for="titleInput">Game Title</label>
-              <input id="titleInput" type="text" placeholder="Auto (from prompt)" />
-            </div>
-            <div class="miniInput">
-              <label for="subtitleInput">Subtitle</label>
-              <input id="subtitleInput" type="text" placeholder="Auto (short)" />
-            </div>
-            <div class="miniInput">
-              <label for="joinKeywordInput">Join Keyword</label>
-              <input id="joinKeywordInput" type="text" placeholder="!join" value="!join" />
-            </div>
-          </div>
-
-          <div class="twoCol">
-            <div class="miniInput">
-              <label for="primaryHex">Primary Color</label>
-              <input id="primaryHex" type="text" value="#ff0050" spellcheck="false" />
-            </div>
-            <div class="miniInput">
-              <label for="secondaryHex">Secondary Color</label>
-              <input id="secondaryHex" type="text" value="#00f2ea" spellcheck="false" />
-            </div>
-            <div class="miniInput">
-              <label for="backgroundHex">Background Color</label>
-              <input id="backgroundHex" type="text" value="#0b0f14" spellcheck="false" />
-            </div>
-          </div>
-
-          <div class="row">
-            <button id="btnAutoFill" class="btn secondary" type="button">Auto-Fill Title/Sub</button>
-            <button id="btnGenerate" class="btn" type="button">Generate Files</button>
-            <button id="btnClear" class="btn secondary" type="button">Clear</button>
-          </div>
-
-          <div class="hint">
-            Output is based on your template files:
-            <code>index.template.html</code>, <code>style.template.css</code>, <code>game.template.js</code>.
-            If any of those are missing, generation will show an error.
-          </div>
-
-          <div id="toast" class="toast"></div>
-        </div>
-      </section>
-
-      <!-- RIGHT: Outputs -->
-      <section class="panel">
-        <div class="panelHead">
-          <div class="panelTitle">
-            <h2>Outputs</h2>
-            <p>Copy/paste into your game bundle — <b>index.html</b>, <b>style.css</b>, <b>game.js</b>.</p>
-          </div>
-
-          <div class="row">
-            <button id="btnCopy" class="btn secondary" type="button">Copy Current Tab</button>
-            <button id="btnDownload" class="btn" type="button">Download Current Tab</button>
-          </div>
-        </div>
-
-        <div class="panelBody">
-          <div class="tabs">
-            <button class="tabBtn active" data-tab="html" type="button">index.html</button>
-            <button class="tabBtn" data-tab="css" type="button">style.css</button>
-            <button class="tabBtn" data-tab="js" type="button">game.js</button>
-          </div>
-
-          <div class="pane active" data-pane="html">
-            <label>index.html</label>
-            <textarea id="outHtml" class="outBox" readonly placeholder="Generated index.html will appear here…"></textarea>
-          </div>
-
-          <div class="pane" data-pane="css">
-            <label>style.css</label>
-            <textarea id="outCss" class="outBox" readonly placeholder="Generated style.css will appear here…"></textarea>
-          </div>
-
-          <div class="pane" data-pane="js">
-            <label>game.js</label>
-            <textarea id="outJs" class="outBox" readonly placeholder="Generated game.js will appear here…"></textarea>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <footer>
-      <div class="footRow">
-        <div class="copy">© <span id="year"></span> ChatTok Tools. All rights reserved.</div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
-          <a href="#" id="privacyLink">Privacy</a>
-          <a href="#" id="termsLink">Terms</a>
-          <a href="#" id="contactLink">Contact</a>
-        </div>
-      </div>
-    </footer>
   </div>
 
-  <!-- IMPORTANT: this must be BEFORE builder logic if you want landing prompt + template hint -->
+  <div class="wrap">
+    <div class="grid">
+      <!-- LEFT: controls -->
+      <div class="card">
+        <div class="card-h">
+          <div>
+            <h2>1) Describe the game</h2>
+            <p>Keep it short. Tell what viewers do (chat / likes / gifts) and what “winning” looks like.</p>
+          </div>
+        </div>
+        <div class="card-b">
+          <div class="hint" style="margin-bottom:12px;">
+            <div class="i">i</div>
+            <div>
+              <strong>Tip:</strong> Mention your join keyword (example: “type !join”), the vibe (“cute / intense / arcade”), and 1–2 key actions (likes = ammo, gifts = power-ups).
+            </div>
+          </div>
+
+          <label class="k">Your prompt</label>
+          <div class="micRow">
+            <textarea class="ta" id="idea" placeholder="Example: A neon space race. Viewers type !boost to speed up, likes add fuel, gifts trigger rockets. First to 100 points wins."></textarea>
+            <button class="micBtn" id="micBtn" title="Talk-to-text (if supported)">🎤</button>
+          </div>
+          <div style="margin-top:8px;color:var(--muted);font-size:12px;" id="micHint"></div>
+
+          <div style="height:12px;"></div>
+
+          <label class="k">API URL (Render)</label>
+          <input class="input" id="apiBase" placeholder="https://chattok-builder-api.onrender.com" />
+
+          <div style="height:12px;"></div>
+
+          <div class="split">
+            <div>
+              <label class="k">Theme Primary</label>
+              <input class="input" id="primary" value="#ff7a18" />
+            </div>
+            <div>
+              <label class="k">Theme Secondary</label>
+              <input class="input" id="secondary" value="#ff9c3a" />
+            </div>
+          </div>
+
+          <div style="height:10px;"></div>
+
+          <div>
+            <label class="k">Theme Background</label>
+            <input class="input" id="background" value="#070707" />
+          </div>
+
+          <div style="height:14px;"></div>
+
+          <div class="row">
+            <button class="btn primary" id="btnHtml">Build HTML</button>
+            <button class="btn" id="btnCss" disabled>Build CSS</button>
+            <button class="btn" id="btnJs" disabled>Build game.js</button>
+          </div>
+
+          <div style="height:12px;"></div>
+
+          <div class="hint">
+            <div class="i">?</div>
+            <div>
+              <strong>How it flows:</strong><br>
+              Build HTML creates the game setup screen + settings UI.<br>
+              Build CSS applies your theme colors.<br>
+              Build game.js generates the actual gameplay logic (the fun part).
+            </div>
+          </div>
+
+          <div style="height:12px;"></div>
+
+          <div class="row">
+            <button class="btn" id="btnReset">Reset</button>
+            <button class="btn" id="btnReloadTemplates">Reload Templates</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: outputs -->
+      <div class="card">
+        <div class="card-h">
+          <div>
+            <h2>2) Output files</h2>
+            <p>Copy/paste into your preview on chat… and you’re live.</p>
+          </div>
+        </div>
+
+        <div class="card-b">
+          <div class="steps">
+
+            <!-- HTML -->
+            <div class="step" id="stepHtml">
+              <div class="step-top">
+                <div class="left">
+                  <div class="badge">1</div>
+                  <div>
+                    <h3>index.html</h3>
+                    <p>Setup overlay + game container</p>
+                  </div>
+                </div>
+              </div>
+
+              <textarea class="codebox" id="outHtml" placeholder="index.html will appear here..."></textarea>
+
+              <div class="mini-actions">
+                <button class="mini" id="copyHtml">Copy</button>
+                <button class="mini" id="dlHtml">Download</button>
+              </div>
+            </div>
+
+            <!-- CSS -->
+            <div class="step" id="stepCss">
+              <div class="step-top">
+                <div class="left">
+                  <div class="badge">2</div>
+                  <div>
+                    <h3>style.css</h3>
+                    <p>Theme + layout styling</p>
+                  </div>
+                </div>
+              </div>
+
+              <textarea class="codebox" id="outCss" placeholder="style.css will appear here..."></textarea>
+
+              <div class="mini-actions">
+                <button class="mini" id="copyCss">Copy</button>
+                <button class="mini" id="dlCss">Download</button>
+              </div>
+            </div>
+
+            <!-- JS -->
+            <div class="step" id="stepJs">
+              <div class="step-top">
+                <div class="left">
+                  <div class="badge">3</div>
+                  <div>
+                    <h3>game.js</h3>
+                    <p>Gameplay + TikTok hooks</p>
+                  </div>
+                </div>
+              </div>
+
+              <textarea class="codebox" id="outJs" placeholder="game.js will appear here..."></textarea>
+
+              <div class="mini-actions">
+                <button class="mini" id="copyJs">Copy</button>
+                <button class="mini" id="dlJs">Download</button>
+              </div>
+            </div>
+
+            <!-- Edit (optional, but nice) -->
+            <div class="step" id="stepEdit">
+              <div class="step-top">
+                <div class="left">
+                  <div class="badge">✎</div>
+                  <div>
+                    <h3>Quick Edit (AI_REGION only)</h3>
+                    <p>Tell it what to change, safely.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="hint" style="margin-bottom:10px;">
+                <div class="i">i</div>
+                <div>
+                  This only edits the AI gameplay section inside <strong>game.js</strong>. It won’t break your TikTok connection template.
+                </div>
+              </div>
+
+              <div class="split">
+                <div>
+                  <label class="k">Edits remaining</label>
+                  <input class="input" id="editsRemaining" type="number" min="0" max="25" value="3" />
+                </div>
+                <div>
+                  <label class="k">Template hint (optional)</label>
+                  <input class="input" id="templateId" value="boss" />
+                </div>
+              </div>
+
+              <div style="height:10px;"></div>
+              <label class="k">Change request</label>
+              <textarea class="ta" id="editText" placeholder="Example: Make the join action spawn a character with a quick animation. Gifts should trigger a super attack."></textarea>
+
+              <div style="height:10px;"></div>
+              <div class="row" style="justify-content:flex-end;">
+                <button class="btn" id="btnEdit">Apply Edit</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <div class="frow">
+      <div>© <span id="year"></span> ChatTok Tools</div>
+      <div class="links">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Optional bridge (if present). If missing, no problem. -->
+  <script>
+    // If landing-bridge.js exists, it may set localStorage keys.
+    // We do NOT require it.
+  </script>
   <script src="landing-bridge.js"></script>
 
   <script>
-    // ====== placeholders for future pages ======
-    document.getElementById("year").textContent = new Date().getFullYear();
-    function toast(msg){
-      const el = document.getElementById("toast");
-      el.textContent = msg;
-      el.classList.add("show");
-      clearTimeout(toast._t);
-      toast._t = setTimeout(()=> el.classList.remove("show"), 2200);
-    }
-    ["privacyLink","termsLink","contactLink"].forEach(id=>{
-      const a = document.getElementById(id);
-      a.addEventListener("click",(e)=>{ e.preventDefault(); toast("Page coming soon."); });
-    });
+    const $ = (id) => document.getElementById(id);
 
-    // ====== auth badge (matches your landing local auth keys) ======
-    const authDot = document.getElementById("authDot");
-    const authMsg = document.getElementById("authMsg");
-    function readJSON(key){ try { return JSON.parse(localStorage.getItem(key) || "null"); } catch { return null; } }
-    function setAuth(){
-      const s = readJSON("ct_auth_session");
-      if (s && s.email){
-        authDot.classList.add("good");
-        authMsg.textContent = s.email;
-      } else {
-        authDot.classList.remove("good");
-        authMsg.textContent = "Signed out";
+    const state = {
+      context: null,      // { spec, templateId }
+      lastTemplateId: "boss",
+      busy: false,
+      speech: null,
+      recognizing: false,
+    };
+
+    const defaults = {
+      apiBase: "https://chattok-builder-api.onrender.com",
+      primary: "#ff7a18",
+      secondary: "#ff9c3a",
+      background: "#070707",
+    };
+
+    function setStatus(kind, text){
+      const dot = $("statusDot");
+      const t = $("statusText");
+      t.textContent = text || "";
+      dot.classList.remove("good","bad","warn");
+      dot.classList.add(kind === "good" ? "good" : kind === "bad" ? "bad" : "warn");
+    }
+
+    function setBusy(on){
+      state.busy = !!on;
+      $("btnHtml").disabled = on;
+      $("btnCss").disabled = on || !state.context;
+      $("btnJs").disabled = on || !state.context;
+      $("btnEdit").disabled = on || !$("outJs").value.trim();
+      $("btnReloadTemplates").disabled = on;
+      $("btnReset").disabled = on;
+    }
+
+    function getApiBase(){
+      const raw = $("apiBase").value.trim();
+      return raw.replace(/\/+$/,"");
+    }
+
+    function themePayload(){
+      return {
+        primary: $("primary").value.trim(),
+        secondary: $("secondary").value.trim(),
+        background: $("background").value.trim(),
+      };
+    }
+
+    function ideaText(){
+      return $("idea").value.trim();
+    }
+
+    function persistSettings(){
+      localStorage.setItem("ct_builder_apiBase", $("apiBase").value.trim());
+      localStorage.setItem("ct_builder_primary", $("primary").value.trim());
+      localStorage.setItem("ct_builder_secondary", $("secondary").value.trim());
+      localStorage.setItem("ct_builder_background", $("background").value.trim());
+    }
+
+    function loadSettings(){
+      $("apiBase").value = localStorage.getItem("ct_builder_apiBase") || defaults.apiBase;
+      $("primary").value = localStorage.getItem("ct_builder_primary") || defaults.primary;
+      $("secondary").value = localStorage.getItem("ct_builder_secondary") || defaults.secondary;
+      $("background").value = localStorage.getItem("ct_builder_background") || defaults.background;
+
+      // Pull idea from landing flow if available
+      const landingIdea = localStorage.getItem("ct_landing_idea") || "";
+      if (landingIdea && !$("idea").value.trim()) $("idea").value = landingIdea;
+
+      const urlIdea = new URLSearchParams(location.search).get("idea");
+      if (urlIdea && !$("idea").value.trim()) $("idea").value = urlIdea;
+    }
+
+    async function postJson(url, body){
+      const r = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type":"application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        const msg = data && (data.error || data.message) ? (data.error || data.message) : `HTTP ${r.status}`;
+        const e = new Error(msg);
+        e.status = r.status;
+        e.data = data;
+        throw e;
       }
-    }
-    setAuth();
-
-    // ====== elements ======
-    const ideaBox = document.getElementById("ideaBox");
-    const titleInput = document.getElementById("titleInput");
-    const subtitleInput = document.getElementById("subtitleInput");
-    const joinKeywordInput = document.getElementById("joinKeywordInput");
-
-    const primaryHex = document.getElementById("primaryHex");
-    const secondaryHex = document.getElementById("secondaryHex");
-    const backgroundHex = document.getElementById("backgroundHex");
-
-    const templateHintEl = document.getElementById("templateHint");
-
-    const outHtml = document.getElementById("outHtml");
-    const outCss = document.getElementById("outCss");
-    const outJs  = document.getElementById("outJs");
-
-    const btnAutoFill = document.getElementById("btnAutoFill");
-    const btnGenerate = document.getElementById("btnGenerate");
-    const btnClear = document.getElementById("btnClear");
-    const btnCopy = document.getElementById("btnCopy");
-    const btnDownload = document.getElementById("btnDownload");
-
-    // ====== tabs ======
-    const tabBtns = Array.from(document.querySelectorAll(".tabBtn"));
-    const panes = Array.from(document.querySelectorAll(".pane"));
-
-    function setTab(key){
-      tabBtns.forEach(b => b.classList.toggle("active", b.dataset.tab === key));
-      panes.forEach(p => p.classList.toggle("active", p.dataset.pane === key));
-    }
-    tabBtns.forEach(b => b.addEventListener("click", ()=> setTab(b.dataset.tab)));
-
-    function currentTab(){
-      const b = tabBtns.find(x => x.classList.contains("active"));
-      return (b && b.dataset.tab) || "html";
-    }
-    function currentText(){
-      const t = currentTab();
-      return t === "html" ? outHtml.value : t === "css" ? outCss.value : outJs.value;
-    }
-    function currentFilename(){
-      const t = currentTab();
-      return t === "html" ? "index.html" : t === "css" ? "style.css" : "game.js";
+      return data;
     }
 
-    btnCopy.addEventListener("click", async () => {
-      const text = currentText();
-      if (!text.trim()) return toast("Nothing to copy yet.");
-      try{
-        await navigator.clipboard.writeText(text);
-        toast("Copied!");
-      }catch{
-        toast("Clipboard blocked — copy manually.");
-      }
-    });
+    function ensureIdea(){
+      const idea = ideaText();
+      if (idea.length < 10) throw new Error("Please describe the game a little more (at least ~10 characters).");
+      return idea;
+    }
 
-    function downloadText(name, text){
-      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    function downloadFile(name, content){
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -560,351 +705,309 @@ A TikTok LIVE spin wheel where viewers join by typing !join. Each person gets th
       document.body.appendChild(a);
       a.click();
       a.remove();
-      setTimeout(()=> URL.revokeObjectURL(url), 1200);
+      URL.revokeObjectURL(url);
     }
 
-    btnDownload.addEventListener("click", () => {
-      const text = currentText();
-      if (!text.trim()) return toast("Nothing to download yet.");
-      downloadText(currentFilename(), text);
-    });
-
-    // ====== prompt handoff from landing ======
-    const landingPrompt = (localStorage.getItem("ct_last_prompt") || "").trim();
-    if (landingPrompt && !ideaBox.value.trim()){
-      ideaBox.value = landingPrompt;
-    }
-
-    // ====== template hint (from landing-bridge.js if present) ======
-    function inferTemplateFallback(prompt){
-      const p = (prompt||"").toLowerCase();
-      const rules = [
-        ["wheel", ["wheel","spin","spinner","raffle","giveaway","roulette"]],
-        ["trivia",["trivia","quiz","question","a/b/c","multiple choice","true or false","scoreboard","round"]],
-        ["battle",["battle","arena","hp","health","damage","attack","defend","eliminate","boss"]],
-        ["racing",["race","racing","track","finish","lap","boost","nitro","speed"]],
-        ["vote",  ["vote","voting","poll","choose","option 1","option 2","majority"]],
-        ["overlay",["overlay","counter","goal","alerts","ticker","leaderboard overlay"]],
-        ["kitchen",["pizza","kitchen","cook","oven","ingredients","toppings","recipe"]],
-      ];
-      for (const [id, keys] of rules){
-        if (keys.some(k => p.includes(k))) return id;
+    async function copyText(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        setStatus("good", "Copied to clipboard");
+        setTimeout(() => setStatus("warn","Ready"), 900);
+      }catch{
+        // fallback
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+        setStatus("good", "Copied");
+        setTimeout(() => setStatus("warn","Ready"), 900);
       }
-      return "overlay";
     }
 
-    function getTemplateHint(){
-      // Prefer bridge API if present
-      if (window.ChatTokLanding && typeof window.ChatTokLanding.getTemplateHint === "function"){
-        return window.ChatTokLanding.getTemplateHint() || "overlay";
-      }
-      const stored = localStorage.getItem("ct_template_hint");
-      if (stored) return stored;
-      return inferTemplateFallback(ideaBox.value);
-    }
-
-    function updateTemplateUI(){
-      const hint = getTemplateHint();
-      templateHintEl.textContent = hint;
-    }
-    updateTemplateUI();
-
-    ideaBox.addEventListener("input", () => {
-      localStorage.setItem("ct_last_prompt", ideaBox.value);
-      updateTemplateUI();
-    });
-
-    // ====== small helpers ======
-    function cleanHex(v, fallback){
-      const s = String(v||"").trim();
-      const m = s.match(/^#?[0-9a-fA-F]{6}$/);
-      if (!m) return fallback;
-      return s.startsWith("#") ? s.toLowerCase() : ("#" + s.toLowerCase());
-    }
-
-    function autoTitleFromPrompt(prompt, templateHint){
-      const p = (prompt||"").trim();
-      if (!p) return { title:"", subtitle:"" };
-
-      // quick title ideas based on template hint
-      const base =
-        templateHint === "wheel"  ? "Spin Wheel Showdown" :
-        templateHint === "trivia" ? "Trivia Clash" :
-        templateHint === "battle" ? "Battle Arena" :
-        templateHint === "racing" ? "Chat Race" :
-        templateHint === "vote"   ? "Chat Vote" :
-        templateHint === "kitchen"? "Crowd Kitchen" :
-        "Live Overlay";
-
-      // subtitle: take first sentence compressed
-      const first = p.split(/\n|[.!?]/).map(x=>x.trim()).filter(Boolean)[0] || "";
-      let sub = first.length > 78 ? first.slice(0, 78).trim() + "…" : first;
-
-      // if empty, default
-      if (!sub) sub = "Built for TikTok LIVE interaction.";
-
-      return { title: base, subtitle: sub };
-    }
-
-    btnAutoFill.addEventListener("click", () => {
-      const hint = getTemplateHint();
-      const { title, subtitle } = autoTitleFromPrompt(ideaBox.value, hint);
-      if (!titleInput.value.trim()) titleInput.value = title;
-      if (!subtitleInput.value.trim()) subtitleInput.value = subtitle;
-      toast("Auto-filled.");
-    });
-
-    btnClear.addEventListener("click", () => {
-      ideaBox.value = "";
-      titleInput.value = "";
-      subtitleInput.value = "";
-      joinKeywordInput.value = "!join";
-      outHtml.value = "";
-      outCss.value = "";
-      outJs.value = "";
-      localStorage.removeItem("ct_last_prompt");
-      updateTemplateUI();
-      toast("Cleared.");
-    });
-
-    // ====== template field presets ======
-    function howToPlayForTemplate(hint, joinKeyword){
-      const jk = joinKeyword || "!join";
-      if (hint === "wheel"){
-        return [
-          `Type <b>${escapeHtml(jk)}</b> to join the wheel.`,
-          `Host can start and spin (customize in game.js).`,
-          `Gifts/likes can trigger bonus effects.`
-        ];
-      }
-      if (hint === "trivia"){
-        return [
-          `Type <b>${escapeHtml(jk)}</b> to join.`,
-          `Answer using A / B / C (or keyword answers).`,
-          `Correct answers score points — top player wins.`
-        ];
-      }
-      if (hint === "battle"){
-        return [
-          `Type <b>${escapeHtml(jk)}</b> to join the fight.`,
-          `Chat commands trigger attacks and power-ups.`,
-          `Last player/team standing wins the round.`
-        ];
-      }
-      if (hint === "racing"){
-        return [
-          `Type <b>${escapeHtml(jk)}</b> to enter the race.`,
-          `Likes/gifts boost progress and trigger effects.`,
-          `First to the finish line wins.`
-        ];
-      }
-      if (hint === "vote"){
-        return [
-          `Type <b>${escapeHtml(jk)}</b> to participate.`,
-          `Vote by typing 1 or 2 (or A/B).`,
-          `Chat majority decides the outcome.`
-        ];
-      }
-      if (hint === "kitchen"){
-        return [
-          `Type <b>${escapeHtml(jk)}</b> to add ingredients.`,
-          `Gifts add special toppings or boosts.`,
-          `Finish the recipe to win the round.`
-        ];
-      }
-      return [
-        `Type <b>${escapeHtml(jk)}</b> to interact.`,
-        `Chat/likes/gifts trigger actions and effects.`,
-        `Customize the win condition in game.js.`
-      ];
-    }
-
-    function settingsFieldsForTemplate(hint, joinKeyword){
-      const jk = joinKeyword || "!join";
-      const safeJk = escapeHtml(jk);
-
-      // Keep it minimal and consistent—ONE extra field max
-      // You can add more later in your server-side inject flow.
-      if (hint === "trivia"){
-        return `
-          <label class="field">
-            <span class="field-label">Answer Mode</span>
-            <select data-setting="answerMode">
-              <option value="abc" selected>A / B / C</option>
-              <option value="keyword">Keyword</option>
-            </select>
-          </label>
-          <label class="field">
-            <span class="field-label">Join Keyword</span>
-            <input data-setting="joinKeyword" type="text" value="${safeJk}" />
-          </label>
-        `.trim();
-      }
-
-      if (hint === "wheel"){
-        return `
-          <label class="field">
-            <span class="field-label">Join Keyword</span>
-            <input data-setting="joinKeyword" type="text" value="${safeJk}" />
-          </label>
-        `.trim();
-      }
-
-      return `
-        <label class="field">
-          <span class="field-label">Join Keyword</span>
-          <input data-setting="joinKeyword" type="text" value="${safeJk}" />
-        </label>
-      `.trim();
-    }
-
-    function oneSentenceForTemplate(hint, joinKeyword){
-      const jk = joinKeyword || "!join";
-      if (hint === "wheel") return `Join the wheel with ${jk}, then spin for a winner with flashy effects.`;
-      if (hint === "trivia") return `Join with ${jk} and answer fast — points decide the winner.`;
-      if (hint === "battle") return `Join with ${jk} and battle using chat, likes, and gifts.`;
-      if (hint === "racing") return `Join with ${jk} and race to the finish with chat boosts.`;
-      if (hint === "vote") return `Join with ${jk} and let the chat decide the outcome.`;
-      if (hint === "kitchen") return `Join with ${jk} and build a recipe together in real-time.`;
-      return `Join with ${jk} and trigger interactive effects on screen.`;
-    }
-
-    function escapeHtml(s){
-      return String(s||"")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
-
-    function liHtml(items){
-      return items.map(x => `<li>${x}</li>`).join("");
-    }
-
-    async function fetchText(path){
-      const res = await fetch(path, { cache: "no-store" });
-      if (!res.ok) throw new Error(`Missing file: ${path} (HTTP ${res.status})`);
-      return await res.text();
-    }
-
-    function injectIndexTemplate(tpl, data){
-      return tpl
-        .replaceAll("{{TITLE}}", data.title)
-        .replaceAll("{{SUBTITLE}}", data.subtitle)
-        .replaceAll("{{ONE_SENTENCE}}", data.oneSentence)
-        .replaceAll("{{HOW_TO_PLAY_LI}}", data.howToPlayLi)
-        .replaceAll("{{SETTINGS_FIELDS_HTML}}", data.settingsFieldsHtml);
-    }
-
-    function injectStyleTemplate(tpl, colors){
-      // Replace only :root variables (safe + stable)
-      const pink = colors.primary;
-      const aqua = colors.secondary;
-      const bg = colors.background;
-
-      let out = tpl;
-
-      out = out.replace(/--pink:\s*#[0-9a-fA-F]{6}\s*;/, `--pink:${pink};`);
-      out = out.replace(/--aqua:\s*#[0-9a-fA-F]{6}\s*;/, `--aqua:${aqua};`);
-      out = out.replace(/--bg:\s*#[0-9a-fA-F]{6}\s*;/, `--bg:${bg};`);
-
-      return out;
-    }
-
-    function buildSpecJson(data){
-      // This spec is intentionally minimal (your stable template code can use it safely)
-      return {
-        meta: {
-          title: data.title,
-          subtitle: data.subtitle,
-          templateHint: data.templateHint,
-          createdAt: new Date().toISOString()
-        },
-        settings: {
-          joinKeyword: data.joinKeyword
-        },
-        notes: {
-          prompt: data.prompt
-        }
-      };
-    }
-
-    function injectGameTemplate(tpl, specObj){
-      // Replace the SPEC placeholder used in game.template.js
-      const json = JSON.stringify(specObj, null, 2);
-      return tpl.replaceAll("__SPEC_JSON__", json);
-    }
-
-    btnGenerate.addEventListener("click", async () => {
-      const prompt = (ideaBox.value || "").trim();
-      if (prompt.length < 18){
-        toast("Please add at least 1–2 sentences so the output isn’t generic.");
+    // ---------------------------
+    // Speech to text (Web Speech)
+    // ---------------------------
+    function setupSpeech(){
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const hint = $("micHint");
+      if (!SR) {
+        hint.textContent = "Talk-to-text not supported in this browser. (Chrome usually works.)";
+        $("micBtn").disabled = true;
         return;
       }
 
-      const colors = {
-        primary: cleanHex(primaryHex.value, "#ff0050"),
-        secondary: cleanHex(secondaryHex.value, "#00f2ea"),
-        background: cleanHex(backgroundHex.value, "#0b0f14"),
+      const rec = new SR();
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.lang = "en-US";
+
+      let baseText = "";
+      rec.onstart = () => {
+        state.recognizing = true;
+        $("micBtn").classList.add("on");
+        setStatus("warn", "Listening…");
+      };
+      rec.onerror = (e) => {
+        setStatus("bad", `Mic error: ${e.error || "unknown"}`);
+      };
+      rec.onend = () => {
+        state.recognizing = false;
+        $("micBtn").classList.remove("on");
+        setStatus("warn", "Ready");
       };
 
-      const templateHint = getTemplateHint();
-      updateTemplateUI();
+      rec.onresult = (event) => {
+        let interim = "";
+        let finalText = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const res = event.results[i];
+          const txt = res[0] && res[0].transcript ? res[0].transcript : "";
+          if (res.isFinal) finalText += txt;
+          else interim += txt;
+        }
 
-      const title = escapeHtml((titleInput.value || "").trim()) || escapeHtml(autoTitleFromPrompt(prompt, templateHint).title) || "ChatTok Game";
-      const subtitle = escapeHtml((subtitleInput.value || "").trim()) || escapeHtml(autoTitleFromPrompt(prompt, templateHint).subtitle) || "Built for TikTok LIVE interaction.";
-      const joinKeyword = (joinKeywordInput.value || "!join").trim() || "!join";
-
-      const howToPlay = howToPlayForTemplate(templateHint, joinKeyword);
-      const oneSentence = escapeHtml(oneSentenceForTemplate(templateHint, joinKeyword));
-      const howToPlayLi = liHtml(howToPlay);
-
-      const settingsFieldsHtml = settingsFieldsForTemplate(templateHint, joinKeyword);
-
-      const data = {
-        prompt,
-        templateHint,
-        title,
-        subtitle,
-        joinKeyword,
-        oneSentence,
-        howToPlayLi,
-        settingsFieldsHtml
+        const combined = (baseText + " " + finalText + " " + interim).replace(/\s+/g," ").trim();
+        $("idea").value = combined;
       };
 
-      btnGenerate.disabled = true;
-      btnGenerate.textContent = "Generating…";
+      $("micBtn").addEventListener("click", async () => {
+        try{
+          if (state.recognizing) {
+            rec.stop();
+            return;
+          }
+          // request mic permission early (helps some browsers)
+          try { await navigator.mediaDevices.getUserMedia({ audio: true }); } catch {}
+          baseText = $("idea").value.trim();
+          rec.start();
+        }catch(err){
+          setStatus("bad", "Could not start microphone.");
+          console.warn(err);
+        }
+      });
+
+      state.speech = rec;
+      hint.textContent = "Click 🎤 and talk. Click again to stop. (Works best on HTTPS.)";
+    }
+
+    // ---------------------------
+    // Staged build
+    // ---------------------------
+    async function buildHtml(){
+      persistSettings();
+      ensureIdea();
+
+      const api = getApiBase();
+      const templateId = $("templateId").value.trim() || "boss";
+      state.lastTemplateId = templateId;
+
+      setBusy(true);
+      setStatus("warn", "Building HTML…");
 
       try{
-        // Fetch templates
-        const [indexTpl, cssTpl, jsTpl] = await Promise.all([
-          fetchText("index.template.html"),
-          fetchText("style.template.css"),
-          fetchText("game.template.js"),
-        ]);
+        const data = await postJson(`${api}/api/generate`, {
+          stage: "html",
+          idea: ideaText(),
+          templateId,
+        });
 
-        const builtIndex = injectIndexTemplate(indexTpl, data);
-        const builtCss = injectStyleTemplate(cssTpl, colors);
+        const html = data?.file?.content || "";
+        if (!html) throw new Error("HTML stage returned empty content.");
 
-        const specObj = buildSpecJson(data);
-        const builtJs = injectGameTemplate(jsTpl, specObj);
+        $("outHtml").value = html;
+        state.context = data.context || null;
 
-        outHtml.value = builtIndex;
-        outCss.value = builtCss;
-        outJs.value = builtJs;
+        // enable next steps
+        $("btnCss").disabled = false;
+        $("btnJs").disabled = false;
 
-        setTab("html");
-        toast("Generated! Copy/paste into your game bundle.");
-
-      }catch(err){
-        console.error(err);
-        toast(err.message || "Generation error. Check console.");
+        setStatus("good", "HTML done");
+        setTimeout(() => setStatus("warn","Ready"), 900);
       }finally{
-        btnGenerate.disabled = false;
-        btnGenerate.textContent = "Generate Files";
+        setBusy(false);
       }
-    });
+    }
+
+    async function buildCss(){
+      persistSettings();
+
+      const api = getApiBase();
+      const templateId = state.context?.templateId || state.lastTemplateId || ($("templateId").value.trim() || "boss");
+
+      setBusy(true);
+      setStatus("warn", "Building CSS…");
+
+      try{
+        const data = await postJson(`${api}/api/generate`, {
+          stage: "css",
+          templateId,
+          theme: themePayload(),
+          context: { spec: state.context?.spec || null }
+        });
+
+        const css = data?.file?.content || "";
+        if (!css) throw new Error("CSS stage returned empty content.");
+
+        $("outCss").value = css;
+
+        setStatus("good", "CSS done");
+        setTimeout(() => setStatus("warn","Ready"), 900);
+      }finally{
+        setBusy(false);
+      }
+    }
+
+    async function buildJs(){
+      persistSettings();
+      ensureIdea();
+
+      const api = getApiBase();
+      const templateId = state.context?.templateId || state.lastTemplateId || ($("templateId").value.trim() || "boss");
+
+      setBusy(true);
+      setStatus("warn", "Building game.js…");
+
+      try{
+        const data = await postJson(`${api}/api/generate`, {
+          stage: "js",
+          idea: ideaText(),
+          templateId,
+          context: { spec: state.context?.spec || null }
+        });
+
+        const js = data?.file?.content || "";
+        if (!js) throw new Error("JS stage returned empty content.");
+
+        $("outJs").value = js;
+        $("btnEdit").disabled = false;
+
+        setStatus("good", "game.js done");
+        setTimeout(() => setStatus("warn","Ready"), 900);
+      }finally{
+        setBusy(false);
+      }
+    }
+
+    async function reloadTemplates(){
+      const api = getApiBase();
+      setBusy(true);
+      setStatus("warn", "Reloading templates…");
+      try{
+        await postJson(`${api}/api/reload-templates`, {});
+        setStatus("good", "Templates reloaded");
+        setTimeout(() => setStatus("warn","Ready"), 900);
+      }finally{
+        setBusy(false);
+      }
+    }
+
+    async function applyEdit(){
+      persistSettings();
+
+      const api = getApiBase();
+      const remaining = Number($("editsRemaining").value || 0);
+      if (!$("outJs").value.trim()) throw new Error("Generate game.js first, then edit.");
+      const changeRequest = $("editText").value.trim();
+      if (!changeRequest) throw new Error("Type what you want changed.");
+
+      const templateId = state.context?.templateId || $("templateId").value.trim() || "boss";
+
+      setBusy(true);
+      setStatus("warn", "Applying edit…");
+
+      try{
+        const data = await postJson(`${api}/api/edit`, {
+          remainingEdits: remaining,
+          changeRequest,
+          templateId,
+          theme: themePayload(),
+          currentFiles: {
+            "style.css": $("outCss").value || "",
+            "game.js": $("outJs").value || ""
+          }
+        });
+
+        if (!data.ok) throw new Error(data.error || "Edit failed.");
+
+        // patch
+        const patches = Array.isArray(data.patches) ? data.patches : [];
+        for (const p of patches) {
+          if (p.name === "game.js") $("outJs").value = p.content || "";
+          if (p.name === "style.css") $("outCss").value = p.content || "";
+        }
+
+        if (typeof data.remainingEdits === "number") $("editsRemaining").value = String(data.remainingEdits);
+
+        setStatus("good", "Edit applied");
+        setTimeout(() => setStatus("warn","Ready"), 900);
+      }finally{
+        setBusy(false);
+      }
+    }
+
+    function resetAll(){
+      state.context = null;
+      $("outHtml").value = "";
+      $("outCss").value = "";
+      $("outJs").value = "";
+      $("editText").value = "";
+      $("btnCss").disabled = true;
+      $("btnJs").disabled = true;
+      $("btnEdit").disabled = true;
+      setStatus("warn","Ready");
+    }
+
+    // ---------------------------
+    // Wire UI
+    // ---------------------------
+    function bind(){
+      $("year").textContent = new Date().getFullYear();
+
+      $("btnHtml").addEventListener("click", async () => {
+        try{ await buildHtml(); }catch(e){ setStatus("bad", e.message || "HTML failed"); console.error(e); }
+      });
+
+      $("btnCss").addEventListener("click", async () => {
+        try{ await buildCss(); }catch(e){ setStatus("bad", e.message || "CSS failed"); console.error(e); }
+      });
+
+      $("btnJs").addEventListener("click", async () => {
+        try{ await buildJs(); }catch(e){ setStatus("bad", e.message || "JS failed"); console.error(e); }
+      });
+
+      $("btnReloadTemplates").addEventListener("click", async () => {
+        try{ await reloadTemplates(); }catch(e){ setStatus("bad", e.message || "Reload failed"); console.error(e); }
+      });
+
+      $("btnReset").addEventListener("click", () => resetAll());
+
+      $("btnEdit").addEventListener("click", async () => {
+        try{ await applyEdit(); }catch(e){ setStatus("bad", e.message || "Edit failed"); console.error(e); }
+      });
+
+      // Copy + Download
+      $("copyHtml").addEventListener("click", () => copyText($("outHtml").value || ""));
+      $("copyCss").addEventListener("click", () => copyText($("outCss").value || ""));
+      $("copyJs").addEventListener("click", () => copyText($("outJs").value || ""));
+
+      $("dlHtml").addEventListener("click", () => downloadFile("index.html", $("outHtml").value || ""));
+      $("dlCss").addEventListener("click", () => downloadFile("style.css", $("outCss").value || ""));
+      $("dlJs").addEventListener("click", () => downloadFile("game.js", $("outJs").value || ""));
+
+      // Persist settings on change
+      for (const id of ["apiBase","primary","secondary","background"]) {
+        $(id).addEventListener("change", persistSettings);
+        $(id).addEventListener("blur", persistSettings);
+      }
+    }
+
+    // Boot
+    loadSettings();
+    bind();
+    setupSpeech();
+    resetAll();
   </script>
 </body>
 </html>
