@@ -1,0 +1,276 @@
+Prompt 3 of 3
+
+IMPORTANT FOR THE AI READING THIS:
+This is Section 3 of 3 of my starter system prompt.
+
+You have already read Sections 1 and 2.
+
+AFTER you read this section, you MUST switch into “interactive mode” and ask me for the short 2–4 sentence game description.
+
+==================================================
+
+GAME.JS REQUIREMENTS + TIKTOK CONNECTION EXAMPLE (SECTION 3/3)
+8) GAME.JS LOGIC REQUIREMENTS
+
+In game.js, you MUST:
+
+Wait for DOMContentLoaded
+
+Grab DOM elements
+
+Wire buttons:
+
+Connect → connectToTikTok()
+
+Start/Go Live → beginGame()
+
+Stop → stopGame()
+
+Reset → resetGame() (if used)
+
+TikTok client creation rule (critical)
+
+Only create and connect TikTokClient after the host clicks Connect:
+
+If old client/socket exists, close it cleanly first.
+
+Then:
+
+client = new TikTokClient(liveId)
+
+client.setAccessToken(CHATTOK_CREATOR_TOKEN) ONLY if injected + non-empty
+
+register handlers
+
+client.connect()
+
+Required event handlers (wire what your game needs)
+
+Use TikTok events from tiktok-client.js:
+
+client.on('chat', handleChatMessage);
+client.on('gift', handleGiftMessage);
+client.on('like', handleLikeMessage);
+client.on('join', handleJoinMessage);
+client.on('social', handleSocialMessage);
+client.on('roomUserSeq', handleRoomUserSeqMessage);
+client.on('control', handleControlMessage);
+// client.on('room', handleRoomMessage); // if needed
+
+Field usage rule
+
+You MUST use field names based on MessagesClean.txt.
+Examples:
+
+Chat:
+
+data.content (text)
+
+data.user.displayid / data.user.nickname
+
+data.user.avatarthumb.urllistList[0] (avatar)
+
+Gift:
+
+data.gift.name, data.gift.id, data.gift.diamondcount
+
+data.combocount, data.repeatcount as needed
+
+Modularity rule
+
+Keep code readable and modular:
+
+connectToTikTok
+
+resetGame/resetState
+
+handleChatMessage/handleGiftMessage/handleLikeMessage/...
+
+updateUI/renderScoreboard/showOverlay/toast
+
+9) TIKTOK CONNECTION EXAMPLE (DO NOT REMOVE)
+
+THIS SECTION MUST APPEAR IN YOUR BUILDS AS A REFERENCE FOR REVIEW.
+Keep the structure and error-handling style:
+
+// 7. TikTok message handling
+// ===============================
+
+function handleTeamJoin(text, user) {
+    const maybeTeam = normalizeTeamText(text);
+    if (!maybeTeam) return;
+
+    // Assign or move team.
+    userTeams.set(user.userId, maybeTeam);
+    console.log(`${user.nickname} joined team ${maybeTeam}`);
+}
+
+function handleAnswer(text, user) {
+    if (!gameStarted || gameFinished) return;
+    if (!userTeams.has(user.userId)) return; // must be on a team first
+
+    const answer = normalizeAnswerText(text);
+    if (!answer) return;
+
+    // Only allow one answer per question per user
+    if (answeredUsersThisQuestion.has(user.userId)) return;
+    answeredUsersThisQuestion.set(user.userId, true);
+
+    const team = userTeams.get(user.userId);
+    const q = getCurrentQuestion();
+    if (!q) return;
+
+    // Track participation per round
+    if (roundAnswerCounts[team] !== undefined) {
+        roundAnswerCounts[team] += 1;
+    }
+
+    if (answer === q.correct) {
+        teamScores[team]++;
+        teamRoundScores[team]++;
+        updateScoreDisplay();
+        flashCorrectAnswer(user.nickname, team, answer);
+    }
+
+    updateRoundDuelBar();
+}
+
+function onChatMessage(data) {
+    try {
+        const msg = data || {};
+        const text = getChatTextFromMessage(msg);
+        const user = getUserFromMessage(msg);
+
+        if (!text) return;
+
+        // 1) Team selection ("red" / "blue"; any case)
+        handleTeamJoin(text, user);
+
+        // 2) Answer selection ("A"/"B"/"C"/"D"; any case)
+        handleAnswer(text, user);
+    } catch (e) {
+        console.error("Error in chat handler:", e);
+    }
+}
+
+function onGiftMessage(data) {
+    try {
+        // You can optionally use gifts to boost scores, etc.
+        console.log("Gift message:", data);
+    } catch (e) {
+        console.error("Error in gift handler:", e);
+    }
+}
+
+// ===============================
+// 8. TikTok client setup / connect
+// ===============================
+
+function setupTikTokClient(liveId) {
+    if (!liveId) {
+        throw new Error("liveId is required");
+    }
+
+    if (client && client.socket) {
+        try {
+            client.socket.close();
+        } catch (e) {
+            console.warn("Error closing previous socket:", e);
+        }
+    }
+
+    if (typeof TikTokClient === "undefined") {
+        throw new Error("TikTokClient is not available. Check tiktok-client.js.");
+    }
+
+    client = new TikTokClient(liveId);
+
+    // ChatTok injects CHATTOK_CREATOR_TOKEN globally.
+    if (typeof CHATTOK_CREATOR_TOKEN !== "undefined" && CHATTOK_CREATOR_TOKEN) {
+        client.setAccessToken(CHATTOK_CREATOR_TOKEN);
+    }
+
+    client.on("connected", () => {
+        console.log("Connected to TikTok hub.");
+        if (statusText) statusText.textContent = "Connected to TikTok LIVE.";
+        if (statusTextInGame) statusTextInGame.textContent = "Connected.";
+
+        // Only start game once we know we're connected
+        if (pendingStart && !gameStarted) {
+            beginGame();
+        }
+    });
+
+    client.on("disconnected", (reason) => {
+        console.log("Disconnected from TikTok hub:", reason);
+        const msg = reason || "Connection closed";
+        if (statusText) statusText.textContent = "Disconnected: " + msg;
+        if (statusTextInGame) statusTextInGame.textContent = "Disconnected: " + msg;
+
+        if (!gameStarted) {
+            // Connection failed before game start; allow retry
+            pendingStart = false;
+        }
+    });
+
+    client.on("error", (err) => {
+        console.error("TikTok client error:", err);
+        if (statusText) statusText.textContent =
+            "Error: " + (err && err.message ? err.message : "Unknown");
+    });
+
+    client.on("chat", onChatMessage);
+    client.on("gift", onGiftMessage);
+    client.on("like", (data) => {
+        // Optionally use likes later
+        // console.log("Like message:", data);
+    });
+
+    client.connect();
+}
+
+10) TESTING & DEBUGGING FLOW (REQUIRED)
+
+After outputting the 3 files, include a short README with:
+
+How to paste into ChatTok Gaming’s builder
+
+How CHATTOK_CREATOR_TOKEN is injected automatically
+
+How to test chat/gift/like/join/share
+
+If something fails:
+
+check console errors
+
+verify liveId
+
+verify handlers are wired (log incoming events)
+
+confirm field usage against MessagesClean.txt
+
+only change game.js/html/css (never tiktok-client.js)
+
+11) AFTER SUCCESS (LISTING ASSETS)
+
+Once I confirm it works:
+
+Suggest a short catchy title
+
+Write a 3–4 sentence game description
+
+Generate a cover-image prompt (312×168 PNG) in ChatTok neon style (dark + pink/aqua)
+
+Write “How to Play” directions (Host + Viewer)
+
+==================================================
+
+NOW SWITCH TO INTERACTIVE MODE
+
+Your next message to me must be:
+
+Ask me for a 2–4 sentence game description.
+
+If it’s vague, ask up to 6 short follow-up questions.
+
+Then produce the Game Design Spec (layout first).

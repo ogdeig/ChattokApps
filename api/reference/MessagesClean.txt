@@ -1,0 +1,285 @@
+
+LIKE
+```
+{
+  "count": 15,
+  "total": 1863,
+  "user": {
+    "id": 6790856460559156000,
+    "nickname": "Elías🎥",
+    "displayid": "elias23corolla",
+    "avatarthumb": {
+      "urllistList": [
+        "https://p16-sign-va.tiktokcdn.com/tos-maliva-avt...idc=maliva",
+        "https://p16-sign-va.tiktokcdn.com/tos-maliva-avt-0068/8...dc=maliva"
+      ]
+    },
+    "badgelistList": [
+      {
+        "scenetype": 8,
+        "combine": {
+          "str": "13",
+          "icon": {
+            "urllistList": [
+              "https://p16-webcast.tiktokcdn.com/webcast-va/grade_badge_icon_lite_lv10_v1.png~tplv-obj.image",
+              "https://p19-webcast.tiktokcdn.com/webcast-va/grade_badge_icon_lite_lv10_v1.png~tplv-obj.image"
+            ]
+          }
+        }
+      },
+      {
+        "scenetype": 6,
+        "combine": {
+          "text": {
+            "defaultpattern": "No. 1"
+          },
+          "icon": {
+            "urllistList": [
+              "https://p16-webcast.tiktokcdn.com/webcast-sg/new_top_gifter_version_2.png~tplv-obj.image",
+              "https://p19-webcast.tiktokcdn.com/webcast-sg/new_top_gifter_version_2.png~tplv-obj.image"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+```
+CHAT
+{
+  "content": "😂😂😂",
+  "user": {
+    "id": 6827879127056696000,
+    "nickname": "Cinthia Collantes",
+    "displayid": "cinthiacollantes2",
+    "avatarthumb": {
+      "urllistList": [
+        "https://p77-sign-va.tiktokcdn.com/tos-m...dc=maliva",
+        "https://p16-sign-va.tiktokcdn.com/tos-mal...=fdd36af4&idc=maliva",
+        "https://p77-sign-va.tiktokcdn.com/tos...474&ps=1idc=maliva"
+      ]
+    },
+    "badgelistList": [
+      {
+        "scenetype": 8,
+        "combine": {
+          "str": "1",
+          "icon": {
+            "urllistList": [
+              "https://p16-webcast.tiktokcdn.com/webcast-va/grade_badge_icon_lite_lv1_v1.png~tplv-obj.image",
+              "https://p19-webcast.tiktokcdn.com/webcast-va/grade_badge_icon_lite_lv1_v1.png~tplv-obj.image"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "emoteslistList": [],
+  "useridentity": {
+    "isgiftgiverofanchor": false,
+    "issubscriberofanchor": false,
+    "ismutualfollowingwithanchor": true,
+    "isfollowerofanchor": true,
+    "ismoderatorofanchor": false,
+    "isanchor": false
+  }
+}
+
+```
+JOIN
+{
+  "action": 1,
+  "membercount": 14,
+  "user": {
+    "id": 6896989987787507000,
+    "nickname": "luphitaroberto💕",
+    "displayid": "lupitaroberto45",
+    "avatarthumb": {
+      "urllistList": [
+        "https://p16-common-sign-va.tikt...4&idc=useast5",
+        "https://p19-common-sign-va.tiktok...useast5",
+        "https://p16-common-sign-va.tiktokcdn-...useast5"
+      ]
+    },
+    "followInfo": {
+      "followingcount": 1092,
+      "followercount": 1101,
+      "followstatus": 0
+    },
+    "badgelistList": [
+      {
+        "scenetype": 8,
+        "combine": {
+          "str": "1",
+          "icon": {
+            "urllistList": [
+              "https://p16-webcast...lv-obj.image",
+              "https://p19-web...lv-obj.image"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+```
+GIFT 
+{
+  "user": {
+    "id": 6928436425060304000,
+    "nickname": "Nat",
+    "displayid": "natps06",
+    "avatarthumb": {
+      "urllistList": [
+        "https://p16-sign-sg.tiktokcdn.com/tos-alisg-avt-0068/60f613c5cb87107d02562ecff03a0f76~tplv-tiktokx-cropcenter:100:100.webp?dr=14579&refresh_token=852a9cb3&x-expires=1754600400&x-signature=ftCJIn8Ggxso2JvChdX0SWmpOe4%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=my",
+        "https://p16-sign-sg.tiktokcdn.com/tos-alisg-avt-0068/60f613c5cb87107d02562ecff03a0f76~tplv-tiktokx-cropcenter:100:100.jpeg?dr=14579&refresh_token=8e943d9f&x-expires=1754600400&x-signature=cgrCMJxf%2FP9GjqpkgQGrV9JxmgA%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=my"
+      ]
+    },
+    "badgelistList": [
+      {
+        "scenetype": 8,
+        "combine": {
+          "str": "11",
+          "icon": {
+            "urllistList": [
+              "https://p16-webcast.tiktokcdn.com/webcast-va/grade_badge_icon_lite_lv10_v1.png~tplv-obj.image",
+              "https://p19-webcast.tiktokcdn.com/webcast-va/grade_badge_icon_lite_lv10_v1.png~tplv-obj.image"
+            ]
+          }
+        }
+      },
+      {
+        "scenetype": 6,
+        "combine": {
+          "text": {
+            "defaultpattern": "No. 2"
+          },
+          "icon": {
+            "urllistList": [
+              "https://p16-webcast.tiktokcdn.com/webcast-sg/new_top_gifter_version_2.png~tplv-obj.image",
+              "https://p19-webcast.tiktokcdn.com/webcast-sg/new_top_gifter_version_2.png~tplv-obj.image"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "gift": {
+    "id": 5655,
+    "name": "Rose",
+    "describe": "Sent Rose",
+    "image": {
+      "urllistList": [
+        "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/eba3a9bb85c33e017f3648eaf88d7189~tplv-obj.png",
+        "https://p19-webcast.tiktokcdn.com/img/maliva/webcast-va/eba3a9bb85c33e017f3648eaf88d7189~tplv-obj.png"
+      ]
+    },
+    "diamondcount": 1,
+    "combo": true
+  },
+  "repeatcount": 1,
+  "combocount": 1,
+  "roomfanticketcount": 1
+}
+```
+SOCIAL
+{
+  "action": 3, --Follow is 1, share is 3
+  "followcount": 3918,
+  "user": {
+    "id": 7533673723653047000,
+    "nickname": "tú flaco 🥷🥷🥷",
+    "displayid": "hendrysgil8",
+    "avatarthumb": {
+      "urllistList": [
+        "https://p16-sign-va.tiktokcdn.com/tos-maliva-avt-006...&idc=maliva",
+        "https://p16-sign-va.tiktokcdn.com/tos-maliva-avt-0068/5b...4&idc=maliva"
+      ]
+    },
+    "followInfo": {
+      "followingcount": 345,
+      "followercount": 131,
+      "followstatus": 1
+    },
+    "badgelistList": []
+  },
+"sharetype": 2,
+  "action": 3,
+  "sharetarget": "7279565070475805701",
+  "followcount": 0,
+  "sharedisplaystyle": 0,
+  "sharecount": 9
+}
+
+```
+RoomUserSeq (cantidad users)
+
+{
+  "popularity": 133,
+  "rankslistList": [
+    {
+      "rank": 1,
+      "score": 10,
+      "user": {
+        "id": 7351593929357624000,
+        "nickname": "🖇️🇻🇪💛💚💜 OHANA FAMILI👬👑",
+        "displayid": "ohanainfinitamente17",
+        "avatarthumb": {
+          "urllistList": [
+            "https://p16-sign...dc=no1a",
+            "https://p16-sign...no1a"
+          ]
+        }
+      }
+    },
+    {
+      "rank": 2,
+      "score": 7,
+      "user": {
+        "id": 7203262074238305000,
+        "nickname": "🐦‍🔥⃤ seko fresa 🍓⃤🐼🍒🍒",
+        "displayid": "alberto.mendoza5595",
+        "avatarthumb": {
+          "urllistList": [
+            "https://p16-sign-sg.tiktokcdn.c...605b&idc=no1a",
+            "https://p16-sign-sg.tiktokcdn....5b&idc=no1a"
+          ]
+        }
+      }
+    },
+    {
+      "rank": 3,
+      "score": 3,
+      "user": {
+        "id": 7290330377862989000,
+        "nickname": "user7703609963388",
+        "displayid": "user7703609963388",
+        "avatarthumb": {
+          "urllistList": [
+            "https://p16-sign-va.tik...=no1a",
+            "https://p16-sign-va.tikt...=no1a"
+          ]
+        }
+      }
+    }
+  ]
+}
+
+```
+Control (LiveEnded)
+{
+  "header": {
+    "method": "WebcastControlMessage",
+    "sei": {
+      "uniqueid": {
+        "primaryid": "7535215850762488581",
+        "messagescene": "end_room"
+      },
+      "timestamp": 1754435308316
+    },
+    "anchorpriorityscore": 0
+  },
+  "action": 3,
+  "tips": "",
+  "floatstyle": 0
+}
