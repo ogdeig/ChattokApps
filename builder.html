@@ -2,1238 +2,1729 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="color-scheme" content="dark" />
-  <title>ChatTok Tools — Game Builder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>ChatTok Game Builder</title>
 
   <style>
     :root{
-      --bg0:#070707;
-      --bg1:#0f0f0f;
-
+      --pink:#ff0050;
+      --aqua:#00f2ea;
+      --bg:#070b14;
       --panel: rgba(255,255,255,.06);
       --panel2: rgba(255,255,255,.04);
       --line: rgba(255,255,255,.12);
-
-      --text:#f7f2ea;
-      --muted: rgba(247,242,234,.72);
-
-      --good:#2ee59d;
-      --bad:#ff4d4d;
-      --warn:#ffb347;
-
-      --shadowPanel: 0 14px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.68);
+      --good: #2ee59d;
+      --bad: #ff5f6d;
+      --warn: #ffb020;
+      --shadow: 0 18px 50px rgba(0,0,0,.45);
       --r: 18px;
       --r2: 14px;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-
-      --accent1:#ff7a00;
-      --accent2:#ffb347;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
+    *{box-sizing:border-box}
+    html, body{height:100%}
     body{
       margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:var(--text);
+      font-family: var(--sans);
+      color: var(--text);
       background:
-        radial-gradient(1200px 700px at 20% 10%, rgba(255,122,0,.14), transparent 60%),
-        radial-gradient(900px 600px at 85% 25%, rgba(255,179,71,.10), transparent 55%),
-        linear-gradient(180deg, var(--bg0), var(--bg1));
+        radial-gradient(1200px 900px at 20% 15%, rgba(255,0,80,.18), rgba(0,0,0,0) 60%),
+        radial-gradient(1100px 900px at 90% 25%, rgba(0,242,234,.16), rgba(0,0,0,0) 60%),
+        linear-gradient(180deg, #050712, var(--bg));
       overflow-x:hidden;
     }
 
-    .wrap{ max-width: 1280px; margin: 0 auto; padding: 18px 16px 44px; }
+    a{color:inherit}
+    .shell{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 16px;
+      height:100%;
+      padding: 16px;
+    }
+
+    @media (max-width: 980px){
+      .shell{grid-template-columns:1fr; height:auto}
+    }
+
+    .card{
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
 
     .topbar{
       display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:14px;
-      margin-bottom: 14px;
-    }
-
-    .brand{ display:flex; flex-direction:column; gap:6px; }
-    .brand h1{
-      margin:0;
-      font-size: 26px;
-      font-weight: 950;
-      letter-spacing:.2px;
-      text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 14px rgba(255,122,0,.35);
-    }
-    .brand p{
-      margin:0;
-      color:var(--muted);
-      font-size: 13.5px;
-      line-height: 1.35;
-      max-width: 860px;
-    }
-
-    .statusPill{
-      display:inline-flex;
       align-items:center;
-      gap:10px;
-      padding: 10px 12px;
-      background: rgba(0,0,0,.26);
-      border: 1px solid var(--line);
+      justify-content:space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      min-width:0;
+    }
+
+    .logoDot{
+      width: 12px;
+      height: 12px;
       border-radius: 999px;
-      box-shadow: 0 10px 25px rgba(0,0,0,.25);
-      color: var(--muted);
-      font-size: 13px;
-      white-space:nowrap;
-      user-select:none;
-    }
-    .dot{
-      width:10px; height:10px; border-radius: 50%;
-      background: rgba(255,255,255,.22);
-      box-shadow: 0 0 0 2px rgba(255,255,255,.10);
-    }
-    .dot.good{ background: var(--good); box-shadow: 0 0 0 2px rgba(46,229,157,.18); }
-    .dot.bad{  background: var(--bad);  box-shadow: 0 0 0 2px rgba(255,77,77,.18); }
-    .dot.warn{ background: var(--warn); box-shadow: 0 0 0 2px rgba(255,179,71,.18); }
-
-    .statusBtn{
-      border:0;
-      cursor:pointer;
-      padding: 8px 10px;
-      border-radius: 999px;
-      font-weight: 900;
-      letter-spacing:.2px;
-      color: #0b0b0b;
-      background: linear-gradient(180deg, var(--accent2), var(--accent1));
-      box-shadow: 0 10px 18px rgba(255,122,0,.18);
-    }
-    .statusBtn.secondary{
-      color: var(--text);
-      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
-      border: 1px solid rgba(255,255,255,.14);
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1.15fr .85fr;
-      gap: 14px;
-    }
-    @media (max-width: 980px){
-      .grid{ grid-template-columns: 1fr; }
-      .statusPill{ width:100%; justify-content:space-between; }
-    }
-
-    .panel{
-      background: linear-gradient(180deg, var(--panel), var(--panel2));
-      border: 1px solid var(--line);
-      border-radius: var(--r);
-      box-shadow: var(--shadowPanel);
-      overflow:hidden;
-    }
-
-    .panelHead{
-      padding: 14px 14px 12px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      background: linear-gradient(180deg, rgba(0,0,0,.18), transparent);
-    }
-    .panelTitle{ display:flex; flex-direction:column; gap:4px; }
-    .panelTitle h2{
-      margin:0;
-      font-size: 16px;
-      font-weight: 950;
-      text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 10px rgba(255,122,0,.22);
-    }
-    .panelTitle p{ margin:0; color:var(--muted); font-size: 13px; }
-
-    .panelBody{ padding: 14px; }
-
-    .label{
-      display:block;
-      font-weight: 950;
-      font-size: 12px;
-      letter-spacing:.3px;
-      color: rgba(255,255,255,.90);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      text-shadow: 0 1px 0 rgba(0,0,0,.35), 0 0 10px rgba(255,122,0,.14);
-    }
-
-    .hint{
-      color: var(--muted);
-      font-size: 13px;
-      margin: 10px 0 0;
-      line-height: 1.4;
-    }
-
-    .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; align-items:center; }
-
-    textarea, input, select{
-      width:100%;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.26);
-      color: rgba(247,242,234,.92);
-      padding: 12px 12px;
-      font-family: var(--mono);
-      outline:none;
-    }
-    textarea{ min-height: 160px; resize: vertical; line-height: 1.45; }
-    textarea::placeholder{ color: rgba(247,242,234,.55); }
-
-    .btn{
-      border: 0;
-      cursor:pointer;
-      padding: 12px 14px;
-      border-radius: 14px;
-      font-weight: 950;
-      letter-spacing:.2px;
-      color: #121212;
-      background: linear-gradient(180deg, var(--accent2), var(--accent1));
-      box-shadow: 0 14px 26px rgba(255,122,0,.20), 0 7px 0 rgba(0,0,0,.35);
-      transform: translateY(0);
-      transition: transform .08s ease, box-shadow .08s ease, filter .15s ease, opacity .15s ease;
-      user-select:none;
-    }
-    .btn:hover{ filter: brightness(1.04); }
-    .btn:active{
-      transform: translateY(6px);
-      box-shadow: 0 8px 18px rgba(255,122,0,.16), 0 1px 0 rgba(0,0,0,.35);
-    }
-    .btn[disabled]{ opacity:.55; cursor:not-allowed; filter:saturate(.6); }
-
-    .btn.secondary{
-      color: var(--text);
-      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.08));
-      border: 1px solid rgba(255,255,255,.14);
-      box-shadow: 0 12px 24px rgba(0,0,0,.28), 0 7px 0 rgba(0,0,0,.35);
-    }
-    .btn.danger{
-      color: var(--text);
-      background: linear-gradient(180deg, rgba(255,77,77,.22), rgba(0,0,0,.18));
-      border: 1px solid rgba(255,77,77,.35);
-    }
-
-    .steps{ display:flex; flex-direction:column; gap:12px; }
-    .stepCard{
-      border-radius: var(--r2);
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      box-shadow: 0 12px 24px rgba(0,0,0,.26);
-      overflow:hidden;
-    }
-    .stepHead{
-      padding: 12px 12px 10px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), transparent);
-    }
-    .stepHead strong{
-      font-size: 13px;
-      letter-spacing:.2px;
-    }
-    .badge{
-      font-family: var(--mono);
-      font-size: 12px;
-      color: rgba(247,242,234,.78);
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.20);
-      padding: 6px 8px;
-      border-radius: 999px;
-      white-space:nowrap;
-    }
-    .stepBody{ padding: 12px; }
-
-    .kv{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-      margin-top: 10px;
-    }
-    @media (max-width: 520px){
-      .kv{ grid-template-columns: 1fr; }
-    }
-    .mini{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      padding: 10px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.18);
-    }
-    .mini .k{
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing:.6px;
-      text-transform: uppercase;
-      color: rgba(247,242,234,.60);
-    }
-    .mini .v{
-      font-weight: 900;
-      color: rgba(247,242,234,.92);
-    }
-
-    .codeBox{
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.26);
-      overflow:hidden;
-    }
-    .codeTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding: 10px 10px;
-      border-bottom: 1px solid rgba(255,255,255,.10);
-      background: linear-gradient(180deg, rgba(255,255,255,.05), transparent);
-    }
-    .codeTop .name{
-      font-family: var(--mono);
-      font-size: 12px;
-      color: rgba(247,242,234,.80);
-    }
-    .copyBtn{
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
-      color: rgba(247,242,234,.85);
-      border-radius: 12px;
-      padding: 8px 10px;
-      font-weight: 900;
-      cursor:pointer;
-    }
-    .codeArea{
-      width:100%;
-      min-height: 240px;
-      border:0;
-      outline:none;
-      resize: vertical;
-      padding: 12px;
-      font-family: var(--mono);
-      color: rgba(247,242,234,.92);
-      background: transparent;
-    }
-
-    .toast{
-      position: fixed;
-      left: 50%;
-      bottom: 18px;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,.60);
-      border: 1px solid rgba(255,255,255,.16);
-      color: rgba(247,242,234,.92);
-      padding: 10px 12px;
-      border-radius: 14px;
-      box-shadow: 0 14px 34px rgba(0,0,0,.45);
-      backdrop-filter: blur(10px);
-      z-index: 9999;
-      opacity: 0;
-      pointer-events:none;
-      transition: opacity .14s ease, transform .14s ease;
-      max-width: min(860px, 92vw);
-      font-size: 13px;
-    }
-    .toast.show{
-      opacity: 1;
-      transform: translateX(-50%) translateY(-4px);
-    }
-
-    /* Theme picker row */
-    .themeRow{
-      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
-    }
-    .themePick{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
-      border-radius: 14px;
-      padding: 10px 10px;
-      min-width: 190px;
-      flex: 1 1 190px;
-    }
-    .swatch{
-      width:18px; height:18px;
-      border-radius: 6px;
-      border: 1px solid rgba(255,255,255,.16);
-      background: var(--accent1);
-      box-shadow: 0 10px 20px rgba(0,0,0,.25);
-      cursor:pointer;
+      background: conic-gradient(from 120deg, var(--pink), var(--aqua), var(--pink));
+      box-shadow: 0 0 18px rgba(255,0,80,.35);
       flex: 0 0 auto;
     }
-    .themePick .t{
-      display:flex; flex-direction:column; gap:2px; min-width:0;
-    }
-    .themePick .t .k{
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing:.6px;
-      text-transform: uppercase;
-      color: rgba(247,242,234,.62);
-    }
-    .themePick .t .v{
+    .brandTitle{
       font-weight: 950;
-      font-size: 12.5px;
-      color: rgba(247,242,234,.90);
-      white-space: nowrap;
+      letter-spacing: .3px;
+      white-space:nowrap;
       overflow:hidden;
-      text-overflow: ellipsis;
-      max-width: 150px;
+      text-overflow:ellipsis;
     }
-    .hiddenColor{
-      position:absolute;
-      opacity:0;
-      width:1px;
-      height:1px;
-      pointer-events:none;
+    .brandSub{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
 
-    /* Auth overlay */
-    #authOverlay{
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.72);
-      backdrop-filter: blur(12px);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding: 18px;
-      z-index: 10000;
-    }
-    #authOverlay.show{ display:flex; }
-    .authCard{
-      width: min(520px, 96vw);
-      border-radius: 20px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: linear-gradient(180deg, rgba(18,18,18,.92), rgba(10,10,10,.78));
-      box-shadow: 0 18px 44px rgba(0,0,0,.55);
-      overflow:hidden;
-    }
-    .authHead{
-      padding: 16px 16px 12px;
-      border-bottom: 1px solid rgba(255,255,255,.10);
-      background: linear-gradient(180deg, rgba(255,122,0,.10), transparent);
-    }
-    .authHead h2{
-      margin:0;
-      font-size: 18px;
-      font-weight: 950;
-    }
-    .authHead p{
-      margin:6px 0 0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.35;
-    }
-    .authBody{ padding: 16px; }
-    .authGrid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-    }
-    @media (max-width: 520px){
-      .authGrid{ grid-template-columns: 1fr; }
-    }
-    .authFoot{
-      padding: 12px 16px 16px;
+    .actions{
       display:flex;
-      gap:10px;
+      align-items:center;
+      gap: 10px;
       flex-wrap:wrap;
       justify-content:flex-end;
     }
 
-    footer{
-      margin-top: 16px;
-      color: rgba(247,242,234,.60);
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      color: rgba(255,255,255,.86);
+      font-weight: 850;
+      font-size: 12px;
+      user-select:none;
+    }
+    .dot{
+      width: 8px; height: 8px; border-radius: 999px;
+      background: rgba(255,255,255,.35);
+      box-shadow: 0 0 0 3px rgba(255,255,255,.08);
+    }
+    .dot.good{background: var(--good); box-shadow: 0 0 0 3px rgba(46,229,157,.14)}
+    .dot.bad{background: var(--bad); box-shadow: 0 0 0 3px rgba(255,95,109,.14)}
+    .dot.warn{background: var(--warn); box-shadow: 0 0 0 3px rgba(255,176,32,.16)}
+
+    .btn{
+      appearance:none;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.24);
+      color: rgba(255,255,255,.92);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 900;
+      letter-spacing: .2px;
+      cursor:pointer;
+      box-shadow: 0 10px 28px rgba(0,0,0,.25);
+      transition: transform .12s ease, opacity .12s ease, background .12s ease;
+    }
+    .btn:hover{transform: translateY(-1px); background: rgba(255,255,255,.06)}
+    .btn:active{transform: translateY(0px); opacity:.9}
+    .btn.primary{
+      border-color: rgba(255,0,80,.35);
+      background: linear-gradient(180deg, rgba(255,0,80,.22), rgba(255,0,80,.12));
+    }
+    .btn.aqua{
+      border-color: rgba(0,242,234,.35);
+      background: linear-gradient(180deg, rgba(0,242,234,.18), rgba(0,242,234,.10));
+    }
+    .btn.ghost{
+      background: transparent;
+      border-color: rgba(255,255,255,.12);
+    }
+    .btn.small{
+      padding: 8px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+    .btn:disabled{
+      cursor:not-allowed;
+      opacity:.45;
+      transform:none !important;
+      box-shadow:none;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      padding: 14px;
+    }
+
+    .step{
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      border-radius: var(--r);
+      overflow:hidden;
+    }
+    .stepHead{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 14px;
+      padding: 14px 14px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    }
+    .stepNum{
+      font-weight: 1000;
+      font-size: 14px;
+      color: rgba(255,255,255,.88);
+      letter-spacing: .8px;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.20);
+      font-size: 12px;
+      font-weight: 900;
+      color: rgba(255,255,255,.78);
+      user-select:none;
+      white-space:nowrap;
+    }
+
+    .stepTitle{
+      font-weight: 950;
+      font-size: 14px;
+      margin: 0;
+      color: rgba(255,255,255,.92);
+    }
+    .stepDesc{
+      margin: 6px 0 0;
+      color: var(--muted);
       font-size: 12.5px;
       line-height: 1.35;
-      text-align:center;
     }
-    footer a{
-      color: rgba(247,242,234,.82);
-      text-decoration: none;
-      border-bottom: 1px solid rgba(255,255,255,.18);
+
+    .stepBody{
+      padding: 14px;
+      display:grid;
+      gap: 12px;
+    }
+
+    .row{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+      width: 100%;
+    }
+    .label{
+      font-size: 12px;
+      font-weight: 900;
+      color: rgba(255,255,255,.82);
+      letter-spacing:.2px;
+    }
+    textarea, input, select{
+      width:100%;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.25);
+      color: rgba(255,255,255,.92);
+      padding: 12px 12px;
+      outline:none;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    textarea{
+      min-height: 138px;
+      resize: vertical;
+      line-height: 1.35;
+    }
+    .hint{
+      font-size: 12px;
+      color: rgba(255,255,255,.64);
+      line-height: 1.35;
+    }
+
+    .mini{
+      font-size: 12px;
+      color: rgba(255,255,255,.72);
+      font-weight: 850;
+    }
+
+    .divider{
+      height:1px;
+      background: rgba(255,255,255,.10);
+      margin: 6px 0;
+    }
+
+    .themeRow{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .swatchGroup{
+      display:flex;
+      gap: 8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .swatch{
+      width: 26px;
+      height: 26px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.16);
+      box-shadow: 0 10px 18px rgba(0,0,0,.25);
+      cursor:pointer;
+      position:relative;
+      overflow:hidden;
+      transition: transform .12s ease;
+      flex: 0 0 auto;
+    }
+    .swatch:hover{transform: translateY(-1px)}
+    .swatch.active::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border: 2px solid rgba(255,255,255,.85);
+      border-radius: 10px;
+      pointer-events:none;
+    }
+
+    .colorPick{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      flex: 1 1 220px;
+    }
+    .colorLabel{
+      font-size: 12px;
+      font-weight: 950;
+      color: rgba(255,255,255,.78);
+      min-width: 82px;
+    }
+    .colorValue{
+      font-family: var(--mono);
+      font-size: 12px;
+      color: rgba(255,255,255,.86);
+      font-weight: 900;
+    }
+
+    .chipBtn{
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.90);
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-weight: 950;
+      cursor:pointer;
+    }
+    .chipBtn:disabled{opacity:.45; cursor:not-allowed}
+
+    .statusLine{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.82);
+      font-weight: 850;
+      font-size: 12px;
+    }
+    .statusLine strong{color: rgba(255,255,255,.92)}
+
+    .locked{
+      opacity: .55;
+      filter: grayscale(.12);
+      pointer-events:none;
+      user-select:none;
+    }
+
+    /* Right panel */
+    .rightWrap{
+      display:grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 0;
+    }
+
+    .tabs{
+      display:flex;
+      gap: 8px;
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(0,0,0,.16);
+      flex-wrap:wrap;
+    }
+    .tab{
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      font-weight: 950;
+      font-size: 12px;
+      color: rgba(255,255,255,.82);
+      cursor:pointer;
+      user-select:none;
+    }
+    .tab.active{
+      border-color: rgba(255,255,255,.18);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+      color: rgba(255,255,255,.92);
+    }
+
+    .codePane{
+      display:grid;
+      grid-template-rows: auto 1fr;
+      min-height:0;
+    }
+    .codeHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.12);
+    }
+    .codeMeta{
+      display:flex;
+      flex-direction:column;
+      gap: 2px;
+      min-width:0;
+    }
+    .codeName{
+      font-weight: 1000;
+      font-size: 13px;
+      letter-spacing:.2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .codeHint{
+      font-size: 12px;
+      color: rgba(255,255,255,.62);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    pre{
+      margin:0;
+      padding: 12px;
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.35;
+      color: rgba(255,255,255,.90);
+      overflow:auto;
+      white-space:pre;
+      tab-size:2;
+      background: rgba(0,0,0,.24);
+      min-height: 0;
+    }
+
+    .gen{
+      display:inline-block;
+      position:relative;
+      padding-right: 18px;
+    }
+    .gen::after{
+      content:"";
+      position:absolute;
+      right: 4px;
+      top: 50%;
+      width: 10px;
+      height: 10px;
+      margin-top: -5px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.35);
+      animation: pulse 1.1s ease-in-out infinite;
+    }
+    @keyframes pulse{
+      0%{transform:scale(.9); opacity:.35}
+      50%{transform:scale(1.12); opacity:.8}
+      100%{transform:scale(.9); opacity:.35}
+    }
+
+    .footerBar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 12px 12px;
+      border-top:1px solid var(--line);
+      background: rgba(0,0,0,.14);
+      flex-wrap:wrap;
+    }
+    .footerBar .hint{margin:0}
+
+    /* Modal */
+    .modalBg{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(6px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 16px;
+      z-index: 9999;
+    }
+    .modal{
+      width: min(720px, 100%);
+      border-radius: var(--r);
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(12,16,28,.92);
+      box-shadow: 0 30px 80px rgba(0,0,0,.6);
+      overflow:hidden;
+    }
+    .modalHead{
+      padding: 14px 16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      border-bottom:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+    }
+    .modalTitle{
+      font-weight: 1000;
+      letter-spacing: .2px;
+    }
+    .modalBody{padding: 14px 16px; display:grid; gap: 12px}
+    .modalFoot{
+      padding: 14px 16px;
+      border-top:1px solid rgba(255,255,255,.12);
+      display:flex; justify-content:flex-end; gap: 10px; flex-wrap:wrap;
+      background: rgba(0,0,0,.10);
+    }
+
+    .kbd{
+      font-family: var(--mono);
+      font-weight: 900;
+      font-size: 12px;
+      color: rgba(255,255,255,.85);
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.14);
+      padding: 2px 8px;
+      border-radius: 10px;
     }
   </style>
 </head>
 
 <body>
-  <div id="authOverlay">
-    <div class="authCard">
-      <div class="authHead">
-        <h2>Sign in</h2>
-        <p>
-          This is a simple local sign-in for now (saved in your browser).<br>
-          Later you can wire it to your real ChatTok accounts.
+  <div class="shell">
+
+    <!-- LEFT: Steps -->
+    <section class="card">
+      <div class="topbar">
+        <div class="brand">
+          <div class="logoDot"></div>
+          <div style="min-width:0">
+            <div class="brandTitle">ChatTok Game Builder</div>
+            <div class="brandSub">Build → Upload → Preview on ChatTokGaming</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <div class="pill" title="API status (URL hidden by design)">
+            <span id="apiDot" class="dot warn"></span>
+            <span id="apiStatus">Checking API…</span>
+          </div>
+          <button id="btnAdvanced" class="btn small ghost" type="button" title="Advanced settings">Advanced</button>
+          <a class="btn small aqua" href="https://chattokgaming.com" target="_blank" rel="noreferrer">Finish on ChatTokGaming</a>
+        </div>
+      </div>
+
+      <div class="grid">
+
+        <!-- STEP 1 -->
+        <div class="step" id="step1">
+          <div class="stepHead">
+            <div style="min-width:0">
+              <div class="stepNum">
+                <span class="badge">STEP 1</span>
+                <span>Describe your game</span>
+              </div>
+              <p class="stepDesc">
+                Write a <strong>detailed</strong> description (what’s on screen, what chat/likes/gifts do, how a round ends).
+                Bigger detail = better first-shot games.
+              </p>
+            </div>
+            <div class="badge" title="Optional mic input">🎙️ Mic</div>
+          </div>
+
+          <div class="stepBody">
+            <div class="field">
+              <div class="label">Game idea</div>
+              <textarea id="idea" placeholder="Example: A boss raid where viewers attack with chat, likes chip damage, and gifts trigger huge power-ups. Include a timer, levels, and a victory screen..."></textarea>
+              <div class="row" style="justify-content:space-between">
+                <div class="hint">
+                  Tip: Mention the <span class="kbd">main action</span> you want visible (spawning, movement, shooting, cooking, racing, etc).
+                </div>
+                <div class="row">
+                  <button id="btnMic" class="btn small" type="button">🎙️ Speak</button>
+                  <span id="ideaCount" class="mini">0 chars</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field" style="flex: 1 1 240px">
+                <div class="label">Game template (keeps games “epic” even with low AI cost)</div>
+                <select id="templateId">
+                  <option value="bossraid">Boss Raid (default, always feels alive)</option>
+                  <option value="asteroids">Asteroids (spawns + shooting action)</option>
+                  <option value="runner">Runner (endless dodging)</option>
+                  <option value="arena">Arena (bouncy chaos)</option>
+                  <option value="wheel">Wheel (join + spin)</option>
+                  <option value="trivia">Trivia (Q/A loop)</option>
+                </select>
+                <div class="hint">This guides the build. You can still describe anything — this helps the first shot look great.</div>
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="label">Theme colors (click squares)</div>
+              <div class="themeRow">
+                <div class="colorPick">
+                  <div class="colorLabel">Primary</div>
+                  <div class="swatchGroup" id="swatchesPrimary"></div>
+                  <div class="colorValue" id="valPrimary">#ff0050</div>
+                </div>
+                <div class="colorPick">
+                  <div class="colorLabel">Secondary</div>
+                  <div class="swatchGroup" id="swatchesSecondary"></div>
+                  <div class="colorValue" id="valSecondary">#00f2ea</div>
+                </div>
+                <div class="colorPick">
+                  <div class="colorLabel">Background</div>
+                  <div class="swatchGroup" id="swatchesBackground"></div>
+                  <div class="colorValue" id="valBackground">#070b14</div>
+                </div>
+              </div>
+              <div class="hint">These inject into CSS variables so games keep your brand look without extra AI cost.</div>
+            </div>
+
+            <div class="row">
+              <button id="btnPlan" class="btn primary" type="button">Generate Plan (Step 2)</button>
+              <div class="statusLine" style="flex:1">
+                <span><strong>Status:</strong> <span id="status1">Ready</span></span>
+                <span class="mini" id="costHint">Low-cost mode</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="step locked" id="step2">
+          <div class="stepHead">
+            <div style="min-width:0">
+              <div class="stepNum">
+                <span class="badge">STEP 2</span>
+                <span>Review the build plan</span>
+              </div>
+              <p class="stepDesc">
+                You can edit the plan and click <strong>Submit Plan Edits</strong> to regenerate it,
+                or click <strong>Continue</strong> to move to the build buttons.
+              </p>
+            </div>
+            <div class="badge" id="planRev">rev 0</div>
+          </div>
+
+          <div class="stepBody">
+            <div class="field">
+              <div class="label">Plan (editable)</div>
+              <textarea id="plan" placeholder="Plan appears here…"></textarea>
+              <div class="hint">Keep edits clear. Example: “Make gifts trigger meteor storms. Likes charge a shield.”</div>
+            </div>
+
+            <div class="row">
+              <button id="btnPlanEdit" class="btn" type="button">Submit Plan Edits</button>
+              <button id="btnContinue" class="btn primary" type="button">Continue to Step 3</button>
+              <div class="statusLine" style="flex:1">
+                <span><strong>Status:</strong> <span id="status2">Waiting</span></span>
+                <span class="mini" id="planHint">Plan drives the build</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="step locked" id="step3">
+          <div class="stepHead">
+            <div style="min-width:0">
+              <div class="stepNum">
+                <span class="badge">STEP 3</span>
+                <span>Build your files</span>
+              </div>
+              <p class="stepDesc">
+                When you click Continue, we auto-build <strong>index.html</strong>.
+                Then you click <strong>Build CSS</strong> and <strong>Build game.js</strong>.
+                Each button locks when done.
+              </p>
+            </div>
+            <div class="badge" id="buildState">not started</div>
+          </div>
+
+          <div class="stepBody">
+            <div class="row">
+              <button id="btnBuildHtml" class="btn" type="button">Build HTML</button>
+              <button id="btnBuildCss" class="btn" type="button" disabled>Build CSS</button>
+              <button id="btnBuildJs" class="btn primary" type="button" disabled>Build game.js</button>
+            </div>
+
+            <div class="statusLine">
+              <span><strong>Output:</strong> <span id="status3">Waiting</span></span>
+              <span class="mini">Files appear on the right</span>
+            </div>
+
+            <div class="hint">
+              After build: copy the 3 files into your game folder and upload/preview on ChatTokGaming.
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 4 -->
+        <div class="step locked" id="step4">
+          <div class="stepHead">
+            <div style="min-width:0">
+              <div class="stepNum">
+                <span class="badge">STEP 4 (optional)</span>
+                <span>Edit & improve</span>
+              </div>
+              <p class="stepDesc">
+                Describe your change and rebuild the file(s). Same 3-button system. JS/HTML edits are limited.
+              </p>
+            </div>
+            <div class="badge">edits left: <span id="editsLeft">3</span></div>
+          </div>
+
+          <div class="stepBody">
+            <div class="field">
+              <div class="label">Edit request</div>
+              <textarea id="editRequest" placeholder="Example: Make the boss bigger, add a victory animation, and make gifts cause a huge screen shake."></textarea>
+              <div class="hint">
+                Tip: “More visible action” edits work best (spawn more, move more, larger effects, better win screen).
+              </div>
+            </div>
+
+            <div class="row">
+              <button id="btnEditHtml" class="btn" type="button">Rebuild HTML</button>
+              <button id="btnEditCss" class="btn" type="button">Rebuild CSS</button>
+              <button id="btnEditJs" class="btn primary" type="button">Rebuild game.js</button>
+            </div>
+
+            <div class="statusLine">
+              <span><strong>Status:</strong> <span id="status4">Waiting</span></span>
+              <span class="mini">Edits update the files on the right</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- RIGHT: Files -->
+    <aside class="card rightWrap">
+      <div class="topbar">
+        <div class="brand">
+          <div class="logoDot"></div>
+          <div style="min-width:0">
+            <div class="brandTitle">Generated Files</div>
+            <div class="brandSub">Copy these into your game folder (index.html, style.css, game.js)</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="btnCopy" class="btn small" type="button">Copy Current</button>
+          <button id="btnCopyAll" class="btn small" type="button">Copy All</button>
+        </div>
+      </div>
+
+      <div class="tabs" id="tabs">
+        <div class="tab active" data-file="index.html">index.html</div>
+        <div class="tab" data-file="style.css">style.css</div>
+        <div class="tab" data-file="game.js">game.js</div>
+      </div>
+
+      <div class="codePane">
+        <div class="codeHead">
+          <div class="codeMeta">
+            <div class="codeName" id="codeName">index.html</div>
+            <div class="codeHint" id="codeHint">Not generated yet</div>
+          </div>
+          <div class="row">
+            <button id="btnDownload" class="btn small ghost" type="button" title="Downloads are optional — copy/paste is usually faster">Export</button>
+            <button id="btnClear" class="btn small ghost" type="button">Clear</button>
+          </div>
+        </div>
+        <pre id="code">Click “Generate Plan” to begin.</pre>
+      </div>
+
+      <div class="footerBar">
+        <p class="hint">
+          This UI hides your API URL, but it can still be found in DevTools. The <strong>API key stays on Render</strong>.
         </p>
-      </div>
-      <div class="authBody">
-        <div class="authGrid">
-          <div>
-            <div class="label">Email</div>
-            <input id="authEmail" type="email" placeholder="you@example.com" autocomplete="username">
-          </div>
-          <div>
-            <div class="label">Password</div>
-            <input id="authPass" type="password" placeholder="••••••••" autocomplete="current-password">
-          </div>
-        </div>
-        <div class="hint" style="margin-top:10px">
-          Note: This does not protect your Render API from being called by others. It only gates your UI.
+        <div class="row">
+          <span class="pill" title="Last action">
+            <span class="dot" id="actionDot"></span>
+            <span id="actionText">Idle</span>
+          </span>
         </div>
       </div>
-      <div class="authFoot">
-        <button id="authReset" class="btn danger" type="button">Reset Local Account</button>
-        <button id="authLogin" class="btn" type="button">Continue</button>
+    </aside>
+
+  </div>
+
+  <!-- Advanced modal (URL masked, not shown on main UI) -->
+  <div id="modalBg" class="modalBg" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal">
+      <div class="modalHead">
+        <div class="modalTitle">Advanced settings</div>
+        <button id="btnCloseModal" class="btn small ghost" type="button">Close</button>
+      </div>
+      <div class="modalBody">
+        <div class="field">
+          <div class="label">Builder API endpoint (masked)</div>
+          <input id="apiBase" type="password" autocomplete="off" spellcheck="false" />
+          <div class="hint">
+            Leave as default unless you change hosts. This is hidden on the main UI.
+          </div>
+        </div>
+        <div class="row">
+          <button id="btnSaveApi" class="btn primary" type="button">Save</button>
+          <button id="btnTestApi" class="btn" type="button">Test /health</button>
+        </div>
+        <div class="statusLine">
+          <span><strong>API check:</strong> <span id="apiCheckText">Not tested</span></span>
+          <span class="mini">URL is not displayed publicly</span>
+        </div>
+      </div>
+      <div class="modalFoot">
+        <button id="btnResetApi" class="btn ghost" type="button">Reset to default</button>
       </div>
     </div>
   </div>
-
-  <div class="wrap">
-    <div class="topbar">
-      <div class="brand">
-        <h1>ChatTok Tools — Game Builder</h1>
-        <p>
-          Describe your TikTok LIVE game idea in one short paragraph. We’ll generate a plan first, then build the files in stages:
-          <strong>HTML → CSS → game.js</strong>. Keep it simple — the games will still feel alive with motion, HUD, and reactions.
-        </p>
-      </div>
-
-      <div class="statusPill" title="Online status is checked via /health">
-        <span id="apiDot" class="dot warn"></span>
-        <span id="apiStatus">Checking builder…</span>
-        <button id="btnConnect" class="statusBtn secondary" type="button">Connect</button>
-        <button id="btnSettings" class="statusBtn" type="button" title="Developer settings">⚙</button>
-      </div>
-    </div>
-
-    <div class="grid">
-      <!-- LEFT: Workflow -->
-      <div class="panel">
-        <div class="panelHead">
-          <div class="panelTitle">
-            <h2>Build Flow</h2>
-            <p>Step 1: Idea → Step 2: Review Plan → Step 3: Generate files → Step 4: Edits</p>
-          </div>
-          <div class="badge" id="editsBadge">Edits: 3</div>
-        </div>
-        <div class="panelBody">
-          <div class="steps">
-
-            <!-- STEP 1 -->
-            <div class="stepCard">
-              <div class="stepHead">
-                <strong>Step 1 — Describe your game</strong>
-                <span class="badge">Prompt</span>
-              </div>
-              <div class="stepBody">
-                <div class="label">Game idea (short)</div>
-                <textarea id="ideaInput" placeholder="Example: Asteroid survival game. Viewers type ‘left’ ‘right’ ‘shoot’ to control a ship. Likes add shields. Gifts trigger bomb power-ups."></textarea>
-
-                <div class="row">
-                  <button id="btnMic" class="btn secondary" type="button">🎙 Talk to text</button>
-                  <button id="btnPlan" class="btn" type="button">Generate Plan</button>
-                </div>
-
-                <div class="hint">
-                  Keep it simple: what you see on screen, and what chat/likes/gifts do. The builder handles the TikTok connection automatically in the generated game.
-                </div>
-              </div>
-            </div>
-
-            <!-- STEP 2 -->
-            <div class="stepCard">
-              <div class="stepHead">
-                <strong>Step 2 — Review the plan</strong>
-                <span class="badge">Plan</span>
-              </div>
-              <div class="stepBody">
-                <div class="kv">
-                  <div class="mini">
-                    <div class="k">Title</div>
-                    <div class="v" id="planTitle">—</div>
-                  </div>
-                  <div class="mini">
-                    <div class="k">Template</div>
-                    <div class="v" id="planTemplate">Auto</div>
-                  </div>
-                  <div class="mini">
-                    <div class="k">Default round</div>
-                    <div class="v" id="planRound">—</div>
-                  </div>
-                  <div class="mini">
-                    <div class="k">Default goal</div>
-                    <div class="v" id="planGoal">—</div>
-                  </div>
-                </div>
-
-                <div style="margin-top:10px">
-                  <div class="label">Corrections (optional)</div>
-                  <textarea id="correctionsInput" placeholder="Only if needed: clarify the controls, interactions, theme, win condition, etc."></textarea>
-                  <div class="row">
-                    <button id="btnReplan" class="btn secondary" type="button" disabled>Apply Corrections</button>
-                    <button id="btnLockPlan" class="btn" type="button" disabled>Lock Plan</button>
-                  </div>
-                  <div class="hint">
-                    “Lock Plan” enables HTML → CSS → game.js generation using this plan.
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- STEP 3 -->
-            <div class="stepCard">
-              <div class="stepHead">
-                <strong>Step 3 — Generate files</strong>
-                <span class="badge">Files</span>
-              </div>
-              <div class="stepBody">
-
-                <div class="themeRow">
-                  <div class="themePick">
-                    <div class="swatch" id="swPrimary" title="Pick primary"></div>
-                    <div class="t">
-                      <div class="k">Primary</div>
-                      <div class="v" id="vPrimary">#ff7a00</div>
-                    </div>
-                    <input class="hiddenColor" id="cPrimary" type="color" value="#ff7a00">
-                  </div>
-
-                  <div class="themePick">
-                    <div class="swatch" id="swSecondary" title="Pick secondary"></div>
-                    <div class="t">
-                      <div class="k">Secondary</div>
-                      <div class="v" id="vSecondary">#ffb347</div>
-                    </div>
-                    <input class="hiddenColor" id="cSecondary" type="color" value="#ffb347">
-                  </div>
-
-                  <div class="themePick">
-                    <div class="swatch" id="swBg" title="Pick background"></div>
-                    <div class="t">
-                      <div class="k">Background</div>
-                      <div class="v" id="vBg">#070707</div>
-                    </div>
-                    <input class="hiddenColor" id="cBg" type="color" value="#070707">
-                  </div>
-                </div>
-
-                <div class="row" style="margin-top:12px">
-                  <button id="btnBuildHtml" class="btn" type="button" disabled>Build HTML</button>
-                  <button id="btnBuildCss" class="btn secondary" type="button" disabled>Build CSS</button>
-                  <button id="btnBuildJs" class="btn secondary" type="button" disabled>Build game.js</button>
-                </div>
-
-                <div class="hint">
-                  Generated games are meant to be previewed inside your ChatTokGaming preview runner. This builder only outputs the files.
-                </div>
-              </div>
-            </div>
-
-            <!-- STEP 4 -->
-            <div class="stepCard">
-              <div class="stepHead">
-                <strong>Step 4 — Edit the game (3 edits)</strong>
-                <span class="badge">Edit</span>
-              </div>
-              <div class="stepBody">
-                <div class="label">Edit request</div>
-                <textarea id="editInput" placeholder="Example: Make the ship bigger, add asteroid spawning, and show a shield bar."></textarea>
-                <div class="row">
-                  <button id="btnApplyEdit" class="btn" type="button" disabled>Apply Edit</button>
-                  <button id="btnResetAll" class="btn danger" type="button">Reset</button>
-                </div>
-                <div class="hint">
-                  Edits update only the safe region inside <strong>game.js</strong> (AI_REGION) or theme vars in <strong>style.css</strong>.
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- RIGHT: Outputs -->
-      <div class="panel">
-        <div class="panelHead">
-          <div class="panelTitle">
-            <h2>Output Files</h2>
-            <p>Copy/paste into your game folder: <strong>index.html</strong>, <strong>style.css</strong>, <strong>game.js</strong></p>
-          </div>
-          <div class="badge" id="outBadge">Ready</div>
-        </div>
-        <div class="panelBody">
-          <div class="codeBox" style="margin-bottom:12px">
-            <div class="codeTop">
-              <div class="name">index.html</div>
-              <button class="copyBtn" type="button" data-copy="outHtml">Copy</button>
-            </div>
-            <textarea id="outHtml" class="codeArea" spellcheck="false" placeholder="(HTML will appear here)"></textarea>
-          </div>
-
-          <div class="codeBox" style="margin-bottom:12px">
-            <div class="codeTop">
-              <div class="name">style.css</div>
-              <button class="copyBtn" type="button" data-copy="outCss">Copy</button>
-            </div>
-            <textarea id="outCss" class="codeArea" spellcheck="false" placeholder="(CSS will appear here)"></textarea>
-          </div>
-
-          <div class="codeBox">
-            <div class="codeTop">
-              <div class="name">game.js</div>
-              <button class="copyBtn" type="button" data-copy="outJs">Copy</button>
-            </div>
-            <textarea id="outJs" class="codeArea" spellcheck="false" placeholder="(game.js will appear here)"></textarea>
-          </div>
-
-          <div class="hint" style="margin-top:12px">
-            Note: The Render API URL is not shown in the UI, but any browser call is visible in DevTools. Your OpenAI key stays safe because it lives only on Render.
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <footer style="margin-top:18px">
-      © <span id="year"></span> ChatTok Tools •
-      <a href="#" onclick="return false;">Privacy</a> •
-      <a href="#" onclick="return false;">Terms</a> •
-      <a href="#" onclick="return false;">Contact</a>
-      <div style="margin-top:6px">
-        (Privacy/Terms pages can be wired later — placeholders for now.)
-      </div>
-    </footer>
-  </div>
-
-  <div id="toast" class="toast"></div>
 
   <script>
-    // -----------------------------
-    // Local auth (simple, browser-only)
-    // -----------------------------
-    const AUTH_KEY = "CT_BUILDER_AUTH_V1";
-    const authOverlay = document.getElementById("authOverlay");
-    const authEmail = document.getElementById("authEmail");
-    const authPass = document.getElementById("authPass");
-    const authLogin = document.getElementById("authLogin");
-    const authReset = document.getElementById("authReset");
+    /**********************************************************
+     * Builder Front-End (3-step + optional edits)
+     * - Keeps API key off GitHub (Render env var only)
+     * - UI does NOT show Render URL
+     **********************************************************/
 
-    function getAuth(){
-      try { return JSON.parse(localStorage.getItem(AUTH_KEY) || "null"); } catch { return null; }
-    }
-    function setAuth(email, pass){
-      // Not secure. Just gates UI.
-      const payload = { email: String(email||"").trim().toLowerCase(), pass: String(pass||"") };
-      localStorage.setItem(AUTH_KEY, JSON.stringify(payload));
-    }
-    function clearAuth(){ localStorage.removeItem(AUTH_KEY); }
+    // Default API base (kept out of the main UI)
+    const DEFAULT_API_BASE = "https://chattok-builder-api.onrender.com";
 
-    function ensureAuth(){
-      const a = getAuth();
-      if (!a || !a.email || !a.pass){
-        authOverlay.classList.add("show");
+    const $ = (id) => document.getElementById(id);
+
+    const state = {
+      apiBase: localStorage.getItem("ct_builder_api_base") || DEFAULT_API_BASE,
+
+      templateId: "bossraid",
+      theme: { primary: "#ff0050", secondary: "#00f2ea", background: "#070b14" },
+
+      idea: "",
+      plan: "",
+      planRev: 0,
+
+      // context from server
+      context: { spec: null, templateId: "bossraid" },
+
+      // cached server outputs
+      files: { "index.html": "", "style.css": "", "game.js": "" },
+      // helper: we cache html returned from "plan generation" so Step3 can be fast
+      cachedHtmlFromPlan: "",
+
+      // build locks
+      built: { html: false, css: false, js: false },
+
+      // edit credits
+      editsLeft: 3,
+    };
+
+    const ui = {
+      apiDot: $("apiDot"),
+      apiStatus: $("apiStatus"),
+      actionDot: $("actionDot"),
+      actionText: $("actionText"),
+
+      status1: $("status1"),
+      status2: $("status2"),
+      status3: $("status3"),
+      status4: $("status4"),
+
+      step2: $("step2"),
+      step3: $("step3"),
+      step4: $("step4"),
+
+      planRev: $("planRev"),
+      buildState: $("buildState"),
+      editsLeft: $("editsLeft"),
+
+      idea: $("idea"),
+      plan: $("plan"),
+      editRequest: $("editRequest"),
+
+      templateId: $("templateId"),
+
+      btnPlan: $("btnPlan"),
+      btnPlanEdit: $("btnPlanEdit"),
+      btnContinue: $("btnContinue"),
+
+      btnBuildHtml: $("btnBuildHtml"),
+      btnBuildCss: $("btnBuildCss"),
+      btnBuildJs: $("btnBuildJs"),
+
+      btnEditHtml: $("btnEditHtml"),
+      btnEditCss: $("btnEditCss"),
+      btnEditJs: $("btnEditJs"),
+
+      code: $("code"),
+      codeName: $("codeName"),
+      codeHint: $("codeHint"),
+      tabs: $("tabs"),
+
+      btnCopy: $("btnCopy"),
+      btnCopyAll: $("btnCopyAll"),
+      btnClear: $("btnClear"),
+      btnDownload: $("btnDownload"),
+
+      ideaCount: $("ideaCount"),
+      costHint: $("costHint"),
+
+      btnMic: $("btnMic"),
+
+      // modal
+      modalBg: $("modalBg"),
+      btnAdvanced: $("btnAdvanced"),
+      btnCloseModal: $("btnCloseModal"),
+      apiBase: $("apiBase"),
+      btnSaveApi: $("btnSaveApi"),
+      btnTestApi: $("btnTestApi"),
+      btnResetApi: $("btnResetApi"),
+      apiCheckText: $("apiCheckText"),
+    };
+
+    let activeFile = "index.html";
+
+    function setAction(text, kind = "warn"){
+      ui.actionText.textContent = text;
+      ui.actionDot.className = "dot " + (kind || "warn");
+    }
+
+    function lockStep(el, locked){
+      if (!el) return;
+      el.classList.toggle("locked", !!locked);
+    }
+
+    function setApiStatus(text, kind){
+      ui.apiStatus.textContent = text;
+      ui.apiDot.className = "dot " + (kind || "warn");
+    }
+
+    function apiUrl(path){
+      const base = String(state.apiBase || "").trim().replace(/\/+$/, "");
+      return base + path;
+    }
+
+    async function apiFetch(path, options){
+      const url = apiUrl(path);
+      const r = await fetch(url, {
+        method: "GET",
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          ...(options && options.headers ? options.headers : {}),
+        }
+      });
+
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        const msg = data && data.error ? data.error : ("Request failed: " + r.status);
+        const err = new Error(msg);
+        err.status = r.status;
+        err.data = data;
+        throw err;
+      }
+      return data;
+    }
+
+    function setFile(name, content, hint){
+      state.files[name] = String(content || "");
+      if (activeFile === name){
+        ui.code.textContent = state.files[name] || "";
+        ui.codeHint.textContent = hint || (state.files[name] ? "Generated" : "Not generated yet");
       }
     }
 
-    authLogin.addEventListener("click", () => {
-      const e = authEmail.value.trim();
-      const p = authPass.value;
-      if (!e || !p) return toast("Enter email + password.");
-      setAuth(e, p);
-      authOverlay.classList.remove("show");
-      toast("Signed in (local).");
-    });
-
-    authReset.addEventListener("click", () => {
-      clearAuth();
-      authEmail.value = "";
-      authPass.value = "";
-      toast("Local account reset.");
-    });
-
-    // -----------------------------
-    // API base (hidden from UI)
-    // -----------------------------
-    // You can't truly hide a browser-called URL, but we don't show it in the UI.
-    const API_KEY = "CT_API_BASE_V1";
-    const DEFAULT_API = "https://chattok-builder-api.onrender.com";
-    function getApiBase(){
-      return (localStorage.getItem(API_KEY) || DEFAULT_API).replace(/\/+$/, "");
-    }
-    function setApiBase(v){
-      localStorage.setItem(API_KEY, String(v||"").trim().replace(/\/+$/, ""));
+    function showGenerating(name){
+      if (activeFile !== name) return;
+      ui.code.textContent = "";
+      ui.codeHint.innerHTML = "<span class='gen'>Generating…</span>";
     }
 
-    // -----------------------------
-    // Online indicator
-    // -----------------------------
-    const apiDot = document.getElementById("apiDot");
-    const apiStatus = document.getElementById("apiStatus");
-    const btnConnect = document.getElementById("btnConnect");
-    const btnSettings = document.getElementById("btnSettings");
+    function setActiveFile(name){
+      activeFile = name;
+      ui.codeName.textContent = name;
+      ui.code.textContent = state.files[name] || "";
+      ui.codeHint.textContent = state.files[name] ? "Generated" : "Not generated yet";
 
-    let apiOnline = false;
+      [...ui.tabs.querySelectorAll(".tab")].forEach(t => {
+        t.classList.toggle("active", t.dataset.file === name);
+      });
+    }
 
-    async function ping(){
-      const base = getApiBase();
+    function updateCounters(){
+      ui.ideaCount.textContent = (ui.idea.value || "").length + " chars";
+    }
+
+    // Swatches
+    const PRESETS = {
+      primary: ["#ff0050", "#ff2d7a", "#ff4d4d", "#ff7a00", "#ffd24d"],
+      secondary: ["#00f2ea", "#00c2ff", "#2ee59d", "#7c5cff", "#b26bff"],
+      background: ["#070b14", "#0b1224", "#111927", "#000000", "#1a1a1a"],
+    };
+
+    function buildSwatches(containerId, key){
+      const el = $(containerId);
+      el.innerHTML = "";
+      PRESETS[key].forEach(hex => {
+        const d = document.createElement("div");
+        d.className = "swatch";
+        d.style.background = hex;
+        d.title = hex;
+        d.addEventListener("click", () => {
+          state.theme[key] = hex;
+          syncThemeUi();
+        });
+        el.appendChild(d);
+      });
+    }
+
+    function syncThemeUi(){
+      $("valPrimary").textContent = state.theme.primary;
+      $("valSecondary").textContent = state.theme.secondary;
+      $("valBackground").textContent = state.theme.background;
+
+      // mark active swatches
+      const mark = (groupEl, val) => {
+        [...groupEl.querySelectorAll(".swatch")].forEach(s => {
+          s.classList.toggle("active", (s.title || "").toLowerCase() === String(val).toLowerCase());
+        });
+      };
+      mark($("swatchesPrimary"), state.theme.primary);
+      mark($("swatchesSecondary"), state.theme.secondary);
+      mark($("swatchesBackground"), state.theme.background);
+    }
+
+    function makePlanText(spec, templateId){
+      const title = spec?.title || "ChatTok Live Game";
+      const subtitle = spec?.subtitle || "Live Interactive";
+      const one = spec?.oneSentence || "Chat and gifts power up the action.";
+      const how = Array.isArray(spec?.howToPlay) ? spec.howToPlay : [];
+      const rs = Number(spec?.defaultSettings?.roundSeconds || 20);
+      const goal = Number(spec?.defaultSettings?.winGoal || 100);
+
+      const templateMap = {
+        bossraid: [
+          "Core loop: A big boss is always on-screen. Viewers damage it and trigger power-ups.",
+          "Chat: basic attacks / commands (ex: “attack”, “hit”, “boom”).",
+          "Likes: chip damage + energy buildup (fast, satisfying).",
+          "Gifts: big damage + screen shake + burst effects (very visible).",
+        ],
+        asteroids: [
+          "Core loop: Asteroids spawn and move. Viewers shoot, spawn, or redirect action.",
+          "Chat: fire/shoot/spawn effects (ex: “fire”, “pew”, “meteor”).",
+          "Likes: add bullets or small explosions.",
+          "Gifts: massive meteor storm / super weapon.",
+        ],
+        runner: [
+          "Core loop: Runner dodges obstacles continuously.",
+          "Chat: lane moves / jump / dodge commands (simple).",
+          "Likes: speed boosts or shield.",
+          "Gifts: clear the screen or slow obstacles.",
+        ],
+        arena: [
+          "Core loop: Arena chaos with bouncing entities.",
+          "Chat: spawn units / push forces.",
+          "Likes: nudge momentum.",
+          "Gifts: giant slam or special unit spawn.",
+        ],
+        wheel: [
+          "Core loop: Players join the wheel, then wheel spins to pick winners.",
+          "Chat: join with keyword.",
+          "Likes: increase spin power.",
+          "Gifts: instant spin or bonus slices.",
+        ],
+        trivia: [
+          "Core loop: Questions appear. Viewers answer in chat.",
+          "Chat: A/B/C/D answers.",
+          "Likes: small team boosts or hints.",
+          "Gifts: reveal hint or freeze timer.",
+        ],
+      };
+
+      const lines = [];
+      lines.push(`TITLE: ${title}`);
+      lines.push(`SUBTITLE: ${subtitle}`);
+      lines.push("");
+      lines.push(`ONE-LINER: ${one}`);
+      lines.push("");
+      lines.push("GAMEPLAY PLAN:");
+      (templateMap[templateId] || templateMap.bossraid).forEach(x => lines.push("- " + x));
+      lines.push("");
+      lines.push("DEFAULT SETTINGS:");
+      lines.push(`- Round seconds: ${rs}`);
+      lines.push(`- Win goal: ${goal}`);
+      lines.push("");
+      lines.push("HOW TO PLAY (shown to viewers):");
+      if (how.length) how.slice(0,10).forEach(x => lines.push("- " + String(x)));
+      else lines.push("- Chat to interact. Likes add energy. Gifts trigger power-ups.");
+      lines.push("");
+      lines.push("STYLE / QUALITY RULES:");
+      lines.push("- Always show visible motion and gameplay action (spawns/movement/effects).");
+      lines.push("- Notifications should be small, transparent, and never block the game.");
+      lines.push("- No debug/test buttons on the game screen.");
+      lines.push("- Keep controls minimal unless the concept truly needs host controls.");
+      return lines.join("\n");
+    }
+
+    function unlockStep2(){
+      lockStep(ui.step2, false);
+      ui.status2.textContent = "Plan ready";
+    }
+
+    function unlockStep3(){
+      lockStep(ui.step3, false);
+      ui.status3.textContent = "Ready to build";
+    }
+
+    function unlockStep4(){
+      lockStep(ui.step4, false);
+      ui.status4.textContent = "Optional edits ready";
+    }
+
+    function setBuildBadge(text){
+      ui.buildState.textContent = text;
+    }
+
+    function setPlanBadge(){
+      ui.planRev.textContent = "rev " + state.planRev;
+    }
+
+    function setEditsLeft(){
+      ui.editsLeft.textContent = String(state.editsLeft);
+      ui.btnEditHtml.disabled = state.editsLeft <= 0;
+      ui.btnEditJs.disabled = state.editsLeft <= 0;
+    }
+
+    function lockBuildButton(btn, done){
+      if (!btn) return;
+      btn.disabled = !!done;
+    }
+
+    function resetBuildLocks(){
+      state.built.html = false;
+      state.built.css = false;
+      state.built.js = false;
+      ui.btnBuildHtml.disabled = false;
+      ui.btnBuildCss.disabled = true;
+      ui.btnBuildJs.disabled = true;
+      setBuildBadge("not started");
+    }
+
+    async function checkApi(){
       try{
-        const r = await fetch(base + "/health", { method:"GET" });
-        if (!r.ok) throw new Error("bad status");
-        apiOnline = true;
-        apiDot.className = "dot good";
-        apiStatus.textContent = "Builder online";
-        btnConnect.textContent = "Connected";
-        btnConnect.classList.add("secondary");
-        btnConnect.disabled = true;
-        return true;
-      }catch{
-        apiOnline = false;
-        apiDot.className = "dot bad";
-        apiStatus.textContent = "Builder offline";
-        btnConnect.textContent = "Connect";
-        btnConnect.disabled = false;
+        setApiStatus("Checking API…", "warn");
+        const r = await apiFetch("/health");
+        if (r && r.ok){
+          setApiStatus("API online", "good");
+          return true;
+        }
+        setApiStatus("API unknown", "warn");
+        return false;
+      }catch(e){
+        setApiStatus("API offline", "bad");
         return false;
       }
     }
 
-    btnConnect.addEventListener("click", async () => {
-      apiDot.className = "dot warn";
-      apiStatus.textContent = "Waking…";
-      btnConnect.disabled = true;
-      await ping();
-    });
-
-    btnSettings.addEventListener("click", () => {
-      const current = getApiBase();
-      const v = prompt("Developer setting: API base URL (Render).", current);
-      if (v && v.trim()){
-        setApiBase(v.trim());
-        toast("Saved API base.");
-        ping();
-      }
-    });
-
-    // -----------------------------
-    // Toast
-    // -----------------------------
-    const toastEl = document.getElementById("toast");
-    let toastTimer = null;
-    function toast(msg){
-      toastEl.textContent = String(msg || "");
-      toastEl.classList.add("show");
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1700);
-    }
-
-    // -----------------------------
-    // Speech-to-text
-    // -----------------------------
-    const btnMic = document.getElementById("btnMic");
-    const ideaInput = document.getElementById("ideaInput");
-    let rec = null;
-    let micOn = false;
-
-    function getSpeech(){
-      return window.SpeechRecognition || window.webkitSpeechRecognition || null;
-    }
-
-    function startMic(){
-      const SR = getSpeech();
-      if (!SR){
-        toast("Speech-to-text not supported in this browser.");
+    // Step 2 “Plan generation” uses /api/generate stage=html (server returns spec + html)
+    async function generatePlanFromIdea({ usePlanEdits=false } = {}){
+      const idea = String(ui.idea.value || "").trim();
+      if (!idea){
+        ui.status1.textContent = "Write a detailed idea first";
+        setAction("Missing idea", "bad");
         return;
       }
-      if (micOn) return;
 
-      rec = new SR();
-      rec.lang = "en-US";
-      rec.interimResults = true;
-      rec.continuous = true;
+      state.idea = idea;
+      state.templateId = String(ui.templateId.value || "bossraid");
+      ui.status1.textContent = "Generating plan…";
+      ui.btnPlan.disabled = true;
+      setAction("Generating plan", "warn");
 
-      let finalText = "";
-      rec.onresult = (e) => {
-        let interim = "";
-        for (let i = e.resultIndex; i < e.results.length; i++){
-          const t = e.results[i][0].transcript;
-          if (e.results[i].isFinal) finalText += t + " ";
-          else interim += t;
+      // During plan generation, show "Generating…" in index.html tab since server returns html too
+      showGenerating("index.html");
+
+      try{
+        const payload = {
+          stage: "html",
+          idea: usePlanEdits
+            ? (state.idea + "\n\nUSER EDITED PLAN:\n" + String(ui.plan.value || "").trim())
+            : state.idea,
+          templateId: state.templateId,
+        };
+
+        const resp = await apiFetch("/api/generate", { method:"POST", body: JSON.stringify(payload) });
+
+        const spec = resp?.context?.spec || resp?.context?.specification || null;
+        state.context = { spec, templateId: resp?.context?.templateId || state.templateId };
+
+        // Cache html returned from this call; Step3 will auto-use it
+        const file = resp?.file;
+        if (file && file.name === "index.html"){
+          state.cachedHtmlFromPlan = file.content || "";
+          setFile("index.html", state.cachedHtmlFromPlan, "Plan pass generated index.html (cached)");
         }
-        const base = ideaInput.value.replace(/\s+$/,"");
-        ideaInput.value = (base ? base + " " : "") + (finalText + interim).trim();
-      };
 
-      rec.onerror = () => {
-        stopMic();
-        toast("Mic error. Try again.");
-      };
+        // Build editable plan text for Step2
+        const planText = makePlanText(spec, state.templateId);
+        state.plan = planText;
+        ui.plan.value = planText;
 
-      rec.onend = () => {
-        micOn = false;
-        btnMic.textContent = "🎙 Talk to text";
-        btnMic.classList.add("secondary");
-      };
+        state.planRev += 1;
+        setPlanBadge();
 
-      micOn = true;
-      btnMic.textContent = "■ Stop mic";
-      btnMic.classList.remove("secondary");
-      rec.start();
-      toast("Listening…");
-    }
+        ui.status1.textContent = "Plan ready";
+        ui.status2.textContent = "Edit or continue";
+        setAction("Plan ready", "good");
 
-    function stopMic(){
-      try{ rec && rec.stop(); }catch{}
-      micOn = false;
-    }
+        unlockStep2();
+        resetBuildLocks();
 
-    btnMic.addEventListener("click", () => {
-      if (micOn) stopMic();
-      else startMic();
-    });
+        // Also clear old outputs except the cached HTML (so the flow feels clean)
+        state.files["style.css"] = "";
+        state.files["game.js"] = "";
+        if (activeFile === "style.css" || activeFile === "game.js"){
+          setActiveFile(activeFile);
+        }
 
-    // -----------------------------
-    // Build flow state
-    // -----------------------------
-    const outHtml = document.getElementById("outHtml");
-    const outCss  = document.getElementById("outCss");
-    const outJs   = document.getElementById("outJs");
-
-    const btnPlan = document.getElementById("btnPlan");
-    const btnReplan = document.getElementById("btnReplan");
-    const btnLockPlan = document.getElementById("btnLockPlan");
-
-    const btnBuildHtml = document.getElementById("btnBuildHtml");
-    const btnBuildCss  = document.getElementById("btnBuildCss");
-    const btnBuildJs   = document.getElementById("btnBuildJs");
-
-    const planTitle = document.getElementById("planTitle");
-    const planTemplate = document.getElementById("planTemplate");
-    const planRound = document.getElementById("planRound");
-    const planGoal = document.getElementById("planGoal");
-
-    const correctionsInput = document.getElementById("correctionsInput");
-    const editsBadge = document.getElementById("editsBadge");
-    const outBadge = document.getElementById("outBadge");
-
-    const editInput = document.getElementById("editInput");
-    const btnApplyEdit = document.getElementById("btnApplyEdit");
-    const btnResetAll = document.getElementById("btnResetAll");
-
-    // Theme pickers
-    const cPrimary = document.getElementById("cPrimary");
-    const cSecondary = document.getElementById("cSecondary");
-    const cBg = document.getElementById("cBg");
-    const swPrimary = document.getElementById("swPrimary");
-    const swSecondary = document.getElementById("swSecondary");
-    const swBg = document.getElementById("swBg");
-    const vPrimary = document.getElementById("vPrimary");
-    const vSecondary = document.getElementById("vSecondary");
-    const vBg = document.getElementById("vBg");
-
-    function applySwatches(){
-      swPrimary.style.background = cPrimary.value;
-      swSecondary.style.background = cSecondary.value;
-      swBg.style.background = cBg.value;
-      vPrimary.textContent = cPrimary.value;
-      vSecondary.textContent = cSecondary.value;
-      vBg.textContent = cBg.value;
-    }
-    applySwatches();
-
-    swPrimary.addEventListener("click", () => cPrimary.click());
-    swSecondary.addEventListener("click", () => cSecondary.click());
-    swBg.addEventListener("click", () => cBg.click());
-    cPrimary.addEventListener("input", applySwatches);
-    cSecondary.addEventListener("input", applySwatches);
-    cBg.addEventListener("input", applySwatches);
-
-    // Builder state
-    let editsRemaining = 3;
-    let locked = false;
-
-    // Context from API to avoid extra cost
-    let currentIdea = "";
-    let currentTemplateId = "auto"; // sent as hint, server can use it
-    let currentSpec = null;
-    let cachedHtml = "";
-
-    function setEdits(n){
-      editsRemaining = Math.max(0, Number(n||0));
-      editsBadge.textContent = "Edits: " + editsRemaining;
-      btnApplyEdit.disabled = !(locked && outJs.value.trim() && editsRemaining > 0);
-    }
-    setEdits(3);
-
-    function setLocked(v){
-      locked = !!v;
-      btnBuildHtml.disabled = !locked;
-      btnBuildCss.disabled  = !locked;
-      btnBuildJs.disabled   = !locked;
-      btnReplan.disabled    = !currentSpec;
-      btnLockPlan.disabled  = !currentSpec;
-      btnApplyEdit.disabled = !(locked && outJs.value.trim() && editsRemaining > 0);
-    }
-    setLocked(false);
-
-    function themePayload(){
-      return {
-        primary: cPrimary.value,
-        secondary: cSecondary.value,
-        background: cBg.value
-      };
-    }
-
-    async function postJson(path, data){
-      const base = getApiBase();
-      const r = await fetch(base + path, {
-        method:"POST",
-        headers: { "Content-Type":"application/json" },
-        body: JSON.stringify(data || {})
-      });
-      const j = await r.json().catch(() => ({}));
-      if (!r.ok || !j.ok){
-        const msg = j && j.error ? j.error : ("Request failed (" + r.status + ")");
-        throw new Error(msg);
+      }catch(e){
+        console.error(e);
+        ui.status1.textContent = "Plan failed: " + (e.message || "error");
+        ui.codeHint.textContent = "Error";
+        ui.code.textContent = (e && e.data) ? JSON.stringify(e.data, null, 2) : String(e);
+        setAction("Plan failed", "bad");
+      }finally{
+        ui.btnPlan.disabled = false;
       }
-      return j;
     }
 
-    function renderPlan(spec){
-      planTitle.textContent = spec?.title || "—";
-      planTemplate.textContent = (currentTemplateId === "auto" ? "Auto" : currentTemplateId);
-      planRound.textContent = String(spec?.defaultSettings?.roundSeconds ?? "—");
-      planGoal.textContent  = String(spec?.defaultSettings?.winGoal ?? "—");
-    }
-
-    // Generate Plan (we use stage=html because the API currently generates spec there)
-    async function generatePlan(ideaText){
-      if (!apiOnline){
-        toast("Builder is offline. Click Connect.");
-        return;
-      }
-      currentIdea = ideaText.trim();
-      if (!currentIdea){
-        toast("Type a short game idea first.");
+    async function buildHtml(){
+      // If we already have cached HTML from plan generation, use it immediately (fast + cheap)
+      if (state.cachedHtmlFromPlan){
+        setFile("index.html", state.cachedHtmlFromPlan, "Built (from plan cache)");
+        ui.status3.textContent = "HTML built";
+        state.built.html = true;
+        lockBuildButton(ui.btnBuildHtml, true);
+        ui.btnBuildCss.disabled = false;
+        setBuildBadge("html done");
+        setAction("HTML built", "good");
         return;
       }
 
-      outBadge.textContent = "Planning…";
-      btnPlan.disabled = true;
+      // Fallback: build from API
+      showGenerating("index.html");
+      ui.status3.textContent = "Building HTML…";
+      setAction("Building HTML", "warn");
 
       const payload = {
         stage: "html",
-        idea: currentIdea,
-        templateId: currentTemplateId,
-        theme: themePayload()
+        idea: (state.idea || String(ui.idea.value || "").trim()) + "\n\nUSER PLAN:\n" + String(ui.plan.value || "").trim(),
+        templateId: state.templateId
       };
 
-      const j = await postJson("/api/generate", payload);
+      const resp = await apiFetch("/api/generate", { method:"POST", body: JSON.stringify(payload) });
+      const file = resp?.file;
 
-      currentSpec = j.context?.spec || null;
-      cachedHtml = j.file?.content || "";
-
-      if (!currentSpec){
-        throw new Error("Plan failed: missing spec from API.");
+      if (file && file.name === "index.html"){
+        setFile("index.html", file.content || "", "Built");
+        state.cachedHtmlFromPlan = file.content || "";
       }
 
-      renderPlan(currentSpec);
-      btnReplan.disabled = false;
-      btnLockPlan.disabled = false;
+      state.context = { spec: resp?.context?.spec || state.context.spec, templateId: resp?.context?.templateId || state.templateId };
 
-      outBadge.textContent = "Plan ready";
-      toast("Plan generated. Review it, then lock it.");
+      ui.status3.textContent = "HTML built";
+      state.built.html = true;
+      lockBuildButton(ui.btnBuildHtml, true);
+      ui.btnBuildCss.disabled = false;
+      setBuildBadge("html done");
+      setAction("HTML built", "good");
+    }
+
+    async function buildCss(){
+      showGenerating("style.css");
+      ui.status3.textContent = "Building CSS…";
+      setAction("Building CSS", "warn");
+
+      const payload = {
+        stage: "css",
+        theme: {
+          primary: state.theme.primary,
+          secondary: state.theme.secondary,
+          background: state.theme.background
+        },
+        context: state.context || {}
+      };
+
+      const resp = await apiFetch("/api/generate", { method:"POST", body: JSON.stringify(payload) });
+      const file = resp?.file;
+
+      if (file && file.name === "style.css"){
+        setFile("style.css", file.content || "", "Built");
+      }
+
+      ui.status3.textContent = "CSS built";
+      state.built.css = true;
+      lockBuildButton(ui.btnBuildCss, true);
+      ui.btnBuildJs.disabled = false;
+      setBuildBadge("html + css done");
+      setAction("CSS built", "good");
+    }
+
+    async function buildJs(){
+      showGenerating("game.js");
+      ui.status3.textContent = "Building game.js…";
+      setAction("Building game.js", "warn");
+
+      const payload = {
+        stage: "js",
+        idea: (state.idea || String(ui.idea.value || "").trim()) + "\n\nUSER PLAN:\n" + String(ui.plan.value || "").trim(),
+        templateId: state.templateId,
+        context: state.context || {}
+      };
+
+      const resp = await apiFetch("/api/generate", { method:"POST", body: JSON.stringify(payload) });
+      const file = resp?.file;
+
+      if (file && file.name === "game.js"){
+        setFile("game.js", file.content || "", "Built");
+      }
+
+      // keep context
+      state.context = { spec: resp?.context?.spec || state.context.spec, templateId: resp?.context?.templateId || state.templateId };
+
+      ui.status3.textContent = "game.js built";
+      state.built.js = true;
+      lockBuildButton(ui.btnBuildJs, true);
+      setBuildBadge("all files done");
+      setAction("Build complete", "good");
+
+      unlockStep4();
+    }
+
+    async function doEditHtml(){
+      if (state.editsLeft <= 0) return;
+      const change = String(ui.editRequest.value || "").trim();
+      if (!change){
+        ui.status4.textContent = "Write an edit request first";
+        setAction("Missing edit request", "bad");
+        return;
+      }
+
+      showGenerating("index.html");
+      ui.status4.textContent = "Rebuilding HTML…";
+      setAction("Edit: HTML", "warn");
+
+      const payload = {
+        stage: "html",
+        idea: (state.idea || String(ui.idea.value || "").trim())
+          + "\n\nUSER PLAN:\n" + String(ui.plan.value || "").trim()
+          + "\n\nCHANGE REQUEST:\n" + change,
+        templateId: state.templateId
+      };
+
+      const resp = await apiFetch("/api/generate", { method:"POST", body: JSON.stringify(payload) });
+      const file = resp?.file;
+      if (file && file.name === "index.html"){
+        state.cachedHtmlFromPlan = file.content || "";
+        setFile("index.html", file.content || "", "Edited build");
+      }
+
+      state.context = { spec: resp?.context?.spec || state.context.spec, templateId: resp?.context?.templateId || state.templateId };
+
+      state.editsLeft = Math.max(0, state.editsLeft - 1);
+      setEditsLeft();
+      ui.status4.textContent = "HTML updated";
+      setAction("HTML updated", "good");
+    }
+
+    async function doEditCss(){
+      // CSS/theme re-injection does not consume edit credits
+      showGenerating("style.css");
+      ui.status4.textContent = "Rebuilding CSS…";
+      setAction("Edit: CSS", "warn");
+
+      const payload = {
+        stage: "css",
+        theme: {
+          primary: state.theme.primary,
+          secondary: state.theme.secondary,
+          background: state.theme.background
+        },
+        context: state.context || {}
+      };
+
+      const resp = await apiFetch("/api/generate", { method:"POST", body: JSON.stringify(payload) });
+      const file = resp?.file;
+      if (file && file.name === "style.css"){
+        setFile("style.css", file.content || "", "Edited build");
+      }
+
+      ui.status4.textContent = "CSS updated";
+      setAction("CSS updated", "good");
+    }
+
+    async function doEditJs(){
+      if (state.editsLeft <= 0) return;
+      const change = String(ui.editRequest.value || "").trim();
+      if (!change){
+        ui.status4.textContent = "Write an edit request first";
+        setAction("Missing edit request", "bad");
+        return;
+      }
+
+      showGenerating("game.js");
+      ui.status4.textContent = "Rebuilding game.js…";
+      setAction("Edit: game.js", "warn");
+
+      const payload = {
+        remainingEdits: state.editsLeft,
+        changeRequest: change,
+        templateId: state.templateId,
+        theme: {
+          primary: state.theme.primary,
+          secondary: state.theme.secondary,
+          background: state.theme.background
+        },
+        currentFiles: {
+          "style.css": state.files["style.css"] || "",
+          "game.js": state.files["game.js"] || ""
+        }
+      };
+
+      const resp = await apiFetch("/api/edit", { method:"POST", body: JSON.stringify(payload) });
+      const patches = Array.isArray(resp?.patches) ? resp.patches : [];
+      patches.forEach(p => {
+        if (p && p.name && typeof p.content === "string"){
+          setFile(p.name, p.content, "Edited build");
+        }
+      });
+
+      state.editsLeft = Number(resp?.remainingEdits ?? Math.max(0, state.editsLeft - 1));
+      setEditsLeft();
+
+      ui.status4.textContent = "game.js updated";
+      setAction("game.js updated", "good");
+    }
+
+    // Copy helpers
+    async function copyText(text){
+      try{
+        await navigator.clipboard.writeText(String(text || ""));
+        setAction("Copied", "good");
+      }catch(e){
+        // fallback
+        const ta = document.createElement("textarea");
+        ta.value = String(text || "");
+        document.body.appendChild(ta);
+        ta.select();
+        try{ document.execCommand("copy"); setAction("Copied", "good"); }catch{}
+        ta.remove();
+      }
+    }
+
+    // Export helper (simple: copies a “bundle” text)
+    function exportBundle(){
+      const bundle =
+`===== index.html =====
+${state.files["index.html"] || ""}
+
+===== style.css =====
+${state.files["style.css"] || ""}
+
+===== game.js =====
+${state.files["game.js"] || ""}
+
+`;
+      copyText(bundle);
+      alert("Export copied to clipboard (all 3 files).");
+    }
+
+    // Speech-to-text
+    let recognition = null;
+    function setupSpeech(){
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) return false;
+      recognition = new SR();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = "en-US";
+
+      let finalText = "";
+
+      recognition.onresult = (evt) => {
+        let interim = "";
+        for (let i = evt.resultIndex; i < evt.results.length; i++){
+          const t = evt.results[i][0]?.transcript || "";
+          if (evt.results[i].isFinal) finalText += t;
+          else interim += t;
+        }
+        const base = ui.idea.value || "";
+        ui.idea.value = (base + " " + (finalText + interim)).replace(/\s+/g, " ").trim();
+        updateCounters();
+      };
+
+      recognition.onerror = () => {};
+      recognition.onend = () => { ui.btnMic.disabled = false; ui.btnMic.textContent = "🎙️ Speak"; };
 
       return true;
     }
 
-    btnPlan.addEventListener("click", async () => {
-      try{
-        await generatePlan(ideaInput.value);
-      }catch(e){
-        toast(e.message || "Plan failed.");
-        outBadge.textContent = "Error";
-      }finally{
-        btnPlan.disabled = false;
-      }
-    });
+    // Modal
+    function openModal(){
+      ui.apiBase.value = state.apiBase || DEFAULT_API_BASE;
+      ui.modalBg.style.display = "flex";
+      ui.modalBg.setAttribute("aria-hidden", "false");
+    }
+    function closeModal(){
+      ui.modalBg.style.display = "none";
+      ui.modalBg.setAttribute("aria-hidden", "true");
+    }
 
-    btnReplan.addEventListener("click", async () => {
-      try{
-        const extra = correctionsInput.value.trim();
-        const merged = extra ? (currentIdea + "\n\nCorrections:\n" + extra) : currentIdea;
-        await generatePlan(merged);
-      }catch(e){
-        toast(e.message || "Re-plan failed.");
-        outBadge.textContent = "Error";
-      }
-    });
+    // Wire up UI
+    function init(){
+      // Build swatches
+      buildSwatches("swatchesPrimary", "primary");
+      buildSwatches("swatchesSecondary", "secondary");
+      buildSwatches("swatchesBackground", "background");
+      syncThemeUi();
 
-    btnLockPlan.addEventListener("click", () => {
-      if (!currentSpec) return;
-      setLocked(true);
-      outBadge.textContent = "Locked";
-      toast("Plan locked. Generate HTML → CSS → game.js.");
-    });
+      // Tabs
+      ui.tabs.addEventListener("click", (e) => {
+        const tab = e.target && e.target.closest(".tab");
+        if (!tab) return;
+        setActiveFile(tab.dataset.file);
+      });
 
-    // Build HTML (no extra API call: we already have the HTML from the plan stage)
-    btnBuildHtml.addEventListener("click", () => {
-      if (!locked) return;
-      if (!cachedHtml) {
-        toast("No HTML cached. Generate plan again.");
-        return;
-      }
-      outHtml.value = cachedHtml;
-      outBadge.textContent = "HTML ready";
-      toast("HTML generated.");
-      // Enable CSS next
-      btnBuildCss.disabled = false;
-      btnBuildJs.disabled = false; // can build JS anytime after lock
-    });
+      // Copy buttons
+      ui.btnCopy.addEventListener("click", () => copyText(state.files[activeFile] || ""));
+      ui.btnCopyAll.addEventListener("click", () => copyText(
+        `index.html\n\n${state.files["index.html"] || ""}\n\nstyle.css\n\n${state.files["style.css"] || ""}\n\ngame.js\n\n${state.files["game.js"] || ""}`
+      ));
+      ui.btnClear.addEventListener("click", () => {
+        state.files[activeFile] = "";
+        setActiveFile(activeFile);
+        setAction("Cleared current", "warn");
+      });
+      ui.btnDownload.addEventListener("click", exportBundle);
 
-    // Build CSS (theme-only; API stage css)
-    btnBuildCss.addEventListener("click", async () => {
-      try{
-        if (!locked) return;
-        outBadge.textContent = "Building CSS…";
-        btnBuildCss.disabled = true;
+      // Text counters
+      ui.idea.addEventListener("input", updateCounters);
+      updateCounters();
 
-        const j = await postJson("/api/generate", {
-          stage: "css",
-          theme: themePayload(),
-          templateId: currentTemplateId,
-          context: { spec: currentSpec }
+      // Template picker
+      ui.templateId.addEventListener("change", () => {
+        state.templateId = String(ui.templateId.value || "bossraid");
+        setAction("Template set: " + state.templateId, "warn");
+      });
+
+      // Step 1 -> Step 2
+      ui.btnPlan.addEventListener("click", () => generatePlanFromIdea({ usePlanEdits:false }));
+
+      // Step 2: Submit plan edits (regen)
+      ui.btnPlanEdit.addEventListener("click", () => {
+        ui.status2.textContent = "Regenerating plan…";
+        setAction("Regenerating plan", "warn");
+        generatePlanFromIdea({ usePlanEdits:true }).then(() => {
+          ui.status2.textContent = "Plan updated";
+          setAction("Plan updated", "good");
         });
+      });
 
-        outCss.value = j.file?.content || "";
-        outBadge.textContent = "CSS ready";
-        toast("CSS generated.");
-      }catch(e){
-        toast(e.message || "CSS failed.");
-        outBadge.textContent = "Error";
-      }finally{
-        btnBuildCss.disabled = false;
-      }
-    });
+      // Step 2: Continue to Step 3 (auto build HTML)
+      ui.btnContinue.addEventListener("click", async () => {
+        unlockStep3();
+        ui.status2.textContent = "Continuing…";
+        setAction("Continuing", "warn");
 
-    // Build JS (uses context.spec from plan to avoid re-spec cost)
-    btnBuildJs.addEventListener("click", async () => {
-      try{
-        if (!locked) return;
-        if (!currentSpec) { toast("Missing plan. Generate plan first."); return; }
-
-        outBadge.textContent = "Building game.js…";
-        btnBuildJs.disabled = true;
-
-        const j = await postJson("/api/generate", {
-          stage: "js",
-          idea: currentIdea,
-          templateId: currentTemplateId,
-          context: { spec: currentSpec }
-        });
-
-        outJs.value = j.file?.content || "";
-        outBadge.textContent = "game.js ready";
-        toast("game.js generated.");
-
-        // Enable edits
-        btnApplyEdit.disabled = !(editsRemaining > 0);
-      }catch(e){
-        toast(e.message || "JS failed.");
-        outBadge.textContent = "Error";
-      }finally{
-        btnBuildJs.disabled = false;
-      }
-    });
-
-    // Apply Edit (calls /api/edit)
-    btnApplyEdit.addEventListener("click", async () => {
-      try{
-        if (!locked) return;
-        if (editsRemaining <= 0) { toast("No edits remaining."); return; }
-        const changeRequest = editInput.value.trim();
-        if (!changeRequest) { toast("Type an edit request first."); return; }
-
-        outBadge.textContent = "Editing…";
-        btnApplyEdit.disabled = true;
-
-        const j = await postJson("/api/edit", {
-          remainingEdits: editsRemaining,
-          changeRequest,
-          templateId: currentTemplateId,
-          theme: themePayload(),
-          currentFiles: {
-            "style.css": outCss.value,
-            "game.js": outJs.value
-          }
-        });
-
-        const patches = Array.isArray(j.patches) ? j.patches : [];
-        for (const p of patches){
-          if (p.name === "style.css") outCss.value = p.content || "";
-          if (p.name === "game.js") outJs.value = p.content || "";
-        }
-
-        setEdits(j.remainingEdits);
-        outBadge.textContent = "Edited";
-        toast("Edit applied.");
-      }catch(e){
-        toast(e.message || "Edit failed.");
-        outBadge.textContent = "Error";
-      }finally{
-        btnApplyEdit.disabled = !(locked && outJs.value.trim() && editsRemaining > 0);
-      }
-    });
-
-    btnResetAll.addEventListener("click", () => {
-      currentIdea = "";
-      currentSpec = null;
-      cachedHtml = "";
-
-      ideaInput.value = "";
-      correctionsInput.value = "";
-      editInput.value = "";
-
-      outHtml.value = "";
-      outCss.value = "";
-      outJs.value = "";
-
-      planTitle.textContent = "—";
-      planRound.textContent = "—";
-      planGoal.textContent = "—";
-      planTemplate.textContent = "Auto";
-
-      setEdits(3);
-      setLocked(false);
-      outBadge.textContent = "Ready";
-      toast("Reset.");
-    });
-
-    // Copy buttons
-    document.querySelectorAll("[data-copy]").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const id = btn.getAttribute("data-copy");
-        const el = document.getElementById(id);
-        const val = el ? el.value : "";
-        if (!val.trim()) { toast("Nothing to copy."); return; }
+        // Auto build HTML, then unlock CSS
         try{
-          await navigator.clipboard.writeText(val);
-          toast("Copied.");
-        }catch{
-          el.focus();
-          el.select();
-          toast("Select + copy manually.");
+          ui.btnContinue.disabled = true;
+          await buildHtml();
+          ui.btnContinue.disabled = false;
+
+          ui.status2.textContent = "Done";
+          ui.status3.textContent = "HTML built — now build CSS";
+          setAction("Step 3 ready", "good");
+        }catch(e){
+          console.error(e);
+          ui.status3.textContent = "HTML build failed: " + (e.message || "error");
+          ui.btnContinue.disabled = false;
+          setAction("HTML build failed", "bad");
         }
       });
-    });
 
-    // Init
-    document.getElementById("year").textContent = String(new Date().getFullYear());
-    ensureAuth();
-    ping();
+      // Step 3 buttons
+      ui.btnBuildHtml.addEventListener("click", async () => {
+        try{ ui.btnBuildHtml.disabled = true; await buildHtml(); }catch(e){
+          ui.btnBuildHtml.disabled = false;
+          ui.status3.textContent = "HTML build failed: " + (e.message || "error");
+          setAction("HTML build failed", "bad");
+        }
+      });
+
+      ui.btnBuildCss.addEventListener("click", async () => {
+        try{ ui.btnBuildCss.disabled = true; await buildCss(); }catch(e){
+          ui.btnBuildCss.disabled = false;
+          ui.status3.textContent = "CSS build failed: " + (e.message || "error");
+          setAction("CSS build failed", "bad");
+        }
+      });
+
+      ui.btnBuildJs.addEventListener("click", async () => {
+        try{ ui.btnBuildJs.disabled = true; await buildJs(); }catch(e){
+          ui.btnBuildJs.disabled = false;
+          ui.status3.textContent = "JS build failed: " + (e.message || "error");
+          setAction("JS build failed", "bad");
+        }
+      });
+
+      // Step 4 buttons
+      ui.btnEditHtml.addEventListener("click", async () => {
+        try{ await doEditHtml(); }catch(e){
+          ui.status4.textContent = "HTML edit failed: " + (e.message || "error");
+          setAction("HTML edit failed", "bad");
+        }
+      });
+      ui.btnEditCss.addEventListener("click", async () => {
+        try{ await doEditCss(); }catch(e){
+          ui.status4.textContent = "CSS edit failed: " + (e.message || "error");
+          setAction("CSS edit failed", "bad");
+        }
+      });
+      ui.btnEditJs.addEventListener("click", async () => {
+        try{ await doEditJs(); }catch(e){
+          ui.status4.textContent = "JS edit failed: " + (e.message || "error");
+          setAction("JS edit failed", "bad");
+        }
+      });
+
+      // Mic
+      const hasSpeech = setupSpeech();
+      if (!hasSpeech) {
+        ui.btnMic.disabled = true;
+        ui.btnMic.title = "Speech not supported in this browser";
+      } else {
+        ui.btnMic.addEventListener("click", () => {
+          if (!recognition) return;
+          try{
+            ui.btnMic.disabled = true;
+            ui.btnMic.textContent = "Listening…";
+            recognition.start();
+          }catch{
+            ui.btnMic.disabled = false;
+            ui.btnMic.textContent = "🎙️ Speak";
+          }
+        });
+      }
+
+      // Advanced modal
+      ui.btnAdvanced.addEventListener("click", openModal);
+      ui.btnCloseModal.addEventListener("click", closeModal);
+      ui.modalBg.addEventListener("click", (e) => { if (e.target === ui.modalBg) closeModal(); });
+
+      ui.btnSaveApi.addEventListener("click", () => {
+        const v = String(ui.apiBase.value || "").trim();
+        state.apiBase = v || DEFAULT_API_BASE;
+        localStorage.setItem("ct_builder_api_base", state.apiBase);
+        ui.apiCheckText.textContent = "Saved (URL masked)";
+        setAction("Saved API settings", "good");
+        checkApi();
+      });
+
+      ui.btnTestApi.addEventListener("click", async () => {
+        ui.apiCheckText.textContent = "Testing…";
+        const ok = await checkApi();
+        ui.apiCheckText.textContent = ok ? "OK" : "Failed";
+      });
+
+      ui.btnResetApi.addEventListener("click", () => {
+        state.apiBase = DEFAULT_API_BASE;
+        localStorage.setItem("ct_builder_api_base", state.apiBase);
+        ui.apiBase.value = state.apiBase;
+        ui.apiCheckText.textContent = "Reset to default";
+        setAction("API reset", "warn");
+        checkApi();
+      });
+
+      // Initial UI state
+      lockStep(ui.step2, true);
+      lockStep(ui.step3, true);
+      lockStep(ui.step4, true);
+      resetBuildLocks();
+      setEditsLeft();
+      setPlanBadge();
+      setBuildBadge("not started");
+      setActiveFile("index.html");
+      setAction("Idle", "warn");
+
+      // Initial API check + periodic quick checks
+      checkApi();
+      setInterval(checkApi, 25000);
+    }
+
+    init();
   </script>
 </body>
 </html>
