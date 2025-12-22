@@ -3,1578 +3,1237 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="color-scheme" content="dark" />
   <title>ChatTok Tools — Game Builder</title>
-  <meta name="description" content="Build TikTok Live interactive games step-by-step: plan → confirm → generate files." />
 
   <style>
     :root{
       --bg0:#070707;
-      --bg1:#0f0f10;
+      --bg1:#0f0f0f;
 
-      --panel:rgba(255,255,255,.06);
-      --panel2:rgba(255,255,255,.04);
-      --line:rgba(255,255,255,.10);
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.04);
+      --line: rgba(255,255,255,.12);
 
-      --text:#ffffff;
-      --muted:rgba(255,255,255,.70);
-      --muted2:rgba(255,255,255,.55);
-
-      --orange:#ff7a18;
-      --orange2:#ff9c4a;
+      --text:#f7f2ea;
+      --muted: rgba(247,242,234,.72);
 
       --good:#2ee59d;
       --bad:#ff4d4d;
-      --warn:#ffb020;
+      --warn:#ffb347;
 
-      --r:18px;
-      --r2:14px;
+      --shadowPanel: 0 14px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08);
+      --r: 18px;
+      --r2: 14px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
 
-      --shadow: 0 18px 48px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08);
-      --shadow2: 0 12px 32px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.07);
-
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --accent1:#ff7a00;
+      --accent2:#ffb347;
     }
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
     body{
       margin:0;
-      font-family:var(--sans);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--text);
       background:
-        radial-gradient(1200px 600px at 30% -20%, rgba(255,122,24,.14), transparent 60%),
-        radial-gradient(900px 500px at 90% 10%, rgba(255,156,74,.10), transparent 62%),
+        radial-gradient(1200px 700px at 20% 10%, rgba(255,122,0,.14), transparent 60%),
+        radial-gradient(900px 600px at 85% 25%, rgba(255,179,71,.10), transparent 55%),
         linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow-x:hidden;
     }
 
-    a{color:inherit}
-    .wrap{
-      max-width: 1240px;
-      margin: 0 auto;
-      padding: 22px 16px 18px;
-    }
+    .wrap{ max-width: 1280px; margin: 0 auto; padding: 18px 16px 44px; }
 
-    header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom: 14px;
-    }
-
-    .brand{
-      display:flex; align-items:center; gap:12px;
-      user-select:none;
-      cursor: default;
-    }
-    .logo{
-      width:44px; height:44px; border-radius:14px;
-      background:
-        radial-gradient(circle at 30% 30%, rgba(255,255,255,.16), transparent 55%),
-        linear-gradient(135deg, rgba(255,122,24,.95), rgba(255,156,74,.55));
-      box-shadow: var(--shadow2);
-      display:grid; place-items:center;
-      border:1px solid rgba(255,255,255,.12);
-      cursor:pointer;
-    }
-    .logo svg{opacity:.96}
-    .brand h1{
-      margin:0;
-      font-size: 16px;
-      letter-spacing:.2px;
-      line-height:1.1;
-    }
-    .brand .sub{
-      margin-top:2px;
-      color:var(--muted);
-      font-size: 12px;
-    }
-
-    .topActions{
-      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-
-    .pill{
-      display:flex; align-items:center; gap:8px;
-      padding: 10px 12px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      box-shadow: 0 10px 24px rgba(0,0,0,.35);
-      color: rgba(255,255,255,.92);
-      font-size: 12px;
-      user-select:none;
-    }
-    .pill b{color:#fff}
-    .pillBtn{
-      cursor:pointer;
-    }
-    .pillBtn:hover{
-      background: rgba(255,255,255,.08);
-    }
-
-    .dot{
-      width:9px; height:9px; border-radius:999px;
-      background: rgba(255,255,255,.35);
-      box-shadow: 0 0 0 2px rgba(0,0,0,.15);
-    }
-    .dot.ok{background: rgba(46,229,157,.90)}
-    .dot.bad{background: rgba(255,77,77,.90)}
-    .dot.wait{background: rgba(255,176,32,.90)}
-
-    .grid{
-      display:grid;
-      grid-template-columns: 460px 1fr;
-      gap: 14px;
-      align-items:start;
-    }
-    @media (max-width: 1080px){
-      .grid{grid-template-columns: 1fr; }
-    }
-
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: var(--r);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-    .card .hd{
-      padding: 14px 14px 12px;
-      border-bottom: 1px solid rgba(255,255,255,.10);
+    .topbar{
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
-      gap: 10px;
+      gap:14px;
+      margin-bottom: 14px;
     }
-    .card .hd .title{
-      display:flex; flex-direction:column; gap:3px;
-    }
-    .card .hd h2{
+
+    .brand{ display:flex; flex-direction:column; gap:6px; }
+    .brand h1{
       margin:0;
-      font-size: 14px;
+      font-size: 26px;
+      font-weight: 950;
       letter-spacing:.2px;
+      text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 14px rgba(255,122,0,.35);
     }
-    .card .hd .hint{
+    .brand p{
       margin:0;
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.25;
-    }
-    .card .bd{ padding: 14px; }
-
-    .steps{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-      margin-bottom: 12px;
-    }
-    .stepChip{
-      display:flex; align-items:center; gap:8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.26);
-      color: rgba(255,255,255,.85);
-      font-size: 12px;
-    }
-    .stepChip b{color:#fff}
-    .stepChip.active{
-      border-color: rgba(255,156,74,.55);
-      background: rgba(255,122,24,.14);
-      color: rgba(255,235,220,.95);
-    }
-
-    .field{
-      display:flex; flex-direction:column; gap:7px;
-      margin-bottom: 10px;
-    }
-    .labelRow{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-    }
-    label{
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .mini{
-      font-size: 11px;
-      color: var(--muted2);
-      line-height: 1.25;
-    }
-
-    input, select, textarea{
-      width:100%;
-      padding: 11px 12px;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.35);
-      color: rgba(255,255,255,.93);
-      outline: none;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
-      font-family: var(--sans);
-    }
-    textarea{
-      min-height: 120px;
-      resize: vertical;
+      color:var(--muted);
+      font-size: 13.5px;
       line-height: 1.35;
+      max-width: 860px;
     }
 
-    .row{display:flex; gap:10px; flex-wrap:wrap}
-    .row > *{flex:1 1 auto}
-
-    .btnRow{display:flex; gap:10px; flex-wrap:wrap}
-    .btn{
+    .statusPill{
       display:inline-flex;
       align-items:center;
-      justify-content:center;
-      gap: 8px;
-      padding: 11px 12px;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.92);
-      cursor:pointer;
-      font-weight: 750;
-      letter-spacing: .2px;
+      gap:10px;
+      padding: 10px 12px;
+      background: rgba(0,0,0,.26);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      box-shadow: 0 10px 25px rgba(0,0,0,.25);
+      color: var(--muted);
+      font-size: 13px;
+      white-space:nowrap;
       user-select:none;
-      transition: transform .08s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
-      text-decoration:none;
     }
-    .btn:hover{transform: translateY(-1px); background: rgba(255,255,255,.08)}
-    .btn:active{transform: translateY(0px)}
-    .btn[disabled]{opacity:.42; cursor:not-allowed; transform:none!important}
+    .dot{
+      width:10px; height:10px; border-radius: 50%;
+      background: rgba(255,255,255,.22);
+      box-shadow: 0 0 0 2px rgba(255,255,255,.10);
+    }
+    .dot.good{ background: var(--good); box-shadow: 0 0 0 2px rgba(46,229,157,.18); }
+    .dot.bad{  background: var(--bad);  box-shadow: 0 0 0 2px rgba(255,77,77,.18); }
+    .dot.warn{ background: var(--warn); box-shadow: 0 0 0 2px rgba(255,179,71,.18); }
 
-    .btnPrimary{
-      background: linear-gradient(180deg, rgba(255,122,24,.96), rgba(255,122,24,.72));
-      border-color: rgba(255,156,74,.55);
-      color:#140a00;
-      box-shadow: 0 16px 40px rgba(255,122,24,.18), 0 0 0 1px rgba(255,255,255,.06) inset;
-    }
-    .btnPrimary:hover{background: linear-gradient(180deg, rgba(255,156,74,.98), rgba(255,122,24,.78));}
-
-    .btnGhost{ background: rgba(0,0,0,.25); }
-    .btnDanger{
-      background: rgba(255,77,77,.12);
-      border-color: rgba(255,77,77,.35);
-      color: rgba(255,210,210,.95);
-    }
-    .btnGood{
-      background: rgba(46,229,157,.12);
-      border-color: rgba(46,229,157,.35);
-      color: rgba(215,255,238,.95);
-    }
-
-    .divider{height:1px; background: rgba(255,255,255,.10); margin: 12px 0;}
-
-    .codebox{
-      font-family: var(--mono);
-      font-size: 12px;
-      min-height: 220px;
-      white-space: pre;
-    }
-
-    .chipRow{
-      display:flex; gap:8px; flex-wrap:wrap; align-items:center;
-    }
-    .badge{
+    .statusBtn{
+      border:0;
+      cursor:pointer;
       padding: 8px 10px;
       border-radius: 999px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.26);
-      color: rgba(255,255,255,.84);
+      font-weight: 900;
+      letter-spacing:.2px;
+      color: #0b0b0b;
+      background: linear-gradient(180deg, var(--accent2), var(--accent1));
+      box-shadow: 0 10px 18px rgba(255,122,0,.18);
+    }
+    .statusBtn.secondary{
+      color: var(--text);
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+      border: 1px solid rgba(255,255,255,.14);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 14px;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+      .statusPill{ width:100%; justify-content:space-between; }
+    }
+
+    .panel{
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      box-shadow: var(--shadowPanel);
+      overflow:hidden;
+    }
+
+    .panelHead{
+      padding: 14px 14px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      background: linear-gradient(180deg, rgba(0,0,0,.18), transparent);
+    }
+    .panelTitle{ display:flex; flex-direction:column; gap:4px; }
+    .panelTitle h2{
+      margin:0;
+      font-size: 16px;
+      font-weight: 950;
+      text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 10px rgba(255,122,0,.22);
+    }
+    .panelTitle p{ margin:0; color:var(--muted); font-size: 13px; }
+
+    .panelBody{ padding: 14px; }
+
+    .label{
+      display:block;
+      font-weight: 950;
       font-size: 12px;
-      display:flex; align-items:center; gap:8px;
+      letter-spacing:.3px;
+      color: rgba(255,255,255,.90);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      text-shadow: 0 1px 0 rgba(0,0,0,.35), 0 0 10px rgba(255,122,0,.14);
+    }
+
+    .hint{
+      color: var(--muted);
+      font-size: 13px;
+      margin: 10px 0 0;
+      line-height: 1.4;
+    }
+
+    .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; align-items:center; }
+
+    textarea, input, select{
+      width:100%;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.26);
+      color: rgba(247,242,234,.92);
+      padding: 12px 12px;
+      font-family: var(--mono);
+      outline:none;
+    }
+    textarea{ min-height: 160px; resize: vertical; line-height: 1.45; }
+    textarea::placeholder{ color: rgba(247,242,234,.55); }
+
+    .btn{
+      border: 0;
+      cursor:pointer;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-weight: 950;
+      letter-spacing:.2px;
+      color: #121212;
+      background: linear-gradient(180deg, var(--accent2), var(--accent1));
+      box-shadow: 0 14px 26px rgba(255,122,0,.20), 0 7px 0 rgba(0,0,0,.35);
+      transform: translateY(0);
+      transition: transform .08s ease, box-shadow .08s ease, filter .15s ease, opacity .15s ease;
       user-select:none;
     }
+    .btn:hover{ filter: brightness(1.04); }
+    .btn:active{
+      transform: translateY(6px);
+      box-shadow: 0 8px 18px rgba(255,122,0,.16), 0 1px 0 rgba(0,0,0,.35);
+    }
+    .btn[disabled]{ opacity:.55; cursor:not-allowed; filter:saturate(.6); }
 
-    .colorRow{
-      display:grid;
-      grid-template-columns: 44px 1fr;
-      gap:10px;
-      align-items:center;
-    }
-    .colorSwatch{
-      width:44px; height:44px;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.35);
-      overflow:hidden;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
-    }
-    .colorSwatch input[type="color"]{
-      width:100%;
-      height:100%;
-      border:none;
-      padding:0;
-      background: transparent;
-      cursor:pointer;
-    }
-    input[type="color"]::-webkit-color-swatch-wrapper{padding:0}
-    input[type="color"]::-webkit-color-swatch{border:none}
-
-    .toastWrap{
-      position: fixed;
-      right: 14px;
-      bottom: 14px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      z-index: 9999;
-      pointer-events:none;
-    }
-    .toast{
-      pointer-events:none;
-      width: min(440px, calc(100vw - 28px));
-      padding: 12px 12px;
-      border-radius: 16px;
-      background: rgba(0,0,0,.78);
+    .btn.secondary{
+      color: var(--text);
+      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.08));
       border: 1px solid rgba(255,255,255,.14);
-      box-shadow: 0 20px 50px rgba(0,0,0,.55);
-      backdrop-filter: blur(10px);
+      box-shadow: 0 12px 24px rgba(0,0,0,.28), 0 7px 0 rgba(0,0,0,.35);
     }
-    .toast .t1{font-weight:900; font-size: 12px}
-    .toast .t2{margin-top:4px; color: rgba(255,255,255,.78); font-size: 12px; line-height: 1.3}
-    .toast.ok{border-color: rgba(46,229,157,.40)}
-    .toast.bad{border-color: rgba(255,77,77,.45)}
-    .toast.wait{border-color: rgba(255,176,32,.45)}
+    .btn.danger{
+      color: var(--text);
+      background: linear-gradient(180deg, rgba(255,77,77,.22), rgba(0,0,0,.18));
+      border: 1px solid rgba(255,77,77,.35);
+    }
 
-    .adSlot{
+    .steps{ display:flex; flex-direction:column; gap:12px; }
+    .stepCard{
       border-radius: var(--r2);
-      border:1px dashed rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.10);
       background: rgba(0,0,0,.22);
-      padding: 14px;
-      color: rgba(255,255,255,.68);
-      font-size: 12px;
-      text-align:center;
+      box-shadow: 0 12px 24px rgba(0,0,0,.26);
+      overflow:hidden;
     }
-
-    .planBox{
-      border-radius: var(--r2);
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      padding: 12px;
-    }
-    .planTitle{
-      font-weight: 900;
-      font-size: 13px;
-      margin: 0 0 6px 0;
-    }
-    .planLine{
-      color: rgba(255,255,255,.80);
-      font-size: 12px;
-      line-height: 1.35;
-      margin: 0 0 10px 0;
-    }
-    .planList{
-      margin: 8px 0 0 18px;
-      padding:0;
-      color: rgba(255,255,255,.78);
-      font-size: 12px;
-      line-height: 1.35;
-    }
-    .planMeta{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-top: 10px;
-    }
-    .metaPill{
-      padding: 7px 10px;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.26);
-      color: rgba(255,255,255,.82);
-      font-size: 12px;
-    }
-
-    footer{
-      margin-top: 14px;
-      padding: 14px 0 10px;
-      color: rgba(255,255,255,.62);
-      font-size: 12px;
+    .stepHead{
+      padding: 12px 12px 10px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap: 10px;
-      flex-wrap:wrap;
+      gap:10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), transparent);
     }
-    footer .links{
+    .stepHead strong{
+      font-size: 13px;
+      letter-spacing:.2px;
+    }
+    .badge{
+      font-family: var(--mono);
+      font-size: 12px;
+      color: rgba(247,242,234,.78);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.20);
+      padding: 6px 8px;
+      border-radius: 999px;
+      white-space:nowrap;
+    }
+    .stepBody{ padding: 12px; }
+
+    .kv{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top: 10px;
+    }
+    @media (max-width: 520px){
+      .kv{ grid-template-columns: 1fr; }
+    }
+    .mini{
       display:flex;
-      gap: 12px;
-      flex-wrap:wrap;
+      flex-direction:column;
+      gap:6px;
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+    }
+    .mini .k{
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing:.6px;
+      text-transform: uppercase;
+      color: rgba(247,242,234,.60);
+    }
+    .mini .v{
+      font-weight: 900;
+      color: rgba(247,242,234,.92);
+    }
+
+    .codeBox{
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.26);
+      overflow:hidden;
+    }
+    .codeTop{
+      display:flex;
       align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), transparent);
+    }
+    .codeTop .name{
+      font-family: var(--mono);
+      font-size: 12px;
+      color: rgba(247,242,234,.80);
+    }
+    .copyBtn{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      color: rgba(247,242,234,.85);
+      border-radius: 12px;
+      padding: 8px 10px;
+      font-weight: 900;
+      cursor:pointer;
+    }
+    .codeArea{
+      width:100%;
+      min-height: 240px;
+      border:0;
+      outline:none;
+      resize: vertical;
+      padding: 12px;
+      font-family: var(--mono);
+      color: rgba(247,242,234,.92);
+      background: transparent;
+    }
+
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.60);
+      border: 1px solid rgba(255,255,255,.16);
+      color: rgba(247,242,234,.92);
+      padding: 10px 12px;
+      border-radius: 14px;
+      box-shadow: 0 14px 34px rgba(0,0,0,.45);
+      backdrop-filter: blur(10px);
+      z-index: 9999;
+      opacity: 0;
+      pointer-events:none;
+      transition: opacity .14s ease, transform .14s ease;
+      max-width: min(860px, 92vw);
+      font-size: 13px;
+    }
+    .toast.show{
+      opacity: 1;
+      transform: translateX(-50%) translateY(-4px);
+    }
+
+    /* Theme picker row */
+    .themeRow{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+    }
+    .themePick{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      border-radius: 14px;
+      padding: 10px 10px;
+      min-width: 190px;
+      flex: 1 1 190px;
+    }
+    .swatch{
+      width:18px; height:18px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: var(--accent1);
+      box-shadow: 0 10px 20px rgba(0,0,0,.25);
+      cursor:pointer;
+      flex: 0 0 auto;
+    }
+    .themePick .t{
+      display:flex; flex-direction:column; gap:2px; min-width:0;
+    }
+    .themePick .t .k{
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing:.6px;
+      text-transform: uppercase;
+      color: rgba(247,242,234,.62);
+    }
+    .themePick .t .v{
+      font-weight: 950;
+      font-size: 12.5px;
+      color: rgba(247,242,234,.90);
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      max-width: 150px;
+    }
+    .hiddenColor{
+      position:absolute;
+      opacity:0;
+      width:1px;
+      height:1px;
+      pointer-events:none;
+    }
+
+    /* Auth overlay */
+    #authOverlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.72);
+      backdrop-filter: blur(12px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 10000;
+    }
+    #authOverlay.show{ display:flex; }
+    .authCard{
+      width: min(520px, 96vw);
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(18,18,18,.92), rgba(10,10,10,.78));
+      box-shadow: 0 18px 44px rgba(0,0,0,.55);
+      overflow:hidden;
+    }
+    .authHead{
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(255,122,0,.10), transparent);
+    }
+    .authHead h2{
+      margin:0;
+      font-size: 18px;
+      font-weight: 950;
+    }
+    .authHead p{
+      margin:6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .authBody{ padding: 16px; }
+    .authGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 520px){
+      .authGrid{ grid-template-columns: 1fr; }
+    }
+    .authFoot{
+      padding: 12px 16px 16px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    footer{
+      margin-top: 16px;
+      color: rgba(247,242,234,.60);
+      font-size: 12.5px;
+      line-height: 1.35;
+      text-align:center;
     }
     footer a{
-      color: rgba(255,255,255,.72);
-      text-decoration:none;
-      border-bottom: 1px dotted rgba(255,255,255,.20);
+      color: rgba(247,242,234,.82);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255,255,255,.18);
     }
-    footer a:hover{color:#fff}
-
-    /* hidden dev panel */
-    .devPanel{
-      display:none;
-      margin-top:10px;
-      border-radius: var(--r2);
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.18);
-      padding: 10px 12px;
-    }
-    .devPanel.show{display:block}
   </style>
 </head>
 
 <body>
+  <div id="authOverlay">
+    <div class="authCard">
+      <div class="authHead">
+        <h2>Sign in</h2>
+        <p>
+          This is a simple local sign-in for now (saved in your browser).<br>
+          Later you can wire it to your real ChatTok accounts.
+        </p>
+      </div>
+      <div class="authBody">
+        <div class="authGrid">
+          <div>
+            <div class="label">Email</div>
+            <input id="authEmail" type="email" placeholder="you@example.com" autocomplete="username">
+          </div>
+          <div>
+            <div class="label">Password</div>
+            <input id="authPass" type="password" placeholder="••••••••" autocomplete="current-password">
+          </div>
+        </div>
+        <div class="hint" style="margin-top:10px">
+          Note: This does not protect your Render API from being called by others. It only gates your UI.
+        </div>
+      </div>
+      <div class="authFoot">
+        <button id="authReset" class="btn danger" type="button">Reset Local Account</button>
+        <button id="authLogin" class="btn" type="button">Continue</button>
+      </div>
+    </div>
+  </div>
+
   <div class="wrap">
-    <header>
+    <div class="topbar">
       <div class="brand">
-        <div class="logo" id="logoBtn" title="(Developer) Alt+Click to toggle hidden settings" aria-hidden="true">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2l8.5 4.8v10.4L12 22 3.5 17.2V6.8L12 2z" stroke="rgba(0,0,0,.55)" stroke-width="1.2"/>
-            <path d="M12 4.2l6.4 3.6v8.4L12 19.8 5.6 16.2V7.8L12 4.2z" fill="rgba(0,0,0,.35)"/>
-            <path d="M8.2 12h7.6" stroke="rgba(255,255,255,.92)" stroke-width="1.6" stroke-linecap="round"/>
-            <path d="M12 8.2v7.6" stroke="rgba(255,255,255,.92)" stroke-width="1.6" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <div>
-          <h1>ChatTok Tools</h1>
-          <div class="sub">Game Builder</div>
-        </div>
+        <h1>ChatTok Tools — Game Builder</h1>
+        <p>
+          Describe your TikTok LIVE game idea in one short paragraph. We’ll generate a plan first, then build the files in stages:
+          <strong>HTML → CSS → game.js</strong>. Keep it simple — the games will still feel alive with motion, HUD, and reactions.
+        </p>
       </div>
 
-      <div class="topActions">
-        <div class="pill pillBtn" id="onlinePill" title="Click to connect / wake the builder">
-          <span class="dot wait" id="onlineDot"></span>
-          <span id="onlineText">Checking builder…</span>
-        </div>
-
-        <div class="pill" id="authPill" title="Local account (this device only)">
-          <span>Account:</span> <b id="authName">Guest</b>
-        </div>
+      <div class="statusPill" title="Online status is checked via /health">
+        <span id="apiDot" class="dot warn"></span>
+        <span id="apiStatus">Checking builder…</span>
+        <button id="btnConnect" class="statusBtn secondary" type="button">Connect</button>
+        <button id="btnSettings" class="statusBtn" type="button" title="Developer settings">⚙</button>
       </div>
-    </header>
-
-    <div class="steps" aria-hidden="true">
-      <div class="stepChip active" id="stepChip1"><b>Step 1</b> Describe</div>
-      <div class="stepChip" id="stepChip2"><b>Step 2</b> Review plan</div>
-      <div class="stepChip" id="stepChip3"><b>Step 3</b> Generate files</div>
-      <div class="stepChip" id="stepChip4"><b>Step 4</b> Refine</div>
     </div>
 
     <div class="grid">
-      <!-- LEFT: Guided flow -->
-      <section class="card">
-        <div class="hd">
-          <div class="title">
-            <h2>Build your game (easy mode)</h2>
-            <p class="hint">Describe it → approve the plan → generate your files.</p>
+      <!-- LEFT: Workflow -->
+      <div class="panel">
+        <div class="panelHead">
+          <div class="panelTitle">
+            <h2>Build Flow</h2>
+            <p>Step 1: Idea → Step 2: Review Plan → Step 3: Generate files → Step 4: Edits</p>
+          </div>
+          <div class="badge" id="editsBadge">Edits: 3</div>
+        </div>
+        <div class="panelBody">
+          <div class="steps">
+
+            <!-- STEP 1 -->
+            <div class="stepCard">
+              <div class="stepHead">
+                <strong>Step 1 — Describe your game</strong>
+                <span class="badge">Prompt</span>
+              </div>
+              <div class="stepBody">
+                <div class="label">Game idea (short)</div>
+                <textarea id="ideaInput" placeholder="Example: Asteroid survival game. Viewers type ‘left’ ‘right’ ‘shoot’ to control a ship. Likes add shields. Gifts trigger bomb power-ups."></textarea>
+
+                <div class="row">
+                  <button id="btnMic" class="btn secondary" type="button">🎙 Talk to text</button>
+                  <button id="btnPlan" class="btn" type="button">Generate Plan</button>
+                </div>
+
+                <div class="hint">
+                  Keep it simple: what you see on screen, and what chat/likes/gifts do. The builder handles the TikTok connection automatically in the generated game.
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 2 -->
+            <div class="stepCard">
+              <div class="stepHead">
+                <strong>Step 2 — Review the plan</strong>
+                <span class="badge">Plan</span>
+              </div>
+              <div class="stepBody">
+                <div class="kv">
+                  <div class="mini">
+                    <div class="k">Title</div>
+                    <div class="v" id="planTitle">—</div>
+                  </div>
+                  <div class="mini">
+                    <div class="k">Template</div>
+                    <div class="v" id="planTemplate">Auto</div>
+                  </div>
+                  <div class="mini">
+                    <div class="k">Default round</div>
+                    <div class="v" id="planRound">—</div>
+                  </div>
+                  <div class="mini">
+                    <div class="k">Default goal</div>
+                    <div class="v" id="planGoal">—</div>
+                  </div>
+                </div>
+
+                <div style="margin-top:10px">
+                  <div class="label">Corrections (optional)</div>
+                  <textarea id="correctionsInput" placeholder="Only if needed: clarify the controls, interactions, theme, win condition, etc."></textarea>
+                  <div class="row">
+                    <button id="btnReplan" class="btn secondary" type="button" disabled>Apply Corrections</button>
+                    <button id="btnLockPlan" class="btn" type="button" disabled>Lock Plan</button>
+                  </div>
+                  <div class="hint">
+                    “Lock Plan” enables HTML → CSS → game.js generation using this plan.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 3 -->
+            <div class="stepCard">
+              <div class="stepHead">
+                <strong>Step 3 — Generate files</strong>
+                <span class="badge">Files</span>
+              </div>
+              <div class="stepBody">
+
+                <div class="themeRow">
+                  <div class="themePick">
+                    <div class="swatch" id="swPrimary" title="Pick primary"></div>
+                    <div class="t">
+                      <div class="k">Primary</div>
+                      <div class="v" id="vPrimary">#ff7a00</div>
+                    </div>
+                    <input class="hiddenColor" id="cPrimary" type="color" value="#ff7a00">
+                  </div>
+
+                  <div class="themePick">
+                    <div class="swatch" id="swSecondary" title="Pick secondary"></div>
+                    <div class="t">
+                      <div class="k">Secondary</div>
+                      <div class="v" id="vSecondary">#ffb347</div>
+                    </div>
+                    <input class="hiddenColor" id="cSecondary" type="color" value="#ffb347">
+                  </div>
+
+                  <div class="themePick">
+                    <div class="swatch" id="swBg" title="Pick background"></div>
+                    <div class="t">
+                      <div class="k">Background</div>
+                      <div class="v" id="vBg">#070707</div>
+                    </div>
+                    <input class="hiddenColor" id="cBg" type="color" value="#070707">
+                  </div>
+                </div>
+
+                <div class="row" style="margin-top:12px">
+                  <button id="btnBuildHtml" class="btn" type="button" disabled>Build HTML</button>
+                  <button id="btnBuildCss" class="btn secondary" type="button" disabled>Build CSS</button>
+                  <button id="btnBuildJs" class="btn secondary" type="button" disabled>Build game.js</button>
+                </div>
+
+                <div class="hint">
+                  Generated games are meant to be previewed inside your ChatTokGaming preview runner. This builder only outputs the files.
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 4 -->
+            <div class="stepCard">
+              <div class="stepHead">
+                <strong>Step 4 — Edit the game (3 edits)</strong>
+                <span class="badge">Edit</span>
+              </div>
+              <div class="stepBody">
+                <div class="label">Edit request</div>
+                <textarea id="editInput" placeholder="Example: Make the ship bigger, add asteroid spawning, and show a shield bar."></textarea>
+                <div class="row">
+                  <button id="btnApplyEdit" class="btn" type="button" disabled>Apply Edit</button>
+                  <button id="btnResetAll" class="btn danger" type="button">Reset</button>
+                </div>
+                <div class="hint">
+                  Edits update only the safe region inside <strong>game.js</strong> (AI_REGION) or theme vars in <strong>style.css</strong>.
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
-
-        <div class="bd">
-          <!-- Step 1 -->
-          <div class="field">
-            <div class="labelRow">
-              <label for="idea">Step 1 — Short game description</label>
-              <span class="mini">You can talk instead of type</span>
-            </div>
-            <textarea id="idea" placeholder="Example: An asteroid shooter where chat spawns asteroids, likes charge the ship, and gifts trigger special weapons."></textarea>
-
-            <div class="btnRow">
-              <button class="btn btnGhost" id="micBtn" type="button" title="Talk to text">🎙️ Talk</button>
-              <button class="btn btnGhost" id="clearIdeaBtn" type="button">Clear</button>
-              <button class="btn btnPrimary" id="generatePlanBtn" type="button">Generate Plan</button>
-            </div>
-
-            <div class="mini" id="micNote" style="margin-top:8px; display:none;">
-              Listening… click 🎙️ again to stop.
-            </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <!-- Theme -->
-          <div class="field">
-            <div class="labelRow">
-              <label>Theme colors</label>
-              <span class="mini">optional</span>
-            </div>
-
-            <div class="row">
-              <div class="field" style="margin-bottom:0;">
-                <label for="cPrimaryText">Primary</label>
-                <div class="colorRow">
-                  <div class="colorSwatch"><input id="cPrimaryPick" type="color" /></div>
-                  <input id="cPrimaryText" placeholder="#ff7a18" />
-                </div>
-              </div>
-
-              <div class="field" style="margin-bottom:0;">
-                <label for="cSecondaryText">Secondary</label>
-                <div class="colorRow">
-                  <div class="colorSwatch"><input id="cSecondaryPick" type="color" /></div>
-                  <input id="cSecondaryText" placeholder="#ffd1ae" />
-                </div>
-              </div>
-
-              <div class="field" style="margin-bottom:0;">
-                <label for="cBgText">Background</label>
-                <div class="colorRow">
-                  <div class="colorSwatch"><input id="cBgPick" type="color" /></div>
-                  <input id="cBgText" placeholder="#070707" />
-                </div>
-              </div>
-            </div>
-
-            <div class="btnRow" style="margin-top:10px;">
-              <button class="btn" id="useDefaultThemeBtn" type="button">Use Default Theme</button>
-              <button class="btn" id="toggleTemplateBtn" type="button">Template: Auto</button>
-            </div>
-
-            <div class="mini" style="margin-top:8px;">
-              Tip: leave templates on Auto — it chooses the best starting template for your idea.
-            </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <!-- Step 2 -->
-          <div class="card" style="box-shadow:none; border-radius: var(--r2);">
-            <div class="hd">
-              <div class="title">
-                <h2>Step 2 — Review the plan</h2>
-                <p class="hint">If anything is wrong, type corrections and submit.</p>
-              </div>
-            </div>
-            <div class="bd">
-              <div class="planBox" id="planBox" style="display:none;">
-                <div class="planTitle" id="planTitle"></div>
-                <p class="planLine" id="planOneSentence"></p>
-                <div class="mini" style="margin-bottom:6px;">How viewers interact:</div>
-                <ul class="planList" id="planHow"></ul>
-
-                <div class="planMeta" id="planMeta"></div>
-              </div>
-
-              <div class="mini" id="planEmptyNote">
-                Generate a plan first (Step 1). You’ll see it here.
-              </div>
-
-              <div class="field" style="margin-top:12px;">
-                <label for="planCorrections">Any corrections before we generate the files?</label>
-                <textarea id="planCorrections" placeholder="Example: Make chat spawn asteroids, but gifts should launch a missile that clears the screen." style="min-height:90px;"></textarea>
-              </div>
-
-              <div class="btnRow">
-                <button class="btn btnPrimary" id="confirmPlanBtn" type="button" disabled>Submit & Generate HTML</button>
-              </div>
-
-              <div class="mini" style="margin-top:8px;">
-                We’ll generate files in this order: <b>HTML → CSS → game.js</b>
-              </div>
-            </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <!-- Step 3 buttons -->
-          <div class="card" style="box-shadow:none; border-radius: var(--r2);">
-            <div class="hd">
-              <div class="title">
-                <h2>Step 3 — Generate files</h2>
-                <p class="hint">When HTML is ready, you can build CSS, then game.js.</p>
-              </div>
-              <div class="chipRow">
-                <div class="badge"><span class="dot wait" id="dotHtml"></span> HTML</div>
-                <div class="badge"><span class="dot wait" id="dotCss"></span> CSS</div>
-                <div class="badge"><span class="dot wait" id="dotJs"></span> JS</div>
-              </div>
-            </div>
-            <div class="bd">
-              <div class="btnRow">
-                <button class="btn btnPrimary" id="buildCssBtn" type="button" disabled>Build CSS</button>
-                <button class="btn btnPrimary" id="buildJsBtn" type="button" disabled>Build game.js</button>
-                <button class="btn btnDanger" id="resetAllBtn" type="button">Reset</button>
-              </div>
-              <div class="mini" style="margin-top:8px;">
-                If the builder is sleeping, click the <b>Builder Online</b> light in the top-right to wake it.
-              </div>
-            </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <!-- Step 4 refine -->
-          <div class="card" style="box-shadow:none; border-radius: var(--r2);">
-            <div class="hd">
-              <div class="title">
-                <h2>Step 4 — Refine gameplay (3 edits)</h2>
-                <p class="hint">This adjusts the game logic inside <b>game.js</b>.</p>
-              </div>
-              <div class="pill"><span>Edits left:</span> <b id="editsLeft">3</b></div>
-            </div>
-            <div class="bd">
-              <div class="field">
-                <label for="editReq">What should change?</label>
-                <textarea id="editReq" placeholder="Example: Add more explosions, increase asteroid speed, and make gifts trigger a huge screen-clearing blast." style="min-height:88px;"></textarea>
-              </div>
-              <div class="btnRow">
-                <button class="btn btnPrimary" id="editBtn" type="button" disabled>Apply Edit</button>
-              </div>
-              <div class="mini" style="margin-top:8px;">
-                Tip: ask for <b>movement, effects, and reactions</b> (that’s what makes it feel like a real game).
-              </div>
-            </div>
-          </div>
-
-          <!-- Hidden dev panel (not visible to users) -->
-          <div class="devPanel" id="devPanel">
-            <div class="mini" style="margin-bottom:8px;">
-              Developer settings (hidden from normal users)
-            </div>
-            <div class="field">
-              <label for="apiOverride">API Base URL override</label>
-              <input id="apiOverride" placeholder="https://chattok-builder-api.onrender.com" />
-              <div class="mini">Only needed if you switch API domains.</div>
-            </div>
-            <div class="btnRow">
-              <button class="btn btnGhost" id="saveDevBtn" type="button">Save</button>
-              <button class="btn btnGhost" id="clearDevBtn" type="button">Clear override</button>
-            </div>
-          </div>
-        </div>
-      </section>
+      </div>
 
       <!-- RIGHT: Outputs -->
-      <section class="card">
-        <div class="hd">
-          <div class="title">
-            <h2>Your generated files</h2>
-            <p class="hint">Copy or download. No preview here.</p>
+      <div class="panel">
+        <div class="panelHead">
+          <div class="panelTitle">
+            <h2>Output Files</h2>
+            <p>Copy/paste into your game folder: <strong>index.html</strong>, <strong>style.css</strong>, <strong>game.js</strong></p>
+          </div>
+          <div class="badge" id="outBadge">Ready</div>
+        </div>
+        <div class="panelBody">
+          <div class="codeBox" style="margin-bottom:12px">
+            <div class="codeTop">
+              <div class="name">index.html</div>
+              <button class="copyBtn" type="button" data-copy="outHtml">Copy</button>
+            </div>
+            <textarea id="outHtml" class="codeArea" spellcheck="false" placeholder="(HTML will appear here)"></textarea>
+          </div>
+
+          <div class="codeBox" style="margin-bottom:12px">
+            <div class="codeTop">
+              <div class="name">style.css</div>
+              <button class="copyBtn" type="button" data-copy="outCss">Copy</button>
+            </div>
+            <textarea id="outCss" class="codeArea" spellcheck="false" placeholder="(CSS will appear here)"></textarea>
+          </div>
+
+          <div class="codeBox">
+            <div class="codeTop">
+              <div class="name">game.js</div>
+              <button class="copyBtn" type="button" data-copy="outJs">Copy</button>
+            </div>
+            <textarea id="outJs" class="codeArea" spellcheck="false" placeholder="(game.js will appear here)"></textarea>
+          </div>
+
+          <div class="hint" style="margin-top:12px">
+            Note: The Render API URL is not shown in the UI, but any browser call is visible in DevTools. Your OpenAI key stays safe because it lives only on Render.
           </div>
         </div>
-
-        <div class="bd">
-          <div class="adSlot">
-            Ad Slot Placeholder (top)
-            <div class="mini" style="margin-top:6px;">We’ll connect your ad provider later.</div>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="field">
-            <div class="labelRow">
-              <label>index.html</label>
-              <span class="mini">
-                <button class="btn btnGhost" id="copyHtmlBtn" type="button" style="padding:8px 10px; border-radius:12px;">Copy</button>
-                <button class="btn btnGhost" id="dlHtmlBtn" type="button" style="padding:8px 10px; border-radius:12px;">Download</button>
-              </span>
-            </div>
-            <textarea class="codebox" id="outHtml" placeholder="After Step 2, HTML will appear here…" spellcheck="false"></textarea>
-          </div>
-
-          <div class="field">
-            <div class="labelRow">
-              <label>style.css</label>
-              <span class="mini">
-                <button class="btn btnGhost" id="copyCssBtn" type="button" style="padding:8px 10px; border-radius:12px;">Copy</button>
-                <button class="btn btnGhost" id="dlCssBtn" type="button" style="padding:8px 10px; border-radius:12px;">Download</button>
-              </span>
-            </div>
-            <textarea class="codebox" id="outCss" placeholder="After Step 3, CSS will appear here…" spellcheck="false"></textarea>
-          </div>
-
-          <div class="field">
-            <div class="labelRow">
-              <label>game.js</label>
-              <span class="mini">
-                <button class="btn btnGhost" id="copyJsBtn" type="button" style="padding:8px 10px; border-radius:12px;">Copy</button>
-                <button class="btn btnGhost" id="dlJsBtn" type="button" style="padding:8px 10px; border-radius:12px;">Download</button>
-              </span>
-            </div>
-            <textarea class="codebox" id="outJs" placeholder="After Step 3, game.js will appear here…" spellcheck="false"></textarea>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="adSlot">
-            Ad Slot Placeholder (bottom)
-            <div class="mini" style="margin-top:6px;">Optional second placement.</div>
-          </div>
-
-          <div class="divider"></div>
-
-          <!-- Local-only sign in (kept lightweight) -->
-          <div class="card" style="box-shadow:none; border-radius: var(--r2);">
-            <div class="hd">
-              <div class="title">
-                <h2>Local Sign-In (optional)</h2>
-                <p class="hint">This device only (no server account yet).</p>
-              </div>
-            </div>
-            <div class="bd">
-              <div class="row">
-                <div class="field" style="margin-bottom:0;">
-                  <label for="email">Email</label>
-                  <input id="email" type="email" placeholder="you@email.com" autocomplete="email" />
-                </div>
-                <div class="field" style="margin-bottom:0;">
-                  <label for="pass">Password</label>
-                  <input id="pass" type="password" placeholder="••••••••" autocomplete="current-password" />
-                </div>
-              </div>
-              <div class="btnRow" style="margin-top:10px;">
-                <button class="btn" id="signupBtn" type="button">Create</button>
-                <button class="btn btnPrimary" id="loginBtn" type="button">Sign In</button>
-                <button class="btn btnDanger" id="logoutBtn" type="button" disabled>Sign Out</button>
-              </div>
-              <div class="mini" style="margin-top:8px;">
-                Later we can switch this to real server sign-in.
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </section>
+      </div>
     </div>
 
-    <footer>
-      <div>© <span id="yr"></span> ChatTok Tools. All rights reserved.</div>
-      <div class="links">
-        <a href="#" onclick="return false;" title="Placeholder">Privacy</a>
-        <a href="#" onclick="return false;" title="Placeholder">Terms</a>
-        <a href="#" onclick="return false;" title="Placeholder">Contact</a>
+    <footer style="margin-top:18px">
+      © <span id="year"></span> ChatTok Tools •
+      <a href="#" onclick="return false;">Privacy</a> •
+      <a href="#" onclick="return false;">Terms</a> •
+      <a href="#" onclick="return false;">Contact</a>
+      <div style="margin-top:6px">
+        (Privacy/Terms pages can be wired later — placeholders for now.)
       </div>
     </footer>
   </div>
 
-  <div class="toastWrap" id="toasts"></div>
+  <div id="toast" class="toast"></div>
 
   <script>
-    // =========================================================
-    // CONFIG (UI hides API URL; requests still go to API)
-    // =========================================================
-    const DEFAULT_API_BASE = "https://chattok-builder-api.onrender.com";
-    const LS_API_OVERRIDE = "ct_api_override_v1";
+    // -----------------------------
+    // Local auth (simple, browser-only)
+    // -----------------------------
+    const AUTH_KEY = "CT_BUILDER_AUTH_V1";
+    const authOverlay = document.getElementById("authOverlay");
+    const authEmail = document.getElementById("authEmail");
+    const authPass = document.getElementById("authPass");
+    const authLogin = document.getElementById("authLogin");
+    const authReset = document.getElementById("authReset");
 
-    function getApiBase(){
-      const v = (localStorage.getItem(LS_API_OVERRIDE) || "").trim();
-      return v ? v.replace(/\/+$/,"") : DEFAULT_API_BASE;
-    }
-
-    // =========================================================
-    // Utils
-    // =========================================================
-    const $ = (id) => document.getElementById(id);
-
-    function escapeHtml(s){
-      return String(s||"")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#39;");
-    }
-
-    function toast(type, title, msg){
-      const wrap = $("toasts");
-      const el = document.createElement("div");
-      el.className = `toast ${type||""}`.trim();
-      el.innerHTML = `<div class="t1">${escapeHtml(title||"")}</div><div class="t2">${escapeHtml(msg||"")}</div>`;
-      wrap.appendChild(el);
-      setTimeout(()=>{ el.style.opacity="0"; el.style.transform="translateY(6px)"; }, 2400);
-      setTimeout(()=>{ try{ wrap.removeChild(el);}catch(e){} }, 2850);
-    }
-
-    function setDot(el, state){
-      el.classList.remove("ok","bad","wait");
-      el.classList.add(state);
-    }
-
-    function safeTrim(v){ return String(v||"").trim(); }
-
-    function normalizeHex(v){
-      let s = safeTrim(v);
-      if (!s) return "";
-      if (!s.startsWith("#")) s = "#" + s;
-      if (/^#[0-9a-fA-F]{3}$/.test(s)){
-        s = "#" + s[1]+s[1]+s[2]+s[2]+s[3]+s[3];
-      }
-      if (!/^#[0-9a-fA-F]{6}$/.test(s)) return "";
-      return s.toLowerCase();
-    }
-
-    async function withTimeout(promise, ms){
-      const ctrl = new AbortController();
-      const t = setTimeout(()=>ctrl.abort(), ms);
-      try{
-        const r = await promise(ctrl.signal);
-        clearTimeout(t);
-        return r;
-      }catch(e){
-        clearTimeout(t);
-        throw e;
-      }
-    }
-
-    async function postJson(path, body){
-      const base = getApiBase();
-      const url = base + path;
-
-      const r = await fetch(url, {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify(body || {})
-      });
-
-      let data = null;
-      try{ data = await r.json(); }catch(e){}
-
-      if (!r.ok){
-        const msg = (data && (data.error || data.message)) || `Request failed (${r.status})`;
-        const err = new Error(msg);
-        err.status = r.status;
-        err.data = data;
-        throw err;
-      }
-      return data;
-    }
-
-    function downloadFile(name, content){
-      const blob = new Blob([content], {type:"text/plain;charset=utf-8"});
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = name;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(()=>{
-        URL.revokeObjectURL(a.href);
-        a.remove();
-      }, 0);
-    }
-
-    async function copyText(text){
-      try{
-        await navigator.clipboard.writeText(text);
-        return true;
-      }catch(e){
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        ta.style.position = "fixed";
-        ta.style.opacity = "0";
-        document.body.appendChild(ta);
-        ta.select();
-        try{
-          document.execCommand("copy");
-          ta.remove();
-          return true;
-        }catch(_){
-          ta.remove();
-          return false;
-        }
-      }
-    }
-
-    function setActiveStep(n){
-      const chips = [$("stepChip1"),$("stepChip2"),$("stepChip3"),$("stepChip4")];
-      chips.forEach((c,i)=> c.classList.toggle("active", (i+1)===n));
-    }
-
-    // =========================================================
-    // Online indicator (click to connect / wake)
-    // =========================================================
-    let onlineState = "wait"; // wait | ok | bad
-    let lastHealthOk = false;
-
-    function setOnline(state, text){
-      onlineState = state;
-      setDot($("onlineDot"), state);
-      $("onlineText").textContent = text;
-    }
-
-    async function checkHealth(showToast){
-      const base = getApiBase();
-      setOnline("wait", "Connecting…");
-
-      try{
-        const url = base + "/health";
-        const data = await withTimeout(async (signal)=>{
-          const r = await fetch(url, {method:"GET", signal});
-          const j = await r.json();
-          if (!r.ok) throw new Error(j?.error || "Health check failed");
-          return j;
-        }, 4500);
-
-        lastHealthOk = !!data?.ok;
-        if (lastHealthOk){
-          setOnline("ok", "Builder Online");
-          if (showToast) toast("ok","Builder Online","Ready to build.");
-          return true;
-        }
-        setOnline("bad", "Offline (click)");
-        if (showToast) toast("bad","Builder Offline","Click the indicator to retry.");
-        return false;
-      }catch(e){
-        lastHealthOk = false;
-        setOnline("bad", "Offline (click)");
-        if (showToast) toast("bad","Can’t connect","Click the indicator to retry.");
-        return false;
-      }
-    }
-
-    // =========================================================
-    // Local sign-in (device-only)
-    // =========================================================
-    const AUTH_KEY = "ct_auth_v1";
-    const USERS_KEY = "ct_users_v1";
-
-    async function sha256(str){
-      const enc = new TextEncoder().encode(str);
-      const buf = await crypto.subtle.digest("SHA-256", enc);
-      const arr = Array.from(new Uint8Array(buf));
-      return arr.map(b=>b.toString(16).padStart(2,"0")).join("");
-    }
-    function getUsers(){
-      try{ return JSON.parse(localStorage.getItem(USERS_KEY) || "{}"); }catch(e){ return {}; }
-    }
-    function setUsers(obj){
-      localStorage.setItem(USERS_KEY, JSON.stringify(obj || {}));
-    }
-    function setAuth(email){
-      localStorage.setItem(AUTH_KEY, JSON.stringify({email}));
-      updateAuthUI();
-    }
-    function clearAuth(){
-      localStorage.removeItem(AUTH_KEY);
-      updateAuthUI();
-    }
     function getAuth(){
-      try{ return JSON.parse(localStorage.getItem(AUTH_KEY) || "null"); }catch(e){ return null; }
+      try { return JSON.parse(localStorage.getItem(AUTH_KEY) || "null"); } catch { return null; }
     }
-    function updateAuthUI(){
-      const auth = getAuth();
-      $("authName").textContent = auth?.email ? auth.email : "Guest";
-      $("logoutBtn").disabled = !auth?.email;
+    function setAuth(email, pass){
+      // Not secure. Just gates UI.
+      const payload = { email: String(email||"").trim().toLowerCase(), pass: String(pass||"") };
+      localStorage.setItem(AUTH_KEY, JSON.stringify(payload));
     }
+    function clearAuth(){ localStorage.removeItem(AUTH_KEY); }
 
-    // =========================================================
-    // Theme + Template Override (optional)
-    // =========================================================
-    const LS_THEME = "ct_builder_theme_v2";
-    const LS_IDEA = "ct_builder_idea_v2";
-    const LS_TEMPLATE_OVERRIDE = "ct_builder_tpl_override_v1";
-
-    let templateOverride = ""; // "" = auto
-
-    function getTheme(){
-      return {
-        primary: normalizeHex($("cPrimaryText").value) || "",
-        secondary: normalizeHex($("cSecondaryText").value) || "",
-        background: normalizeHex($("cBgText").value) || ""
-      };
-    }
-
-    function setDefaultTheme(){
-      $("cPrimaryText").value = "#ff7a18";
-      $("cSecondaryText").value = "#ffd1ae";
-      $("cBgText").value = "#070707";
-      syncPickersFromText();
-      saveLocal();
-    }
-
-    function syncPickersFromText(){
-      const p = normalizeHex($("cPrimaryText").value) || "#ff7a18";
-      const s = normalizeHex($("cSecondaryText").value) || "#ffd1ae";
-      const b = normalizeHex($("cBgText").value) || "#070707";
-      $("cPrimaryPick").value = p;
-      $("cSecondaryPick").value = s;
-      $("cBgPick").value = b;
-    }
-
-    function syncTextFromPickers(){
-      $("cPrimaryText").value = $("cPrimaryPick").value;
-      $("cSecondaryText").value = $("cSecondaryPick").value;
-      $("cBgText").value = $("cBgPick").value;
-      saveLocal();
-    }
-
-    function updateTemplateButton(){
-      $("toggleTemplateBtn").textContent = "Template: " + (templateOverride ? templateOverride : "Auto");
-    }
-
-    // =========================================================
-    // Builder state + flow
-    // =========================================================
-    let builderContext = { spec: null, templateId: "" };
-    let pendingPlan = null;      // {spec, templateId, html}
-    let finalIdeaUsed = "";      // includes corrections if any
-    let remainingEdits = 3;
-
-    function resetOutputsOnly(){
-      $("outHtml").value = "";
-      $("outCss").value = "";
-      $("outJs").value = "";
-      setDot($("dotHtml"), "wait");
-      setDot($("dotCss"), "wait");
-      setDot($("dotJs"), "wait");
-      $("buildCssBtn").disabled = true;
-      $("buildJsBtn").disabled = true;
-      $("editBtn").disabled = true;
-    }
-
-    function resetPlanUI(){
-      pendingPlan = null;
-      builderContext = { spec: null, templateId: "" };
-      $("planBox").style.display = "none";
-      $("planEmptyNote").style.display = "block";
-      $("confirmPlanBtn").disabled = true;
-      $("planTitle").textContent = "";
-      $("planOneSentence").textContent = "";
-      $("planHow").innerHTML = "";
-      $("planMeta").innerHTML = "";
-      $("planCorrections").value = "";
-      setActiveStep(1);
-    }
-
-    function resetAll(){
-      remainingEdits = 3;
-      $("editsLeft").textContent = String(remainingEdits);
-      $("editReq").value = "";
-      finalIdeaUsed = "";
-      resetOutputsOnly();
-      resetPlanUI();
-      toast("ok","Reset","Start again with Step 1.");
-    }
-
-    function saveLocal(){
-      localStorage.setItem(LS_IDEA, $("idea").value || "");
-      localStorage.setItem(LS_THEME, JSON.stringify(getTheme()));
-      localStorage.setItem(LS_TEMPLATE_OVERRIDE, templateOverride || "");
-    }
-
-    function loadLocal(){
-      $("yr").textContent = String(new Date().getFullYear());
-
-      $("idea").value = localStorage.getItem(LS_IDEA) || "";
-
-      try{
-        const th = JSON.parse(localStorage.getItem(LS_THEME) || "null");
-        if (th && typeof th === "object"){
-          $("cPrimaryText").value = th.primary || "";
-          $("cSecondaryText").value = th.secondary || "";
-          $("cBgText").value = th.background || "";
-        }
-      }catch(e){}
-
-      if (!normalizeHex($("cPrimaryText").value)) $("cPrimaryText").value = "#ff7a18";
-      if (!normalizeHex($("cSecondaryText").value)) $("cSecondaryText").value = "#ffd1ae";
-      if (!normalizeHex($("cBgText").value)) $("cBgText").value = "#070707";
-      syncPickersFromText();
-
-      templateOverride = (localStorage.getItem(LS_TEMPLATE_OVERRIDE) || "").trim().toLowerCase();
-      updateTemplateButton();
-
-      updateAuthUI();
-
-      // dev panel init
-      $("apiOverride").value = (localStorage.getItem(LS_API_OVERRIDE) || "").trim();
-    }
-
-    function renderPlan(spec, templateId){
-      $("planEmptyNote").style.display = "none";
-      $("planBox").style.display = "block";
-
-      const title = (spec?.title || "Game Plan").trim();
-      const subtitle = (spec?.subtitle || "").trim();
-      const one = (spec?.oneSentence || "").trim();
-
-      $("planTitle").textContent = subtitle ? `${title} — ${subtitle}` : title;
-      $("planOneSentence").textContent = one || "This game reacts to chat, likes, and gifts.";
-
-      const how = Array.isArray(spec?.howToPlay) ? spec.howToPlay : [];
-      $("planHow").innerHTML = how.slice(0, 10).map(x=>`<li>${escapeHtml(String(x||""))}</li>`).join("");
-
-      const rs = Number(spec?.defaultSettings?.roundSeconds || 20);
-      const wg = Number(spec?.defaultSettings?.winGoal || 100);
-
-      $("planMeta").innerHTML = `
-        <div class="metaPill">Template: <b>${escapeHtml(templateId || spec?.templateId || "auto")}</b></div>
-        <div class="metaPill">Round seconds: <b>${Number.isFinite(rs) ? rs : 20}</b></div>
-        <div class="metaPill">Win goal: <b>${Number.isFinite(wg) ? wg : 100}</b></div>
-      `;
-    }
-
-    function getIdeaOrThrow(){
-      const idea = safeTrim($("idea").value);
-      if (!idea) throw new Error("Please enter a short game description first.");
-      return idea;
-    }
-
-    // =========================================================
-    // STEP 1: Generate Plan
-    // For now this calls stage=html and uses context.spec as the plan.
-    // (We’ll optimize later with a spec-only endpoint to lower cost.)
-    // =========================================================
-    async function generatePlan(){
-      try{
-        if (!lastHealthOk){
-          toast("wait","Connecting…","Waking the builder first.");
-          const ok = await checkHealth(false);
-          if (!ok) throw new Error("Builder is offline. Click the Online indicator to retry.");
-        }
-
-        resetOutputsOnly();
-        resetPlanUI();
-
-        const idea = getIdeaOrThrow();
-        const theme = getTheme();
-
-        setActiveStep(1);
-        toast("wait","Generating plan…","Creating a clean game plan you can review.");
-
-        const data = await postJson("/api/generate", {
-          stage: "html",
-          idea,
-          theme,
-          templateId: templateOverride || undefined
-        });
-
-        if (!data?.ok) throw new Error(data?.error || "Plan generation failed.");
-
-        const spec = data?.context?.spec;
-        const tid = data?.context?.templateId || spec?.templateId || templateOverride || "";
-
-        if (!spec) throw new Error("Plan was generated, but no plan data was returned.");
-
-        pendingPlan = {
-          spec,
-          templateId: tid,
-          html: data?.file?.content || ""
-        };
-
-        renderPlan(spec, tid);
-        $("confirmPlanBtn").disabled = false;
-
-        setActiveStep(2);
-        toast("ok","Plan ready","Review Step 2 and submit corrections if needed.");
-      }catch(e){
-        toast("bad","Plan failed", e.message || String(e));
-        console.error(e);
+    function ensureAuth(){
+      const a = getAuth();
+      if (!a || !a.email || !a.pass){
+        authOverlay.classList.add("show");
       }
     }
 
-    // =========================================================
-    // STEP 2: Submit corrections & Generate HTML
-    // If corrections exist, we regenerate (simple + effective).
-    // =========================================================
-    async function confirmPlanAndBuildHtml(){
+    authLogin.addEventListener("click", () => {
+      const e = authEmail.value.trim();
+      const p = authPass.value;
+      if (!e || !p) return toast("Enter email + password.");
+      setAuth(e, p);
+      authOverlay.classList.remove("show");
+      toast("Signed in (local).");
+    });
+
+    authReset.addEventListener("click", () => {
+      clearAuth();
+      authEmail.value = "";
+      authPass.value = "";
+      toast("Local account reset.");
+    });
+
+    // -----------------------------
+    // API base (hidden from UI)
+    // -----------------------------
+    // You can't truly hide a browser-called URL, but we don't show it in the UI.
+    const API_KEY = "CT_API_BASE_V1";
+    const DEFAULT_API = "https://chattok-builder-api.onrender.com";
+    function getApiBase(){
+      return (localStorage.getItem(API_KEY) || DEFAULT_API).replace(/\/+$/, "");
+    }
+    function setApiBase(v){
+      localStorage.setItem(API_KEY, String(v||"").trim().replace(/\/+$/, ""));
+    }
+
+    // -----------------------------
+    // Online indicator
+    // -----------------------------
+    const apiDot = document.getElementById("apiDot");
+    const apiStatus = document.getElementById("apiStatus");
+    const btnConnect = document.getElementById("btnConnect");
+    const btnSettings = document.getElementById("btnSettings");
+
+    let apiOnline = false;
+
+    async function ping(){
+      const base = getApiBase();
       try{
-        if (!pendingPlan?.spec) throw new Error("Generate a plan first.");
-
-        if (!lastHealthOk){
-          const ok = await checkHealth(false);
-          if (!ok) throw new Error("Builder is offline. Click the Online indicator to retry.");
-        }
-
-        const idea = getIdeaOrThrow();
-        const corrections = safeTrim($("planCorrections").value);
-        const theme = getTheme();
-
-        let useIdea = idea;
-        if (corrections){
-          useIdea = `${idea}\n\nCorrections / must-haves:\n${corrections}`;
-        }
-        finalIdeaUsed = useIdea;
-
-        toast("wait","Generating HTML…","Building the game files step-by-step.");
-
-        let html = pendingPlan.html;
-        let spec = pendingPlan.spec;
-        let tid = pendingPlan.templateId || "";
-
-        // If corrections exist, regenerate html/spec so plan reflects changes
-        if (corrections){
-          const data = await postJson("/api/generate", {
-            stage: "html",
-            idea: useIdea,
-            theme,
-            templateId: templateOverride || undefined
-          });
-
-          if (!data?.ok) throw new Error(data?.error || "HTML generation failed.");
-
-          html = data?.file?.content || "";
-          spec = data?.context?.spec || spec;
-          tid = data?.context?.templateId || tid;
-
-          pendingPlan = { spec, templateId: tid, html };
-          renderPlan(spec, tid);
-        }
-
-        $("outHtml").value = html || "";
-        builderContext = { spec, templateId: tid || spec?.templateId || templateOverride || "" };
-
-        setDot($("dotHtml"), "ok");
-        $("buildCssBtn").disabled = false;
-
-        setActiveStep(3);
-        toast("ok","HTML ready","Click Build CSS (Step 3).");
-      }catch(e){
-        setDot($("dotHtml"), "bad");
-        toast("bad","HTML failed", e.message || String(e));
-        console.error(e);
+        const r = await fetch(base + "/health", { method:"GET" });
+        if (!r.ok) throw new Error("bad status");
+        apiOnline = true;
+        apiDot.className = "dot good";
+        apiStatus.textContent = "Builder online";
+        btnConnect.textContent = "Connected";
+        btnConnect.classList.add("secondary");
+        btnConnect.disabled = true;
+        return true;
+      }catch{
+        apiOnline = false;
+        apiDot.className = "dot bad";
+        apiStatus.textContent = "Builder offline";
+        btnConnect.textContent = "Connect";
+        btnConnect.disabled = false;
+        return false;
       }
     }
 
-    // =========================================================
-    // STEP 3: Build CSS + JS
-    // =========================================================
-    async function buildCss(){
-      try{
-        if (!builderContext?.spec) throw new Error("Generate HTML first.");
+    btnConnect.addEventListener("click", async () => {
+      apiDot.className = "dot warn";
+      apiStatus.textContent = "Waking…";
+      btnConnect.disabled = true;
+      await ping();
+    });
 
-        if (!lastHealthOk){
-          const ok = await checkHealth(false);
-          if (!ok) throw new Error("Builder is offline. Click the Online indicator to retry.");
-        }
-
-        const theme = getTheme();
-        const templateId = templateOverride || builderContext?.templateId || builderContext?.spec?.templateId || "";
-
-        toast("wait","Building CSS…","Applying your theme to the game.");
-
-        const data = await postJson("/api/generate", {
-          stage: "css",
-          theme,
-          templateId: templateId || undefined,
-          context: builderContext
-        });
-
-        if (!data?.ok) throw new Error(data?.error || "CSS build failed.");
-
-        $("outCss").value = data?.file?.content || data?.style_css || "";
-        setDot($("dotCss"), "ok");
-        $("buildJsBtn").disabled = false;
-
-        toast("ok","CSS ready","Now build game.js.");
-      }catch(e){
-        setDot($("dotCss"), "bad");
-        toast("bad","CSS failed", e.message || String(e));
-        console.error(e);
+    btnSettings.addEventListener("click", () => {
+      const current = getApiBase();
+      const v = prompt("Developer setting: API base URL (Render).", current);
+      if (v && v.trim()){
+        setApiBase(v.trim());
+        toast("Saved API base.");
+        ping();
       }
+    });
+
+    // -----------------------------
+    // Toast
+    // -----------------------------
+    const toastEl = document.getElementById("toast");
+    let toastTimer = null;
+    function toast(msg){
+      toastEl.textContent = String(msg || "");
+      toastEl.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1700);
     }
 
-    async function buildJs(){
-      try{
-        if (!builderContext?.spec) throw new Error("Generate HTML first.");
-        if (!safeTrim($("outHtml").value)) throw new Error("HTML is empty. Generate HTML first.");
+    // -----------------------------
+    // Speech-to-text
+    // -----------------------------
+    const btnMic = document.getElementById("btnMic");
+    const ideaInput = document.getElementById("ideaInput");
+    let rec = null;
+    let micOn = false;
 
-        if (!lastHealthOk){
-          const ok = await checkHealth(false);
-          if (!ok) throw new Error("Builder is offline. Click the Online indicator to retry.");
-        }
-
-        const theme = getTheme();
-        const templateId = templateOverride || builderContext?.templateId || builderContext?.spec?.templateId || "";
-        const idea = finalIdeaUsed || getIdeaOrThrow();
-
-        toast("wait","Building game.js…","Generating gameplay logic (this is the important part).");
-
-        const data = await postJson("/api/generate", {
-          stage: "js",
-          idea,
-          theme,
-          templateId: templateId || undefined,
-          context: builderContext
-        });
-
-        if (!data?.ok) throw new Error(data?.error || "JS build failed.");
-
-        $("outJs").value = data?.file?.content || data?.game_js || "";
-        builderContext = data?.context || builderContext;
-
-        setDot($("dotJs"), "ok");
-        $("editBtn").disabled = false;
-
-        setActiveStep(4);
-        toast("ok","game.js ready","If you want more action, use Step 4 edits.");
-      }catch(e){
-        setDot($("dotJs"), "bad");
-        toast("bad","game.js failed", e.message || String(e));
-        console.error(e);
-      }
+    function getSpeech(){
+      return window.SpeechRecognition || window.webkitSpeechRecognition || null;
     }
 
-    // =========================================================
-    // STEP 4: Edits (AI_REGION only)
-    // =========================================================
-    async function applyEdit(){
-      try{
-        if (remainingEdits <= 0) return toast("bad","No edits left","Reset to get edits back.");
-        const changeRequest = safeTrim($("editReq").value);
-        if (!changeRequest) throw new Error("Type what you want to change first.");
-        if (!safeTrim($("outJs").value)) throw new Error("Build game.js first.");
-
-        if (!lastHealthOk){
-          const ok = await checkHealth(false);
-          if (!ok) throw new Error("Builder is offline. Click the Online indicator to retry.");
-        }
-
-        const theme = getTheme();
-        const templateId = templateOverride || builderContext?.templateId || builderContext?.spec?.templateId || "";
-
-        toast("wait","Applying edit…","Updating gameplay logic.");
-
-        const data = await postJson("/api/edit", {
-          remainingEdits,
-          changeRequest,
-          currentFiles: {
-            "index.html": $("outHtml").value || "",
-            "style.css": $("outCss").value || "",
-            "game.js": $("outJs").value || ""
-          },
-          theme,
-          templateId: templateId || undefined
-        });
-
-        if (!data?.ok) throw new Error(data?.error || "Edit failed.");
-
-        const patches = Array.isArray(data.patches) ? data.patches : [];
-        for (const p of patches){
-          if (p?.name === "game.js") $("outJs").value = p.content || "";
-          if (p?.name === "style.css") $("outCss").value = p.content || "";
-        }
-
-        remainingEdits = Number(data.remainingEdits ?? (remainingEdits - 1));
-        $("editsLeft").textContent = String(remainingEdits);
-
-        toast("ok","Edit applied", data.notes || "Updated your file(s).");
-        if (remainingEdits <= 0) $("editBtn").disabled = true;
-      }catch(e){
-        toast("bad","Edit failed", e.message || String(e));
-        console.error(e);
-      }
-    }
-
-    // =========================================================
-    // Talk-to-text (Web Speech API)
-    // =========================================================
-    let recognizer = null;
-    let listening = false;
-
-    function setupSpeech(){
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SR) {
-        $("micBtn").disabled = true;
-        $("micBtn").title = "Talk-to-text not supported in this browser.";
+    function startMic(){
+      const SR = getSpeech();
+      if (!SR){
+        toast("Speech-to-text not supported in this browser.");
         return;
       }
-      recognizer = new SR();
-      recognizer.lang = "en-US";
-      recognizer.interimResults = true;
-      recognizer.continuous = true;
+      if (micOn) return;
+
+      rec = new SR();
+      rec.lang = "en-US";
+      rec.interimResults = true;
+      rec.continuous = true;
 
       let finalText = "";
-
-      recognizer.onresult = (e) => {
+      rec.onresult = (e) => {
         let interim = "";
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-          const res = e.results[i];
-          const txt = res[0]?.transcript || "";
-          if (res.isFinal) finalText += txt + " ";
-          else interim += txt;
+        for (let i = e.resultIndex; i < e.results.length; i++){
+          const t = e.results[i][0].transcript;
+          if (e.results[i].isFinal) finalText += t + " ";
+          else interim += t;
         }
-        const base = $("idea").value || "";
-        const merged = (base + " " + finalText + interim).replace(/\s+/g," ").trim();
-        $("idea").value = merged;
-        saveLocal();
+        const base = ideaInput.value.replace(/\s+$/,"");
+        ideaInput.value = (base ? base + " " : "") + (finalText + interim).trim();
       };
 
-      recognizer.onerror = (e) => {
-        stopListening();
-        toast("bad", "Mic error", e?.error || "Speech recognition error.");
+      rec.onerror = () => {
+        stopMic();
+        toast("Mic error. Try again.");
       };
 
-      recognizer.onend = () => {
-        if (listening) stopListening();
+      rec.onend = () => {
+        micOn = false;
+        btnMic.textContent = "🎙 Talk to text";
+        btnMic.classList.add("secondary");
+      };
+
+      micOn = true;
+      btnMic.textContent = "■ Stop mic";
+      btnMic.classList.remove("secondary");
+      rec.start();
+      toast("Listening…");
+    }
+
+    function stopMic(){
+      try{ rec && rec.stop(); }catch{}
+      micOn = false;
+    }
+
+    btnMic.addEventListener("click", () => {
+      if (micOn) stopMic();
+      else startMic();
+    });
+
+    // -----------------------------
+    // Build flow state
+    // -----------------------------
+    const outHtml = document.getElementById("outHtml");
+    const outCss  = document.getElementById("outCss");
+    const outJs   = document.getElementById("outJs");
+
+    const btnPlan = document.getElementById("btnPlan");
+    const btnReplan = document.getElementById("btnReplan");
+    const btnLockPlan = document.getElementById("btnLockPlan");
+
+    const btnBuildHtml = document.getElementById("btnBuildHtml");
+    const btnBuildCss  = document.getElementById("btnBuildCss");
+    const btnBuildJs   = document.getElementById("btnBuildJs");
+
+    const planTitle = document.getElementById("planTitle");
+    const planTemplate = document.getElementById("planTemplate");
+    const planRound = document.getElementById("planRound");
+    const planGoal = document.getElementById("planGoal");
+
+    const correctionsInput = document.getElementById("correctionsInput");
+    const editsBadge = document.getElementById("editsBadge");
+    const outBadge = document.getElementById("outBadge");
+
+    const editInput = document.getElementById("editInput");
+    const btnApplyEdit = document.getElementById("btnApplyEdit");
+    const btnResetAll = document.getElementById("btnResetAll");
+
+    // Theme pickers
+    const cPrimary = document.getElementById("cPrimary");
+    const cSecondary = document.getElementById("cSecondary");
+    const cBg = document.getElementById("cBg");
+    const swPrimary = document.getElementById("swPrimary");
+    const swSecondary = document.getElementById("swSecondary");
+    const swBg = document.getElementById("swBg");
+    const vPrimary = document.getElementById("vPrimary");
+    const vSecondary = document.getElementById("vSecondary");
+    const vBg = document.getElementById("vBg");
+
+    function applySwatches(){
+      swPrimary.style.background = cPrimary.value;
+      swSecondary.style.background = cSecondary.value;
+      swBg.style.background = cBg.value;
+      vPrimary.textContent = cPrimary.value;
+      vSecondary.textContent = cSecondary.value;
+      vBg.textContent = cBg.value;
+    }
+    applySwatches();
+
+    swPrimary.addEventListener("click", () => cPrimary.click());
+    swSecondary.addEventListener("click", () => cSecondary.click());
+    swBg.addEventListener("click", () => cBg.click());
+    cPrimary.addEventListener("input", applySwatches);
+    cSecondary.addEventListener("input", applySwatches);
+    cBg.addEventListener("input", applySwatches);
+
+    // Builder state
+    let editsRemaining = 3;
+    let locked = false;
+
+    // Context from API to avoid extra cost
+    let currentIdea = "";
+    let currentTemplateId = "auto"; // sent as hint, server can use it
+    let currentSpec = null;
+    let cachedHtml = "";
+
+    function setEdits(n){
+      editsRemaining = Math.max(0, Number(n||0));
+      editsBadge.textContent = "Edits: " + editsRemaining;
+      btnApplyEdit.disabled = !(locked && outJs.value.trim() && editsRemaining > 0);
+    }
+    setEdits(3);
+
+    function setLocked(v){
+      locked = !!v;
+      btnBuildHtml.disabled = !locked;
+      btnBuildCss.disabled  = !locked;
+      btnBuildJs.disabled   = !locked;
+      btnReplan.disabled    = !currentSpec;
+      btnLockPlan.disabled  = !currentSpec;
+      btnApplyEdit.disabled = !(locked && outJs.value.trim() && editsRemaining > 0);
+    }
+    setLocked(false);
+
+    function themePayload(){
+      return {
+        primary: cPrimary.value,
+        secondary: cSecondary.value,
+        background: cBg.value
       };
     }
 
-    function startListening(){
-      if (!recognizer) return;
-      listening = true;
-      $("micNote").style.display = "block";
-      $("micBtn").textContent = "⏹️ Stop";
-      try { recognizer.start(); } catch (_) {}
-      toast("wait", "Listening", "Speak your game idea. Click Stop when done.");
+    async function postJson(path, data){
+      const base = getApiBase();
+      const r = await fetch(base + path, {
+        method:"POST",
+        headers: { "Content-Type":"application/json" },
+        body: JSON.stringify(data || {})
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.ok){
+        const msg = j && j.error ? j.error : ("Request failed (" + r.status + ")");
+        throw new Error(msg);
+      }
+      return j;
     }
 
-    function stopListening(){
-      listening = false;
-      $("micNote").style.display = "none";
-      $("micBtn").textContent = "🎙️ Talk";
-      try { recognizer.stop(); } catch (_) {}
+    function renderPlan(spec){
+      planTitle.textContent = spec?.title || "—";
+      planTemplate.textContent = (currentTemplateId === "auto" ? "Auto" : currentTemplateId);
+      planRound.textContent = String(spec?.defaultSettings?.roundSeconds ?? "—");
+      planGoal.textContent  = String(spec?.defaultSettings?.winGoal ?? "—");
     }
 
-    // =========================================================
-    // Copy / Download
-    // =========================================================
-    function wireCopyDownload(){
-      $("copyHtmlBtn").addEventListener("click", async ()=>{
-        const ok = await copyText($("outHtml").value || "");
-        toast(ok?"ok":"bad", ok?"Copied":"Copy failed", "index.html");
-      });
-      $("copyCssBtn").addEventListener("click", async ()=>{
-        const ok = await copyText($("outCss").value || "");
-        toast(ok?"ok":"bad", ok?"Copied":"Copy failed", "style.css");
-      });
-      $("copyJsBtn").addEventListener("click", async ()=>{
-        const ok = await copyText($("outJs").value || "");
-        toast(ok?"ok":"bad", ok?"Copied":"Copy failed", "game.js");
-      });
+    // Generate Plan (we use stage=html because the API currently generates spec there)
+    async function generatePlan(ideaText){
+      if (!apiOnline){
+        toast("Builder is offline. Click Connect.");
+        return;
+      }
+      currentIdea = ideaText.trim();
+      if (!currentIdea){
+        toast("Type a short game idea first.");
+        return;
+      }
 
-      $("dlHtmlBtn").addEventListener("click", ()=> downloadFile("index.html", $("outHtml").value || ""));
-      $("dlCssBtn").addEventListener("click", ()=> downloadFile("style.css", $("outCss").value || ""));
-      $("dlJsBtn").addEventListener("click", ()=> downloadFile("game.js", $("outJs").value || ""));
+      outBadge.textContent = "Planning…";
+      btnPlan.disabled = true;
+
+      const payload = {
+        stage: "html",
+        idea: currentIdea,
+        templateId: currentTemplateId,
+        theme: themePayload()
+      };
+
+      const j = await postJson("/api/generate", payload);
+
+      currentSpec = j.context?.spec || null;
+      cachedHtml = j.file?.content || "";
+
+      if (!currentSpec){
+        throw new Error("Plan failed: missing spec from API.");
+      }
+
+      renderPlan(currentSpec);
+      btnReplan.disabled = false;
+      btnLockPlan.disabled = false;
+
+      outBadge.textContent = "Plan ready";
+      toast("Plan generated. Review it, then lock it.");
+
+      return true;
     }
 
-    // =========================================================
-    // Hidden dev settings toggle (Alt+Click logo)
-    // =========================================================
-    function wireDevPanel(){
-      $("logoBtn").addEventListener("click", (e)=>{
-        if (!e.altKey) return;
-        $("devPanel").classList.toggle("show");
-      });
+    btnPlan.addEventListener("click", async () => {
+      try{
+        await generatePlan(ideaInput.value);
+      }catch(e){
+        toast(e.message || "Plan failed.");
+        outBadge.textContent = "Error";
+      }finally{
+        btnPlan.disabled = false;
+      }
+    });
 
-      $("saveDevBtn").addEventListener("click", ()=>{
-        const v = safeTrim($("apiOverride").value).replace(/\/+$/,"");
-        if (v && !/^https?:\/\//i.test(v)) {
-          toast("bad","Invalid URL","Must start with http:// or https://");
-          return;
+    btnReplan.addEventListener("click", async () => {
+      try{
+        const extra = correctionsInput.value.trim();
+        const merged = extra ? (currentIdea + "\n\nCorrections:\n" + extra) : currentIdea;
+        await generatePlan(merged);
+      }catch(e){
+        toast(e.message || "Re-plan failed.");
+        outBadge.textContent = "Error";
+      }
+    });
+
+    btnLockPlan.addEventListener("click", () => {
+      if (!currentSpec) return;
+      setLocked(true);
+      outBadge.textContent = "Locked";
+      toast("Plan locked. Generate HTML → CSS → game.js.");
+    });
+
+    // Build HTML (no extra API call: we already have the HTML from the plan stage)
+    btnBuildHtml.addEventListener("click", () => {
+      if (!locked) return;
+      if (!cachedHtml) {
+        toast("No HTML cached. Generate plan again.");
+        return;
+      }
+      outHtml.value = cachedHtml;
+      outBadge.textContent = "HTML ready";
+      toast("HTML generated.");
+      // Enable CSS next
+      btnBuildCss.disabled = false;
+      btnBuildJs.disabled = false; // can build JS anytime after lock
+    });
+
+    // Build CSS (theme-only; API stage css)
+    btnBuildCss.addEventListener("click", async () => {
+      try{
+        if (!locked) return;
+        outBadge.textContent = "Building CSS…";
+        btnBuildCss.disabled = true;
+
+        const j = await postJson("/api/generate", {
+          stage: "css",
+          theme: themePayload(),
+          templateId: currentTemplateId,
+          context: { spec: currentSpec }
+        });
+
+        outCss.value = j.file?.content || "";
+        outBadge.textContent = "CSS ready";
+        toast("CSS generated.");
+      }catch(e){
+        toast(e.message || "CSS failed.");
+        outBadge.textContent = "Error";
+      }finally{
+        btnBuildCss.disabled = false;
+      }
+    });
+
+    // Build JS (uses context.spec from plan to avoid re-spec cost)
+    btnBuildJs.addEventListener("click", async () => {
+      try{
+        if (!locked) return;
+        if (!currentSpec) { toast("Missing plan. Generate plan first."); return; }
+
+        outBadge.textContent = "Building game.js…";
+        btnBuildJs.disabled = true;
+
+        const j = await postJson("/api/generate", {
+          stage: "js",
+          idea: currentIdea,
+          templateId: currentTemplateId,
+          context: { spec: currentSpec }
+        });
+
+        outJs.value = j.file?.content || "";
+        outBadge.textContent = "game.js ready";
+        toast("game.js generated.");
+
+        // Enable edits
+        btnApplyEdit.disabled = !(editsRemaining > 0);
+      }catch(e){
+        toast(e.message || "JS failed.");
+        outBadge.textContent = "Error";
+      }finally{
+        btnBuildJs.disabled = false;
+      }
+    });
+
+    // Apply Edit (calls /api/edit)
+    btnApplyEdit.addEventListener("click", async () => {
+      try{
+        if (!locked) return;
+        if (editsRemaining <= 0) { toast("No edits remaining."); return; }
+        const changeRequest = editInput.value.trim();
+        if (!changeRequest) { toast("Type an edit request first."); return; }
+
+        outBadge.textContent = "Editing…";
+        btnApplyEdit.disabled = true;
+
+        const j = await postJson("/api/edit", {
+          remainingEdits: editsRemaining,
+          changeRequest,
+          templateId: currentTemplateId,
+          theme: themePayload(),
+          currentFiles: {
+            "style.css": outCss.value,
+            "game.js": outJs.value
+          }
+        });
+
+        const patches = Array.isArray(j.patches) ? j.patches : [];
+        for (const p of patches){
+          if (p.name === "style.css") outCss.value = p.content || "";
+          if (p.name === "game.js") outJs.value = p.content || "";
         }
-        localStorage.setItem(LS_API_OVERRIDE, v);
-        toast("ok","Saved","API override updated.");
-        checkHealth(false);
+
+        setEdits(j.remainingEdits);
+        outBadge.textContent = "Edited";
+        toast("Edit applied.");
+      }catch(e){
+        toast(e.message || "Edit failed.");
+        outBadge.textContent = "Error";
+      }finally{
+        btnApplyEdit.disabled = !(locked && outJs.value.trim() && editsRemaining > 0);
+      }
+    });
+
+    btnResetAll.addEventListener("click", () => {
+      currentIdea = "";
+      currentSpec = null;
+      cachedHtml = "";
+
+      ideaInput.value = "";
+      correctionsInput.value = "";
+      editInput.value = "";
+
+      outHtml.value = "";
+      outCss.value = "";
+      outJs.value = "";
+
+      planTitle.textContent = "—";
+      planRound.textContent = "—";
+      planGoal.textContent = "—";
+      planTemplate.textContent = "Auto";
+
+      setEdits(3);
+      setLocked(false);
+      outBadge.textContent = "Ready";
+      toast("Reset.");
+    });
+
+    // Copy buttons
+    document.querySelectorAll("[data-copy]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const id = btn.getAttribute("data-copy");
+        const el = document.getElementById(id);
+        const val = el ? el.value : "";
+        if (!val.trim()) { toast("Nothing to copy."); return; }
+        try{
+          await navigator.clipboard.writeText(val);
+          toast("Copied.");
+        }catch{
+          el.focus();
+          el.select();
+          toast("Select + copy manually.");
+        }
       });
+    });
 
-      $("clearDevBtn").addEventListener("click", ()=>{
-        localStorage.removeItem(LS_API_OVERRIDE);
-        $("apiOverride").value = "";
-        toast("ok","Cleared","API override removed.");
-        checkHealth(false);
-      });
-    }
-
-    // =========================================================
-    // Wire everything
-    // =========================================================
-    function wire(){
-      $("onlinePill").addEventListener("click", ()=>checkHealth(true));
-
-      $("generatePlanBtn").addEventListener("click", generatePlan);
-      $("confirmPlanBtn").addEventListener("click", confirmPlanAndBuildHtml);
-
-      $("buildCssBtn").addEventListener("click", buildCss);
-      $("buildJsBtn").addEventListener("click", buildJs);
-
-      $("resetAllBtn").addEventListener("click", resetAll);
-      $("editBtn").addEventListener("click", applyEdit);
-
-      $("clearIdeaBtn").addEventListener("click", ()=>{
-        $("idea").value = "";
-        saveLocal();
-      });
-
-      $("useDefaultThemeBtn").addEventListener("click", ()=>{
-        setDefaultTheme();
-        toast("ok","Theme set","Default orange/black applied.");
-      });
-
-      $("toggleTemplateBtn").addEventListener("click", ()=>{
-        // cycle
-        const order = ["", "asteroids", "runner", "trivia", "wheel", "arena", "bossraid"];
-        const idx = Math.max(0, order.indexOf(templateOverride));
-        templateOverride = order[(idx + 1) % order.length];
-        localStorage.setItem(LS_TEMPLATE_OVERRIDE, templateOverride);
-        updateTemplateButton();
-        toast("ok","Template updated", templateOverride ? `Forced: ${templateOverride}` : "Auto selection enabled");
-      });
-
-      // color picker sync
-      $("cPrimaryPick").addEventListener("input", syncTextFromPickers);
-      $("cSecondaryPick").addEventListener("input", syncTextFromPickers);
-      $("cBgPick").addEventListener("input", syncTextFromPickers);
-
-      $("cPrimaryText").addEventListener("input", ()=>{ syncPickersFromText(); saveLocal(); });
-      $("cSecondaryText").addEventListener("input", ()=>{ syncPickersFromText(); saveLocal(); });
-      $("cBgText").addEventListener("input", ()=>{ syncPickersFromText(); saveLocal(); });
-
-      // mic
-      $("micBtn").addEventListener("click", ()=>{
-        if (!recognizer) return toast("bad","Not supported","Talk-to-text isn’t supported in this browser.");
-        if (!listening) startListening();
-        else stopListening();
-      });
-
-      // local auth
-      $("signupBtn").addEventListener("click", async ()=>{
-        const email = safeTrim($("email").value).toLowerCase();
-        const pass = safeTrim($("pass").value);
-        if (!email || !pass) return toast("bad","Missing info","Enter email + password.");
-
-        const users = getUsers();
-        if (users[email]) return toast("bad","Already exists","That email already exists on this device.");
-
-        const hash = await sha256(email + "::" + pass);
-        users[email] = { hash, createdAt: Date.now() };
-        setUsers(users);
-        setAuth(email);
-        toast("ok","Account created","Signed in locally.");
-      });
-
-      $("loginBtn").addEventListener("click", async ()=>{
-        const email = safeTrim($("email").value).toLowerCase();
-        const pass = safeTrim($("pass").value);
-        if (!email || !pass) return toast("bad","Missing info","Enter email + password.");
-
-        const users = getUsers();
-        if (!users[email]) return toast("bad","Not found","No local account found for that email.");
-
-        const hash = await sha256(email + "::" + pass);
-        if (hash !== users[email].hash) return toast("bad","Wrong password","Try again.");
-
-        setAuth(email);
-        toast("ok","Signed in","Local login success.");
-      });
-
-      $("logoutBtn").addEventListener("click", ()=>{
-        clearAuth();
-        toast("ok","Signed out","You are now in Guest mode.");
-      });
-
-      // save idea as they type
-      let saveT = null;
-      $("idea").addEventListener("input", ()=>{
-        clearTimeout(saveT);
-        saveT = setTimeout(saveLocal, 250);
-      });
-    }
-
-    // =========================================================
     // Init
-    // =========================================================
-    loadLocal();
-    setupSpeech();
-    wireDevPanel();
-    wireCopyDownload();
-    wire();
-
-    resetAll();
-    checkHealth(false);
+    document.getElementById("year").textContent = String(new Date().getFullYear());
+    ensureAuth();
+    ping();
   </script>
 </body>
 </html>
