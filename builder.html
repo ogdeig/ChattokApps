@@ -2,32 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="color-scheme" content="dark" />
-  <title>ChatTok Game Builder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>ChatTok AI Game Builder</title>
 
   <style>
     :root{
-      /* ChatTok brand */
-      --pink:#ff0050;
-      --aqua:#00f2ea;
-      --black:#000000;
-
-      --bg0:#060812;
-      --bg1:#0b1022;
+      --bg0:#050b17;
+      --bg1:#071a35;
 
       --panel: rgba(255,255,255,.06);
       --panel2: rgba(255,255,255,.04);
-      --line: rgba(255,255,255,.12);
+      --line: rgba(255,255,255,.10);
 
-      --text:#f7f7fb;
-      --muted: rgba(247,247,251,.72);
+      --text:#ffffff;
+      --muted: rgba(255,255,255,.72);
 
       --good:#2ee59d;
       --bad:#ff4d4d;
       --warn:#ffb347;
 
-      --shadowPanel: 0 16px 46px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08);
+      --pink:#ff0050;
+      --aqua:#00f2ea;
+      --black:#000000;
+
+      --shadowPanel: 0 14px 40px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.08);
       --r: 18px;
       --r2: 14px;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
@@ -37,1360 +35,1231 @@
     html,body{ height:100%; }
     body{
       margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       background:
-        radial-gradient(1200px 720px at 18% 12%, rgba(255,0,80,.18), transparent 60%),
-        radial-gradient(950px 650px at 86% 22%, rgba(0,242,234,.12), transparent 55%),
+        radial-gradient(1100px 700px at 16% 14%, rgba(255,0,80,.18), transparent 62%),
+        radial-gradient(900px 650px at 86% 18%, rgba(0,242,234,.12), transparent 60%),
         linear-gradient(180deg, var(--bg0), var(--bg1));
       overflow-x:hidden;
     }
 
-    .wrap{ max-width: 1320px; margin: 0 auto; padding: 18px 16px 46px; }
-
-    .topbar{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:14px;
-      margin-bottom: 14px;
+    /* Subtle drift glow */
+    body:before{
+      content:"";
+      position: fixed;
+      inset:-140px;
+      pointer-events:none;
+      z-index:-1;
+      background:
+        radial-gradient(620px 520px at 18% 20%, rgba(255,0,80,.18), transparent 70%),
+        radial-gradient(720px 620px at 78% 16%, rgba(0,242,234,.14), transparent 72%);
+      filter: blur(22px);
+      opacity:.7;
+      animation: drift 10.5s ease-in-out infinite alternate;
+    }
+    @keyframes drift{
+      from{ transform: translate3d(-12px,-6px,0) scale(1.02); }
+      to  { transform: translate3d(16px,12px,0) scale(1.08); }
     }
 
-    .brand{ display:flex; flex-direction:column; gap:8px; }
+    .wrap{
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 18px 12px 26px;
+    }
+
+    .header{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap: 4px;
+    }
     .brand h1{
       margin:0;
-      font-size: 26px;
+      font-size: 22px;
       font-weight: 950;
       letter-spacing:.2px;
-      text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 18px rgba(255,0,80,.22);
+      text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 18px rgba(255,0,80,.25);
     }
-    .brand p{
-      margin:0;
-      color:var(--muted);
-      font-size: 13.5px;
-      line-height: 1.35;
-      max-width: 920px;
+    .brand .sub{
+      font-size: 13px;
+      color: var(--muted);
+      line-height:1.25;
     }
 
-    .statusRow{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
-
-    .statusPill{
+    .pill{
       display:inline-flex;
       align-items:center;
-      gap:10px;
-      padding: 10px 12px;
-      background: rgba(0,0,0,.26);
-      border: 1px solid var(--line);
+      gap:8px;
+      padding: 9px 12px;
       border-radius: 999px;
-      box-shadow: 0 10px 25px rgba(0,0,0,.25);
-      color: var(--muted);
-      font-size: 13px;
-      white-space:nowrap;
-      user-select:none;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.20);
+      color: rgba(255,255,255,.86);
+      font-size: 12.5px;
+      font-family: var(--mono);
+      box-shadow: 0 10px 26px rgba(0,0,0,.22);
+      white-space: nowrap;
     }
     .dot{
-      width:10px; height:10px; border-radius: 50%;
-      background: rgba(255,255,255,.22);
-      box-shadow: 0 0 0 2px rgba(255,255,255,.10);
+      width:10px; height:10px; border-radius:99px;
+      background: rgba(255,255,255,.35);
+      box-shadow: 0 0 0 2px rgba(255,255,255,.08);
     }
-    .dot.good{ background: var(--good); box-shadow: 0 0 0 2px rgba(46,229,157,.18); }
-    .dot.bad{  background: var(--bad);  box-shadow: 0 0 0 2px rgba(255,77,77,.18); }
-    .dot.warn{ background: var(--warn); box-shadow: 0 0 0 2px rgba(255,179,71,.18); }
-
-    .btn{
-      border: 0;
-      cursor:pointer;
-      padding: 12px 14px;
-      border-radius: 14px;
-      font-weight: 950;
-      letter-spacing:.2px;
-      color: #0b0b0b;
-      background: linear-gradient(180deg, rgba(0,242,234,.95), rgba(255,0,80,.95));
-      box-shadow: 0 14px 26px rgba(255,0,80,.12), 0 7px 0 rgba(0,0,0,.35);
-      transform: translateY(0);
-      transition: transform .08s ease, box-shadow .08s ease, filter .15s ease, opacity .15s ease;
-      user-select:none;
-      white-space:nowrap;
-    }
-    .btn:hover{ filter: brightness(1.04); }
-    .btn:active{
-      transform: translateY(6px);
-      box-shadow: 0 8px 18px rgba(255,0,80,.10), 0 1px 0 rgba(0,0,0,.35);
-    }
-    .btn[disabled]{ opacity:.55; cursor:not-allowed; filter:saturate(.6); }
-    .btn.secondary{
-      color: var(--text);
-      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.08));
-      border: 1px solid rgba(255,255,255,.14);
-      box-shadow: 0 12px 24px rgba(0,0,0,.28), 0 7px 0 rgba(0,0,0,.35);
-    }
-    .btn.danger{
-      color: var(--text);
-      background: linear-gradient(180deg, rgba(255,77,77,.22), rgba(0,0,0,.18));
-      border: 1px solid rgba(255,77,77,.35);
-      box-shadow: 0 12px 24px rgba(0,0,0,.28), 0 7px 0 rgba(0,0,0,.35);
-    }
+    .dot.good{ background: rgba(46,229,157,.95); }
+    .dot.bad{ background: rgba(255,77,77,.95); }
+    .dot.warn{ background: rgba(255,179,71,.95); }
 
     .grid{
       display:grid;
-      grid-template-columns: 1.05fr .95fr;
-      gap: 14px;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 12px;
     }
     @media (max-width: 980px){
       .grid{ grid-template-columns: 1fr; }
-      .statusRow{ width:100%; justify-content:space-between; }
-      .statusPill{ flex: 1 1 auto; justify-content:space-between; }
     }
 
-    .panel{
+    .card{
       background: linear-gradient(180deg, var(--panel), var(--panel2));
       border: 1px solid var(--line);
       border-radius: var(--r);
       box-shadow: var(--shadowPanel);
       overflow:hidden;
     }
-    .panelHead{
-      padding: 14px 14px 12px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      background: linear-gradient(180deg, rgba(0,0,0,.18), transparent);
-    }
-    .panelTitle{ display:flex; flex-direction:column; gap:4px; }
-    .panelTitle h2{
-      margin:0;
-      font-size: 16px;
-      font-weight: 950;
-      text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 10px rgba(0,242,234,.18);
-    }
-    .panelTitle p{ margin:0; color:var(--muted); font-size: 13px; }
-    .panelBody{ padding: 14px; }
 
-    .badge{
-      font-family: var(--mono);
-      font-size: 12px;
-      color: rgba(247,247,251,.78);
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.20);
-      padding: 6px 8px;
-      border-radius: 999px;
-      white-space:nowrap;
-    }
-
-    .steps{ display:flex; flex-direction:column; gap:12px; }
-    .stepCard{
-      border-radius: var(--r2);
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      box-shadow: 0 12px 24px rgba(0,0,0,.26);
-      overflow:hidden;
-    }
-    .stepHead{
+    .card-h{
       padding: 12px 12px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:10px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), transparent);
+      gap: 10px;
     }
-    .stepLeft{ display:flex; align-items:center; gap:10px; min-width:0; }
-    .stepNum{
-      width: 30px; height: 30px;
-      border-radius: 10px;
-      display:grid;
-      place-items:center;
+    .card-h .t{
       font-weight: 950;
-      color: rgba(247,247,251,.95);
-      background: linear-gradient(180deg, rgba(255,0,80,.35), rgba(0,242,234,.18));
-      border: 1px solid rgba(255,255,255,.10);
-      box-shadow: 0 10px 20px rgba(0,0,0,.25);
-      flex: 0 0 auto;
-    }
-    .stepHead strong{
-      font-size: 14px;
       letter-spacing:.2px;
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
+      text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 12px rgba(0,242,234,.18);
+      display:flex;
+      align-items:center;
+      gap:8px;
     }
-    .stepBody{ padding: 12px; }
+    .badge{
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing:.4px;
+      color: rgba(255,255,255,.78);
+      padding: 3px 8px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 999px;
+      background: rgba(0,0,0,.22);
+    }
 
-    .label{
-      display:block;
+    .card-b{ padding: 12px; }
+
+    .step{
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
+      border-radius: var(--r2);
+      margin-bottom: 10px;
+    }
+    .step:last-child{ margin-bottom: 0; }
+
+    .step-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .step-title{
       font-weight: 950;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+    }
+    .num{
+      width: 28px; height: 28px; border-radius: 10px;
+      display:grid; place-items:center;
+      font-family: var(--mono);
+      font-weight: 950;
+      background: rgba(0,0,0,.28);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(255,255,255,.92);
+    }
+    .step-desc{
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.3;
+      margin-top: 2px;
+    }
+
+    .row{
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+    }
+
+    textarea, input[type="text"]{
+      width:100%;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.26);
+      color: rgba(255,255,255,.92);
+      padding: 12px 12px;
+      outline: none;
+      font-family: var(--mono);
+      font-size: 12.8px;
+      line-height: 1.35;
+    }
+    textarea{
+      min-height: 130px;
+      resize: vertical;
+    }
+    input[type="text"]::placeholder, textarea::placeholder{ color: rgba(255,255,255,.55); }
+    textarea:focus, input[type="text"]:focus{
+      border-color: rgba(0,242,234,.35);
+      box-shadow: 0 0 0 3px rgba(0,242,234,.12);
+    }
+
+    .btn{
+      border:0;
+      cursor:pointer;
+      padding: 11px 12px;
+      border-radius: 14px;
+      font-weight: 950;
+      letter-spacing:.2px;
+      background: rgba(255,255,255,.08);
+      color: rgba(255,255,255,.92);
+      border: 1px solid rgba(255,255,255,.12);
+      transition: transform .08s ease, filter .15s ease, opacity .15s ease;
+      user-select:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    }
+    .btn:hover{ filter: brightness(1.05); }
+    .btn:active{ transform: translateY(2px); }
+    .btn:disabled{ opacity:.50; cursor:not-allowed; filter:saturate(.6); }
+
+    .btn.primary{
+      color: #0b0b0b;
+      background: linear-gradient(180deg, rgba(0,242,234,.95), rgba(255,0,80,.92));
+      border: 0;
+      box-shadow: 0 12px 28px rgba(255,0,80,.12), 0 7px 0 rgba(0,0,0,.34);
+    }
+    .btn.primary:active{
+      transform: translateY(6px);
+      box-shadow: 0 8px 18px rgba(255,0,80,.10), 0 1px 0 rgba(0,0,0,.34);
+    }
+
+    .btn.good{
+      background: rgba(46,229,157,.12);
+      border-color: rgba(46,229,157,.35);
+    }
+    .btn.warn{
+      background: rgba(255,179,71,.12);
+      border-color: rgba(255,179,71,.32);
+    }
+
+    .mini{
       font-size: 12px;
-      letter-spacing:.3px;
-      color: rgba(255,255,255,.90);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      text-shadow: 0 1px 0 rgba(0,0,0,.35), 0 0 10px rgba(255,0,80,.12);
+      font-weight: 850;
+      padding: 9px 10px;
+      border-radius: 12px;
+    }
+
+    .split2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    @media (max-width: 700px){
+      .split2{ grid-template-columns: 1fr; }
     }
 
     .hint{
-      color: var(--muted);
-      font-size: 13px;
-      margin: 10px 0 0;
-      line-height: 1.45;
-    }
-
-    .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; align-items:center; }
-
-    textarea, input{
-      width:100%;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.26);
-      color: rgba(247,247,251,.92);
-      padding: 12px 12px;
-      font-family: var(--mono);
-      outline:none;
-    }
-    textarea{ min-height: 160px; resize: vertical; line-height: 1.45; }
-    textarea::placeholder{ color: rgba(247,247,251,.55); }
-
-    .kv{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-      margin-top: 10px;
-    }
-    @media (max-width: 520px){
-      .kv{ grid-template-columns: 1fr; }
-    }
-    .mini{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
       padding: 10px;
-      border-radius: 14px;
+      border-radius: var(--r2);
       border: 1px solid rgba(255,255,255,.10);
       background: rgba(0,0,0,.18);
-      min-width:0;
-    }
-    .mini .k{
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing:.6px;
-      text-transform: uppercase;
-      color: rgba(247,247,251,.60);
-    }
-    .mini .v{
-      font-weight: 900;
-      color: rgba(247,247,251,.92);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-    }
-
-    .codeBox{
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.26);
-      overflow:hidden;
-    }
-    .codeTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding: 10px 10px;
-      border-bottom: 1px solid rgba(255,255,255,.10);
-      background: linear-gradient(180deg, rgba(255,255,255,.05), transparent);
-    }
-    .codeTop .name{
-      font-family: var(--mono);
-      font-size: 12px;
-      color: rgba(247,247,251,.80);
-    }
-    .copyBtn{
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
-      color: rgba(247,247,251,.85);
-      border-radius: 12px;
-      padding: 8px 10px;
-      font-weight: 900;
-      cursor:pointer;
-      white-space:nowrap;
-    }
-    .codeArea{
-      width:100%;
-      min-height: 240px;
-      border:0;
-      outline:none;
-      resize: vertical;
-      padding: 12px;
-      font-family: var(--mono);
-      color: rgba(247,247,251,.92);
-      background: transparent;
-    }
-
-    .toast{
-      position: fixed;
-      left: 50%;
-      bottom: 18px;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,.58);
-      border: 1px solid rgba(255,255,255,.16);
-      color: rgba(247,247,251,.92);
-      padding: 10px 12px;
-      border-radius: 14px;
-      box-shadow: 0 14px 34px rgba(0,0,0,.45);
-      backdrop-filter: blur(10px);
-      z-index: 9999;
-      opacity: 0;
-      pointer-events:none;
-      transition: opacity .14s ease, transform .14s ease;
-      max-width: min(860px, 92vw);
+      color: rgba(255,255,255,.86);
       font-size: 13px;
+      line-height: 1.35;
     }
-    .toast.show{
-      opacity: 1;
-      transform: translateX(-50%) translateY(-4px);
-    }
+    .hint b{ color: rgba(255,255,255,.95); }
+    .muted{ color: var(--muted); }
 
     .themeRow{
-      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex-wrap:wrap;
       margin-top: 10px;
     }
-    .themePick{
+    .swatches{
       display:flex;
-      gap:8px;
-      align-items:center;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
-      border-radius: 14px;
-      padding: 10px 10px;
-      min-width: 190px;
-      flex: 1 1 190px;
+      gap: 8px;
+      flex-wrap:wrap;
     }
     .swatch{
-      width:18px; height:18px;
-      border-radius: 6px;
-      border: 1px solid rgba(255,255,255,.16);
-      background: var(--pink);
-      box-shadow: 0 10px 20px rgba(0,0,0,.25);
+      width: 34px; height: 34px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow: 0 10px 20px rgba(0,0,0,.22);
       cursor:pointer;
-      flex: 0 0 auto;
+      position:relative;
+      outline: none;
     }
-    .themePick .t{ display:flex; flex-direction:column; gap:2px; min-width:0; }
-    .themePick .t .k{
+    .swatch:after{
+      content:"";
+      position:absolute;
+      inset:6px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,.22);
+      opacity:.15;
+    }
+    .swatch.sel{
+      box-shadow: 0 0 0 3px rgba(0,242,234,.22), 0 14px 26px rgba(0,0,0,.26);
+      border-color: rgba(0,242,234,.45);
+    }
+
+    .kv{
+      display:flex;
+      gap: 8px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-top: 10px;
+    }
+    .k{
       font-family: var(--mono);
       font-size: 11px;
-      letter-spacing:.6px;
+      letter-spacing:.5px;
       text-transform: uppercase;
-      color: rgba(247,247,251,.62);
+      color: rgba(255,255,255,.70);
     }
-    .themePick .t .v{
-      font-weight: 950;
-      font-size: 12.5px;
-      color: rgba(247,247,251,.90);
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-      max-width: 150px;
-    }
-    .hiddenColor{ position:absolute; opacity:0; width:1px; height:1px; pointer-events:none; }
-
-    .disabledPanel{
-      opacity: .62;
-      filter: saturate(.85);
+    .hex{
+      width: 140px;
     }
 
-    .editBox{
-      margin-top: 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.22);
+    .outWrap{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      padding: 12px;
+    }
+
+    .out{
+      border-radius: var(--r2);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
       overflow:hidden;
     }
-    .editHead{
+    .out-h{
+      padding: 10px 10px 8px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:10px;
-      padding: 10px 10px;
-      border-bottom: 1px solid rgba(255,255,255,.10);
-      background: linear-gradient(180deg, rgba(255,255,255,.05), transparent);
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
     }
-    .editHead .name{
+    .out-h .name{
+      font-family: var(--mono);
       font-weight: 950;
-      letter-spacing:.2px;
-      color: rgba(247,247,251,.90);
+      letter-spacing:.4px;
+      font-size: 12px;
+      color: rgba(255,255,255,.90);
+      display:flex;
+      align-items:center;
+      gap: 8px;
     }
-    .editBody{ padding: 10px; }
-    .editBody textarea{ min-height: 110px; }
+    .dotSmall{
+      width:9px;height:9px;border-radius:99px;background:rgba(255,255,255,.30);
+    }
+    .dotSmall.ok{ background: rgba(46,229,157,.95); }
+    .dotSmall.wait{ background: rgba(255,179,71,.95); }
 
-    footer{
-      margin-top: 16px;
-      color: rgba(247,247,251,.60);
+    .out-b{ padding: 10px; }
+    .out-b textarea{
+      min-height: 190px;
+      font-size: 12px;
+    }
+
+    .rightFooter{
+      padding: 0 12px 12px;
+      color: rgba(255,255,255,.60);
+      font-family: var(--mono);
+      font-size: 11.5px;
+      line-height: 1.3;
+    }
+
+    .hr{
+      height:1px;
+      background: rgba(255,255,255,.08);
+      margin: 12px 0;
+    }
+
+    .smallNote{
       font-size: 12.5px;
-      line-height: 1.4;
-      text-align:center;
+      color: rgba(255,255,255,.78);
+      line-height: 1.3;
+      margin-top: 8px;
     }
-    footer a{
-      color: rgba(247,247,251,.82);
-      text-decoration: none;
-      border-bottom: 1px solid rgba(255,255,255,.18);
-    }
+
+    .hide{ display:none !important; }
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <div class="topbar">
+    <div class="header">
       <div class="brand">
-        <h1>ChatTok Game Builder</h1>
-        <p>
-          <strong>Step 1:</strong> Describe your game idea. <strong>Step 2:</strong> Get a detailed build plan (you can edit it and resubmit).
-          <strong>Step 3:</strong> Pick colors and generate <em>index.html → style.css → game.js</em>.
-          <br />
-          After game.js is generated, optional edits (max 3) appear <strong>under the game.js box</strong>.
-        </p>
+        <h1>ChatTok AI Game Builder</h1>
+        <div class="sub">Plan → Lock → Build. Fast, stable, preview-safe. No keys on GitHub Pages.</div>
       </div>
-
-      <div class="statusRow">
-        <div class="statusPill" aria-live="polite">
-          <span id="apiDot" class="dot warn"></span>
-          <span id="apiStatus">Checking…</span>
-          <button id="btnConnect" class="btn secondary" type="button">Reconnect</button>
-        </div>
-        <a class="btn" href="https://chattokgaming.com" target="_blank" rel="noopener">Open ChatTokGaming</a>
+      <div class="pill" id="apiPill" title="Connection status (not the URL).">
+        <span class="dot warn" id="apiDot"></span>
+        <span id="apiStatus">API: checking…</span>
       </div>
     </div>
 
     <div class="grid">
-      <!-- LEFT: Steps -->
-      <div class="panel">
-        <div class="panelHead">
-          <div class="panelTitle">
-            <h2>Steps</h2>
-            <p>Simple locked flow. No confusion. No broken sequences.</p>
+      <!-- LEFT: FLOW -->
+      <div class="card">
+        <div class="card-h">
+          <div class="t">Builder Flow <span class="badge" id="flowBadge">Step 1</span></div>
+          <div class="row">
+            <button class="btn mini warn" id="resetBtn" type="button" title="Clears plan + outputs.">Reset</button>
           </div>
-          <div class="badge" id="editsBadge">Edits: 3</div>
         </div>
 
-        <div class="panelBody">
-          <div class="steps">
-
-            <!-- STEP 1 -->
-            <div class="stepCard" id="cardStep1">
-              <div class="stepHead">
-                <div class="stepLeft">
-                  <div class="stepNum">1</div>
-                  <strong>Describe your game (detailed)</strong>
-                </div>
-                <span class="badge">Idea</span>
+        <div class="card-b">
+          <!-- STEP 1 -->
+          <div class="step" id="step1">
+            <div class="step-top">
+              <div>
+                <div class="step-title"><span class="num">1</span> Describe the game</div>
+                <div class="step-desc">Give a clear idea. The plan will spell out gameplay + TikTok actions.</div>
               </div>
-              <div class="stepBody">
-                <div class="label">Game idea</div>
-                <textarea id="ideaInput" placeholder="Write a detailed description:
-• What’s on screen right away?
-• What do viewers type in chat to affect the game?
-• What do likes do?
-• What do gifts do?
-• How do you win?"></textarea>
-
-                <div class="row">
-                  <button id="btnMic" class="btn secondary" type="button">🎙 Talk to text</button>
-                  <button id="btnPlan" class="btn" type="button">Create Plan</button>
-                </div>
-
-                <div class="hint">
-                  If you want a specific archetype, say it: <em>runner</em>, <em>arena</em>, <em>tower defense</em>, <em>asteroids</em>, <em>racing</em>, etc.
-                </div>
+              <div class="row">
+                <button class="btn primary" id="planBtn" type="button">Generate Plan</button>
               </div>
             </div>
 
-            <!-- STEP 2 -->
-            <div class="stepCard disabledPanel" id="cardStep2">
-              <div class="stepHead">
-                <div class="stepLeft">
-                  <div class="stepNum">2</div>
-                  <strong>Plan preview (copy, edit, resubmit)</strong>
-                </div>
-                <span class="badge">Plan</span>
+            <textarea id="ideaInput" placeholder="Example: A neon boss battle arena. Viewers type ‘join’ to spawn a hero orb, type ‘attack’ to damage the boss. Likes fill a Hype meter that increases effects. Gifts trigger special power bursts."></textarea>
+
+            <div class="smallNote">
+              Tip: Mention <b>what shows on screen</b>, <b>what viewers type</b>, and <b>what gifts/likes do</b>. The plan will make it structured.
+            </div>
+          </div>
+
+          <!-- STEP 2 -->
+          <div class="step" id="step2">
+            <div class="step-top">
+              <div>
+                <div class="step-title"><span class="num">2</span> Plan / Confirm</div>
+                <div class="step-desc">You can copy and edit the plan below, submit edits, then lock it.</div>
               </div>
-              <div class="stepBody">
+              <div class="row">
+                <button class="btn good" id="submitPlanEditsBtn" type="button" disabled>Submit Plan Edits</button>
+                <button class="btn primary" id="continueBtn" type="button" disabled>Continue to Build</button>
+              </div>
+            </div>
+
+            <textarea id="planText" placeholder="Your detailed plan/spec will appear here…" disabled></textarea>
+
+            <div class="hint" style="margin-top:10px">
+              <b>What this plan includes:</b>
+              <div class="muted">Gameplay loop, visible action on load, and how TikTok chat/likes/gifts/join/share change the game.</div>
+            </div>
+          </div>
+
+          <!-- STEP 3 -->
+          <div class="step" id="step3">
+            <div class="step-top">
+              <div>
+                <div class="step-title"><span class="num">3</span> Theme + Build Files</div>
+                <div class="step-desc">Pick colors, then build in order: HTML → CSS → game.js (locks after success).</div>
+              </div>
+              <div class="row">
+                <button class="btn" id="buildHtmlBtn" type="button" disabled>Build HTML</button>
+                <button class="btn" id="buildCssBtn" type="button" disabled>Build CSS</button>
+                <button class="btn" id="buildJsBtn" type="button" disabled>Build game.js</button>
+              </div>
+            </div>
+
+            <div class="hint">
+              <b>Theme:</b> quick picks + optional custom hex. The builder injects colors into style.css only.
+              <div class="themeRow">
+                <div class="swatches" id="swatches"></div>
                 <div class="kv">
-                  <div class="mini">
-                    <div class="k">Title</div>
-                    <div class="v" id="planTitle">—</div>
-                  </div>
-                  <div class="mini">
-                    <div class="k">Round seconds</div>
-                    <div class="v" id="planRound">—</div>
-                  </div>
-                  <div class="mini">
-                    <div class="k">Win goal</div>
-                    <div class="v" id="planGoal">—</div>
-                  </div>
-                  <div class="mini">
-                    <div class="k">Mode</div>
-                    <div class="v" id="planStyle">Arcade</div>
-                  </div>
-                </div>
-
-                <div style="margin-top:10px">
-                  <div class="label">Detailed build description (editable)</div>
-                  <textarea id="planText" placeholder="(Your full plan will appear here after Step 1)"></textarea>
-
-                  <div class="row">
-                    <button id="btnCopyPlan" class="btn secondary" type="button" disabled>Copy Plan</button>
-                    <button id="btnApplyPlanChanges" class="btn secondary" type="button" disabled>Submit Plan Edits</button>
-                    <button id="btnContinue" class="btn" type="button" disabled>Continue</button>
-                  </div>
-
-                  <div class="hint">
-                    This plan is written for humans. You can edit it directly (add mechanics, change chat commands, adjust difficulty),
-                    then click <strong>Submit Plan Edits</strong> to regenerate a cleaner plan. When it looks right, click <strong>Continue</strong>.
-                  </div>
+                  <span class="k">Primary</span><input class="hex" id="hexPrimary" type="text" placeholder="#ff0050" />
+                  <span class="k">Secondary</span><input class="hex" id="hexSecondary" type="text" placeholder="#00f2ea" />
+                  <span class="k">Background</span><input class="hex" id="hexBg" type="text" placeholder="#000000" />
+                  <button class="btn mini" id="applyHexBtn" type="button" title="Apply custom hex colors.">Apply</button>
                 </div>
               </div>
             </div>
 
-            <!-- STEP 3 -->
-            <div class="stepCard disabledPanel" id="cardStep3">
-              <div class="stepHead">
-                <div class="stepLeft">
-                  <div class="stepNum">3</div>
-                  <strong>Pick colors → Build files (locked order)</strong>
-                </div>
-                <span class="badge" id="buildBadge">Locked</span>
-              </div>
-              <div class="stepBody">
-                <div class="label">Theme colors</div>
+            <div class="hr"></div>
 
-                <div class="themeRow">
-                  <div class="themePick">
-                    <div class="swatch" id="swPrimary" title="Pick primary"></div>
-                    <div class="t">
-                      <div class="k">Primary</div>
-                      <div class="v" id="vPrimary">#ff0050</div>
-                    </div>
-                    <input class="hiddenColor" id="cPrimary" type="color" value="#ff0050">
-                  </div>
-
-                  <div class="themePick">
-                    <div class="swatch" id="swSecondary" title="Pick secondary"></div>
-                    <div class="t">
-                      <div class="k">Secondary</div>
-                      <div class="v" id="vSecondary">#00f2ea</div>
-                    </div>
-                    <input class="hiddenColor" id="cSecondary" type="color" value="#00f2ea">
-                  </div>
-
-                  <div class="themePick">
-                    <div class="swatch" id="swBg" title="Pick background"></div>
-                    <div class="t">
-                      <div class="k">Background</div>
-                      <div class="v" id="vBg">#000000</div>
-                    </div>
-                    <input class="hiddenColor" id="cBg" type="color" value="#000000">
-                  </div>
-                </div>
-
-                <div class="row" style="margin-top:12px">
-                  <button id="btnBuildHtml" class="btn" type="button" disabled>Build HTML</button>
-                  <button id="btnBuildCss" class="btn secondary" type="button" disabled>Build CSS</button>
-                  <button id="btnBuildJs" class="btn secondary" type="button" disabled>Build game.js</button>
-                </div>
-
-                <div class="hint">
-                  Locked sequence on purpose: <strong>HTML → CSS → game.js</strong>. This prevents broken states and keeps results consistent.
-                </div>
-              </div>
+            <div class="hint">
+              <b>Build tip:</b> HTML and game.js are generated using your locked plan. CSS is template-based (low-cost) and only injects theme colors.
             </div>
+          </div>
 
-            <div class="row">
-              <button id="btnResetAll" class="btn danger" type="button">Reset</button>
-            </div>
+          <!-- helper -->
+          <div class="hint" style="margin-top:10px">
+            <b>Status:</b> <span id="statusLine" class="muted">Ready.</span>
+          </div>
 
+          <div class="row" style="margin-top:10px;justify-content:space-between;">
+            <button class="btn mini" id="finishBtn" type="button" title="Open ChatTokGaming where you upload/test games.">Finish Building on ChatTokGaming</button>
+            <button class="btn mini" id="copyPlanBtn" type="button" disabled title="Copy the locked plan to clipboard.">Copy Plan</button>
           </div>
         </div>
       </div>
 
-      <!-- RIGHT: Outputs -->
-      <div class="panel">
-        <div class="panelHead">
-          <div class="panelTitle">
-            <h2>Your files</h2>
-            <p>Copy/paste into your game folder: <strong>index.html</strong>, <strong>style.css</strong>, <strong>game.js</strong></p>
+      <!-- RIGHT: OUTPUTS -->
+      <div class="card">
+        <div class="card-h">
+          <div class="t">Outputs</div>
+          <div class="row">
+            <button class="btn mini" id="clearOutputsBtn" type="button" title="Clears output panels only.">Clear Outputs</button>
           </div>
-          <div class="badge" id="outBadge">Ready</div>
         </div>
 
-        <div class="panelBody">
-          <div class="codeBox" style="margin-bottom:12px">
-            <div class="codeTop">
-              <div class="name">index.html</div>
-              <button class="copyBtn" type="button" data-copy="outHtml">Copy</button>
-            </div>
-            <textarea id="outHtml" class="codeArea" spellcheck="false" placeholder="(index.html will appear here)"></textarea>
-          </div>
-
-          <div class="codeBox" style="margin-bottom:12px">
-            <div class="codeTop">
-              <div class="name">style.css</div>
-              <button class="copyBtn" type="button" data-copy="outCss">Copy</button>
-            </div>
-            <textarea id="outCss" class="codeArea" spellcheck="false" placeholder="(style.css will appear here)"></textarea>
-          </div>
-
-          <div class="codeBox">
-            <div class="codeTop">
-              <div class="name">game.js</div>
-              <button class="copyBtn" type="button" data-copy="outJs">Copy</button>
-            </div>
-            <textarea id="outJs" class="codeArea" spellcheck="false" placeholder="(game.js will appear here)"></textarea>
-          </div>
-
-          <!-- EDITS (MUST BE AFTER OUTPUTS + UNDER game.js) -->
-          <div id="editBox" class="editBox disabledPanel" aria-live="polite">
-            <div class="editHead">
-              <div class="name">Optional edits (max 3) — game.js only</div>
-              <div class="badge" id="editsRightBadge">Edits left: 3</div>
-            </div>
-            <div class="editBody">
-              <div class="label">Edit request</div>
-              <textarea id="editInput" placeholder="Example: Make it more exciting. Add more visible action, better animations, and make chat/likes/gifts feel powerful."></textarea>
-
+        <div class="outWrap">
+          <!-- HTML -->
+          <div class="out" id="outHtml">
+            <div class="out-h">
+              <div class="name"><span class="dotSmall" id="dotHtml"></span> index.html</div>
               <div class="row">
-                <button id="btnApplyEditJs" class="btn" type="button" disabled>Apply Edit (Rebuild game.js)</button>
-                <button id="btnRebuildAllFromPlan" class="btn secondary" type="button" disabled>Rebuild All (same plan)</button>
+                <button class="btn mini" id="copyHtmlBtn" type="button" disabled>Copy</button>
+              </div>
+            </div>
+            <div class="out-b">
+              <textarea id="htmlOut" placeholder="index.html will appear here…" readonly></textarea>
+            </div>
+          </div>
+
+          <!-- CSS -->
+          <div class="out" id="outCss">
+            <div class="out-h">
+              <div class="name"><span class="dotSmall" id="dotCss"></span> style.css</div>
+              <div class="row">
+                <button class="btn mini" id="copyCssBtn" type="button" disabled>Copy</button>
+              </div>
+            </div>
+            <div class="out-b">
+              <textarea id="cssOut" placeholder="style.css will appear here…" readonly></textarea>
+            </div>
+          </div>
+
+          <!-- JS -->
+          <div class="out" id="outJs">
+            <div class="out-h">
+              <div class="name"><span class="dotSmall" id="dotJs"></span> game.js</div>
+              <div class="row">
+                <button class="btn mini" id="copyJsBtn" type="button" disabled>Copy</button>
+              </div>
+            </div>
+            <div class="out-b">
+              <textarea id="jsOut" placeholder="game.js will appear here…" readonly></textarea>
+            </div>
+          </div>
+
+          <!-- EDITS (MUST BE AFTER OUTPUTS, per your requirement) -->
+          <div class="out" id="editBox">
+            <div class="out-h">
+              <div class="name">
+                Optional Edits (Safe AI_REGION) <span class="badge" id="editsBadge">3 left</span>
+              </div>
+              <div class="row">
+                <button class="btn mini good" id="applyEditBtn" type="button" disabled>Apply Edit</button>
+              </div>
+            </div>
+            <div class="out-b">
+              <textarea id="editInput" placeholder="Describe a change (example: “make the join command ‘enter’ instead of ‘join’, make gifts spawn a giant meteor, and add a bigger boss defeat celebration”)"></textarea>
+
+              <div class="split2">
+                <button class="btn mini" id="rebuildHtmlBtn" type="button" disabled>Rebuild HTML</button>
+                <button class="btn mini" id="rebuildCssBtn" type="button" disabled>Rebuild CSS</button>
+              </div>
+              <div class="split2">
+                <button class="btn mini" id="rebuildJsBtn" type="button" disabled>Rebuild game.js</button>
+                <button class="btn mini warn" id="unlockRebuildBtn" type="button" disabled title="Allows rebuild buttons again if you want to regenerate from the locked plan.">Unlock Rebuild</button>
               </div>
 
-              <div class="hint">
-                Edits are limited so testing stays cheap and predictable. If you need bigger changes, edit the plan in Step 2 and continue again.
+              <div class="smallNote">
+                <b>How edits work:</b> The API updates only the AI_REGION section of game.js (and theme changes only update style.css). This avoids breaking TikTok connection code.
               </div>
             </div>
           </div>
 
-          <div class="row" style="margin-top:12px">
-            <a class="btn" href="https://chattokgaming.com" target="_blank" rel="noopener">Finish Build on ChatTokGaming</a>
-          </div>
+        </div>
 
-          <div class="hint" style="margin-top:10px">
-            Note: ChatTokGaming preview may run games inside an embedded runner. Your generated game files are built to handle that environment.
-          </div>
+        <div class="rightFooter">
+          Upload these three files into ChatTokGaming: <b>index.html</b>, <b>style.css</b>, <b>game.js</b>.
+          <br/>No extra files needed.
         </div>
       </div>
     </div>
-
-    <footer>
-      © <span id="year"></span> ChatTok Gaming •
-      <a href="https://chattokgaming.com/policy/privacy" target="_blank" rel="noopener">Privacy</a> •
-      <a href="https://chattokgaming.com/policy/terms" target="_blank" rel="noopener">Terms</a>
-    </footer>
   </div>
 
-  <div id="toast" class="toast"></div>
-
   <script>
-    /* =========================================================
-       ChatTok Game Builder — Locked 3-step flow
-       - Step 1: idea
-       - Step 2: detailed plan (editable, resubmittable)
-       - Step 3: theme + locked build (HTML -> CSS -> JS)
-       - Edits appear under game.js AFTER outputs (max 3)
-       ========================================================= */
-
-    // API base (kept out of UI text). Update to your Render service domain.
-    const API_BASE = "https://chattok-builder-api.onrender.com";
-
-    // Online indicator
-    const apiDot = document.getElementById("apiDot");
-    const apiStatus = document.getElementById("apiStatus");
-    const btnConnect = document.getElementById("btnConnect");
-
-    // Steps/cards
-    const cardStep2 = document.getElementById("cardStep2");
-    const cardStep3 = document.getElementById("cardStep3");
-
-    // Inputs/outputs
-    const ideaInput = document.getElementById("ideaInput");
-    const planText = document.getElementById("planText");
-    const editInput = document.getElementById("editInput");
-
-    const outHtml = document.getElementById("outHtml");
-    const outCss  = document.getElementById("outCss");
-    const outJs   = document.getElementById("outJs");
-
-    // Buttons
-    const btnMic = document.getElementById("btnMic");
-    const btnPlan = document.getElementById("btnPlan");
-    const btnCopyPlan = document.getElementById("btnCopyPlan");
-    const btnApplyPlanChanges = document.getElementById("btnApplyPlanChanges");
-    const btnContinue = document.getElementById("btnContinue");
-
-    const btnBuildHtml = document.getElementById("btnBuildHtml");
-    const btnBuildCss  = document.getElementById("btnBuildCss");
-    const btnBuildJs   = document.getElementById("btnBuildJs");
-
-    const btnResetAll = document.getElementById("btnResetAll");
-
-    const editBox = document.getElementById("editBox");
-    const btnApplyEditJs = document.getElementById("btnApplyEditJs");
-    const btnRebuildAllFromPlan = document.getElementById("btnRebuildAllFromPlan");
-    const editsRightBadge = document.getElementById("editsRightBadge");
-
-    // Badges/text
-    const editsBadge = document.getElementById("editsBadge");
-    const outBadge = document.getElementById("outBadge");
-    const buildBadge = document.getElementById("buildBadge");
-
-    const planTitle = document.getElementById("planTitle");
-    const planRound = document.getElementById("planRound");
-    const planGoal  = document.getElementById("planGoal");
-    const planStyle = document.getElementById("planStyle");
-
-    // Toast
-    const toastEl = document.getElementById("toast");
-    let toastTimer = null;
-    function toast(msg){
-      toastEl.textContent = String(msg || "");
-      toastEl.classList.add("show");
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1750);
-    }
-
-    // Theme pickers
-    const cPrimary = document.getElementById("cPrimary");
-    const cSecondary = document.getElementById("cSecondary");
-    const cBg = document.getElementById("cBg");
-    const swPrimary = document.getElementById("swPrimary");
-    const swSecondary = document.getElementById("swSecondary");
-    const swBg = document.getElementById("swBg");
-    const vPrimary = document.getElementById("vPrimary");
-    const vSecondary = document.getElementById("vSecondary");
-    const vBg = document.getElementById("vBg");
-
-    function applySwatches(){
-      swPrimary.style.background = cPrimary.value;
-      swSecondary.style.background = cSecondary.value;
-      swBg.style.background = cBg.value;
-      vPrimary.textContent = cPrimary.value;
-      vSecondary.textContent = cSecondary.value;
-      vBg.textContent = cBg.value;
-    }
-    applySwatches();
-    swPrimary.addEventListener("click", () => cPrimary.click());
-    swSecondary.addEventListener("click", () => cSecondary.click());
-    swBg.addEventListener("click", () => cBg.click());
-    cPrimary.addEventListener("input", applySwatches);
-    cSecondary.addEventListener("input", applySwatches);
-    cBg.addEventListener("input", applySwatches);
-
-    function themePayload(){
-      return {
-        primary: cPrimary.value,
-        secondary: cSecondary.value,
-        background: cBg.value
-      };
-    }
-
-    // Speech-to-text
-    let rec = null;
-    let micOn = false;
-    function getSpeech(){
-      return window.SpeechRecognition || window.webkitSpeechRecognition || null;
-    }
-    function startMic(){
-      const SR = getSpeech();
-      if (!SR){
-        toast("Speech-to-text not supported in this browser.");
-        return;
-      }
-      if (micOn) return;
-
-      rec = new SR();
-      rec.lang = "en-US";
-      rec.interimResults = true;
-      rec.continuous = true;
-
-      let finalText = "";
-      rec.onresult = (e) => {
-        let interim = "";
-        for (let i = e.resultIndex; i < e.results.length; i++){
-          const t = e.results[i][0].transcript;
-          if (e.results[i].isFinal) finalText += t + " ";
-          else interim += t;
-        }
-        const base = ideaInput.value.replace(/\s+$/,"");
-        ideaInput.value = (base ? base + " " : "") + (finalText + interim).trim();
-      };
-
-      rec.onerror = () => {
-        stopMic();
-        toast("Mic error. Try again.");
-      };
-
-      rec.onend = () => {
-        micOn = false;
-        btnMic.textContent = "🎙 Talk to text";
-        btnMic.classList.add("secondary");
-      };
-
-      micOn = true;
-      btnMic.textContent = "■ Stop mic";
-      btnMic.classList.remove("secondary");
-      rec.start();
-      toast("Listening…");
-    }
-    function stopMic(){
-      try{ rec && rec.stop(); }catch{}
-      micOn = false;
-    }
-    btnMic.addEventListener("click", () => micOn ? stopMic() : startMic());
-
-    // -----------------------------
-    // API helpers (timeout + clean errors)
-    // -----------------------------
-    let apiOnline = false;
-
-    async function fetchWithTimeout(url, opts, ms){
-      const t = Number(ms || 15000);
-      const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), t);
-      try{
-        const r = await fetch(url, { ...(opts||{}), signal: controller.signal });
-        return r;
-      } finally {
-        clearTimeout(id);
-      }
-    }
-
-    async function ping(){
-      apiDot.className = "dot warn";
-      apiStatus.textContent = "Connecting…";
-      try{
-        const r = await fetchWithTimeout(API_BASE + "/health", { method:"GET" }, 8000);
-        if (!r.ok) throw new Error("bad status");
-        apiOnline = true;
-        apiDot.className = "dot good";
-        apiStatus.textContent = "Online";
-        return true;
-      }catch{
-        apiOnline = false;
-        apiDot.className = "dot bad";
-        apiStatus.textContent = "Offline";
-        return false;
-      }
-    }
-
-    btnConnect.addEventListener("click", async () => {
-      btnConnect.disabled = true;
-      await ping();
-      btnConnect.disabled = false;
-      if (!apiOnline) toast("Builder is offline. Try again in a moment.");
-    });
-
-    async function postJson(path, data, timeoutMs){
-      const r = await fetchWithTimeout(API_BASE + path, {
-        method:"POST",
-        headers: { "Content-Type":"application/json" },
-        body: JSON.stringify(data || {})
-      }, timeoutMs || 20000);
-
-      const j = await r.json().catch(() => ({}));
-      if (!r.ok || !j.ok){
-        const msg = j && j.error ? j.error : ("Request failed (" + r.status + ")");
-        throw new Error(msg);
-      }
-      return j;
-    }
-
-    // -----------------------------
-    // State
-    // -----------------------------
-    let editsRemaining = 3;
-    let locked = false;
-
-    let currentIdea = "";
-    let currentSpec = null;
-
-    const built = { html:false, css:false, js:false };
-
-    function setEdits(n){
-      editsRemaining = Math.max(0, Number(n||0));
-      editsBadge.textContent = "Edits: " + editsRemaining;
-      editsRightBadge.textContent = "Edits left: " + editsRemaining;
-    }
-    setEdits(3);
-
-    function enableCard(card, enabled){
-      if (!card) return;
-      card.classList.toggle("disabledPanel", !enabled);
-    }
-    function enableEditBox(enabled){
-      editBox.classList.toggle("disabledPanel", !enabled);
-    }
-
-    function updateButtons(){
-      // Step 2 availability
-      btnCopyPlan.disabled = !currentSpec;
-      btnApplyPlanChanges.disabled = !currentSpec;
-      btnContinue.disabled = !currentSpec;
-
-      // Step 3 flow
-      btnBuildHtml.disabled = !locked || built.html;
-      btnBuildCss.disabled  = !locked || !built.html || built.css;
-      btnBuildJs.disabled   = !locked || !built.css || built.js;
-
-      // Edit flow (right side, under outputs)
-      const canEdit = (locked && built.js && editsRemaining > 0);
-      btnApplyEditJs.disabled = !canEdit;
-      btnRebuildAllFromPlan.disabled = !(locked && built.html && built.css && built.js);
-
-      // Labels
-      btnBuildHtml.textContent = built.html ? "HTML Built ✓" : "Build HTML";
-      btnBuildCss.textContent  = built.css  ? "CSS Built ✓"  : "Build CSS";
-      btnBuildJs.textContent   = built.js   ? "game.js Built ✓" : "Build game.js";
-      buildBadge.textContent = locked ? (built.js ? "Complete" : "Ready") : "Locked";
-    }
-
-    function renderPlanMini(spec){
-      planTitle.textContent = spec?.title || "—";
-      planRound.textContent = String(spec?.defaultSettings?.roundSeconds ?? "—");
-      planGoal.textContent  = String(spec?.defaultSettings?.winGoal ?? "—");
-      planStyle.textContent = "Arcade";
-    }
-
-    function guessArchetype(idea){
-      const t = String(idea||"").toLowerCase();
-      if (/(tower|defend|base|lanes|waves)/.test(t)) return "Tower Defense";
-      if (/(race|racing|track|lap|car)/.test(t)) return "Racing";
-      if (/(runner|run|dash|jump|obstacle)/.test(t)) return "Runner";
-      if (/(arena|battle|brawl|duel|pvp)/.test(t)) return "Arena";
-      if (/(asteroid|space|ship|meteor)/.test(t)) return "Space / Asteroids";
-      return "Arcade Arena";
-    }
-
-    function makePlanNarrative(spec, idea){
-      const s = spec || {};
-      const title = s.title || "ChatTok Live Game";
-      const subtitle = s.subtitle || "Live Interactive";
-      const one = s.oneSentence || "Chat + likes + gifts power up the action.";
-      const roundSeconds = Number(s?.defaultSettings?.roundSeconds || 20);
-      const winGoal = Number(s?.defaultSettings?.winGoal || 100);
-      const how = Array.isArray(s.howToPlay) ? s.howToPlay.filter(Boolean) : [];
-      const archetype = guessArchetype(idea);
-
-      const howBullets = how.length
-        ? how.map((x,i)=>`${i+1}) ${x}`).join("\n")
-        : "1) Viewers interact in chat.\n2) Likes boost the action.\n3) Gifts trigger big power-ups.";
-
-      return [
-`TITLE: ${title} — ${subtitle}`,
-`ARCHETYPE: ${archetype}`,
-``,
-`WHAT YOU'LL SEE ON SCREEN (immediately):`,
-`- A full-screen 9:16 game area with a clear HUD (score/energy/status).`,
-`- Visible entities moving right away (no blank screen).`,
-`- Pop-out “flags” for chat/gift feedback (non-blocking).`,
-``,
-`CORE GAME LOOP:`,
-`- The game runs continuously and escalates as viewers interact.`,
-`- Every round lasts ~${roundSeconds}s (default) and progress pushes toward a win goal of ${winGoal}.`,
-`- A winner state can trigger a celebration and reset/continue (depending on the game).`,
-``,
-`VIEWER INTERACTIONS (TikTok → gameplay):`,
-`CHAT:`,
-`- Chat commands spawn or control entities (example: join/team commands, boosts, attacks).`,
-`- The game maps chat into real actions (not just text on screen).`,
-`LIKES:`,
-`- Likes fill an “Energy” meter that increases spawn rate / speed / buffs.`,
-`- Milestones (e.g., every 50 likes) trigger a small bonus effect.`,
-`GIFTS:`,
-`- Gifts trigger strong power-ups (shield, nuke, boss, mega-spawn, ultimate).`,
-`- Bigger gifts = bigger effect (visual + gameplay impact).`,
-`JOIN:`,
-`- When a user joins, the game creates/activates an entity tied to them (when available via events).`,
-``,
-`HOST ACTIONS (what the host does):`,
-`- The host sets their LIVE ID inside ChatTokGaming when launching (platform side).`,
-`- The host can explain the chat commands quickly on-stream and encourage interaction.`,
-`- The host can restart the game by reloading or launching a new round when desired.`,
-``,
-`HOW TO PLAY (quick rules):`,
-`${howBullets}`,
-``,
-`ONE-SENTENCE PITCH:`,
-`${one}`,
-``,
-`NOTES / CONSTRAINTS:`,
-`- We do NOT edit tiktok-client.js (platform-provided).`,
-`- The game must run even before TikTok connects (demo mode).`,
-`- ChatTokGaming preview may run inside iframe/srcdoc, so paths must be robust.`,
-``,
-`EDIT THIS PLAN IF YOU WANT CHANGES:`,
-`- Add exact chat commands you want (e.g., "!join", "red/blue", "A/B/C/D").`,
-`- Describe special gift effects you want (boss, nuke, shield, slowmo).`,
-`- Ask for “more action” / “bigger visuals” / “faster pacing”.`
-      ].join("\n");
-    }
-
-    function resetAll(){
-      locked = false;
-      currentIdea = "";
-      currentSpec = null;
-
-      built.html = built.css = built.js = false;
-
-      ideaInput.value = "";
-      planText.value = "";
-      editInput.value = "";
-
-      outHtml.value = "";
-      outCss.value = "";
-      outJs.value = "";
-
-      planTitle.textContent = "—";
-      planRound.textContent = "—";
-      planGoal.textContent  = "—";
-      planStyle.textContent = "Arcade";
-
-      enableCard(cardStep2, false);
-      enableCard(cardStep3, false);
-      enableEditBox(false);
-
-      outBadge.textContent = "Ready";
-      setEdits(3);
-      updateButtons();
-    }
-
-    // -----------------------------
-    // Step 1 -> Step 2 (Plan)
-    // -----------------------------
-    async function createPlanFromIdea(ideaText){
-      if (!apiOnline){
-        toast("Builder is offline. Tap Reconnect.");
-        return false;
-      }
-      const idea = String(ideaText || "").trim();
-      if (!idea){
-        toast("Write your game idea first.");
-        return false;
-      }
-
-      outBadge.textContent = "Planning…";
-      btnPlan.disabled = true;
-
-      const j = await postJson("/api/plan", {
-        idea,
-        templateId: "auto"
-      }, 25000);
-
-      currentIdea = idea;
-      currentSpec = j.spec || null;
-
-      if (!currentSpec) throw new Error("Plan failed: missing spec.");
-
-      renderPlanMini(currentSpec);
-      planText.value = makePlanNarrative(currentSpec, currentIdea);
-
-      enableCard(cardStep2, true);
-      outBadge.textContent = "Plan ready";
-      toast("Plan ready. Edit it if needed, then Continue.");
-      updateButtons();
-      return true;
-    }
-
-    btnPlan.addEventListener("click", async () => {
-      try{
-        await createPlanFromIdea(ideaInput.value);
-      }catch(e){
-        outBadge.textContent = "Error";
-        toast(e.message || "Plan failed.");
-      }finally{
-        btnPlan.disabled = false;
-      }
-    });
-
-    btnCopyPlan.addEventListener("click", async () => {
-      const val = String(planText.value || "");
-      if (!val.trim()) { toast("Nothing to copy."); return; }
-      try{
-        await navigator.clipboard.writeText(val);
-        toast("Plan copied.");
-      }catch{
-        planText.focus();
-        planText.select();
-        toast("Select + copy manually.");
-      }
-    });
-
-    btnApplyPlanChanges.addEventListener("click", async () => {
-      try{
-        if (!currentSpec) return;
-        if (!apiOnline){ toast("Builder is offline. Tap Reconnect."); return; }
-
-        const planEdits = String(planText.value || "").trim();
-        if (!planEdits){ toast("Plan is empty."); return; }
-
-        outBadge.textContent = "Updating plan…";
-        btnApplyPlanChanges.disabled = true;
-        btnContinue.disabled = true;
-
-        const j = await postJson("/api/plan", {
-          templateId: "auto",
-          spec: currentSpec,
-          planEdits
-        }, 25000);
-
-        currentSpec = j.spec || currentSpec;
-        renderPlanMini(currentSpec);
-        planText.value = makePlanNarrative(currentSpec, currentIdea);
-
-        outBadge.textContent = "Plan updated";
-        toast("Plan updated. Continue when ready.");
-        updateButtons();
-      }catch(e){
-        outBadge.textContent = "Error";
-        toast(e.message || "Plan update failed.");
-        updateButtons();
-      }finally{
-        btnApplyPlanChanges.disabled = !currentSpec;
-        btnContinue.disabled = !currentSpec;
-      }
-    });
-
-    // -----------------------------
-    // Step 2 -> Step 3 (lock plan)
-    // -----------------------------
-    btnContinue.addEventListener("click", () => {
-      if (!currentSpec){
-        toast("Create a plan first.");
-        return;
-      }
-      locked = true;
-      enableCard(cardStep3, true);
-      outBadge.textContent = "Ready to build";
-      toast("Step 3 unlocked. Choose colors, then Build HTML → CSS → game.js.");
-      updateButtons();
-    });
-
-    // -----------------------------
-    // Step 3 (Build files)
-    // Uses /api/build (locked spec)
-    // -----------------------------
-    btnBuildHtml.addEventListener("click", async () => {
-      try{
-        if (!locked || built.html) return;
-        if (!currentSpec){ toast("Missing plan."); return; }
-        if (!apiOnline){ toast("Builder is offline. Tap Reconnect."); return; }
-
-        outBadge.textContent = "Building HTML…";
-        btnBuildHtml.disabled = true;
-        outHtml.value = "";
-
-        const j = await postJson("/api/build", {
-          stage: "html",
-          spec: currentSpec,
-          templateId: "auto",
-          idea: currentIdea
-        }, 20000);
-
-        outHtml.value = j.file?.content || "";
-        built.html = true;
-
-        outBadge.textContent = "HTML ready";
-        toast("HTML generated. Now build CSS.");
-        updateButtons();
-      }catch(e){
-        outBadge.textContent = "Error";
-        toast(e.message || "HTML failed.");
-        btnBuildHtml.disabled = false;
-        updateButtons();
-      }
-    });
-
-    btnBuildCss.addEventListener("click", async () => {
-      try{
-        if (!locked || !built.html || built.css) return;
-        if (!currentSpec){ toast("Missing plan."); return; }
-        if (!apiOnline){ toast("Builder is offline. Tap Reconnect."); return; }
-
-        outBadge.textContent = "Building CSS…";
-        btnBuildCss.disabled = true;
-        outCss.value = "";
-
-        const j = await postJson("/api/build", {
-          stage: "css",
-          spec: currentSpec,
-          theme: themePayload(),
-          templateId: "auto"
-        }, 15000);
-
-        outCss.value = j.file?.content || "";
-        built.css = true;
-
-        outBadge.textContent = "CSS ready";
-        toast("CSS generated. Now build game.js.");
-        updateButtons();
-      }catch(e){
-        outBadge.textContent = "Error";
-        toast(e.message || "CSS failed.");
-        btnBuildCss.disabled = false;
-        updateButtons();
-      }
-    });
-
-    btnBuildJs.addEventListener("click", async () => {
-      try{
-        if (!locked || !built.css || built.js) return;
-        if (!currentSpec){ toast("Missing plan."); return; }
-        if (!apiOnline){ toast("Builder is offline. Tap Reconnect."); return; }
-
-        outBadge.textContent = "Building game.js…";
-        btnBuildJs.disabled = true;
-        outJs.value = "";
-
-        const j = await postJson("/api/build", {
-          stage: "js",
-          spec: currentSpec,
-          idea: currentIdea,
-          templateId: "auto"
-        }, 30000);
-
-        outJs.value = j.file?.content || "";
-        built.js = true;
-
-        enableEditBox(true);
-        outBadge.textContent = "Complete";
-        toast("game.js generated. Optional edits are under game.js.");
-        updateButtons();
-      }catch(e){
-        outBadge.textContent = "Error";
-        toast(e.message || "game.js failed.");
-        btnBuildJs.disabled = false;
-        updateButtons();
-      }
-    });
-
-    // -----------------------------
-    // Optional edits (after outputs)
-    // - Apply Edit: rebuild game.js only (counts down from 3)
-    // - Rebuild All (same plan): rebuild html/css/js without consuming edit
-    // -----------------------------
-    btnApplyEditJs.addEventListener("click", async () => {
-      try{
-        if (!locked || !built.js) return;
-        if (editsRemaining <= 0){ toast("No edits remaining."); return; }
-        if (!currentSpec){ toast("Missing plan."); return; }
-        if (!apiOnline){ toast("Builder is offline. Tap Reconnect."); return; }
-
-        const changeRequest = String(editInput.value || "").trim();
-        if (!changeRequest){ toast("Type an edit request first."); return; }
-
-        outBadge.textContent = "Editing game.js…";
-        btnApplyEditJs.disabled = true;
-
-        // Clear only JS during regeneration (strict)
-        outJs.value = "";
-
-        const j = await postJson("/api/build", {
-          stage: "js",
-          spec: currentSpec,
-          idea: currentIdea,
-          templateId: "auto",
-          changeRequest
-        }, 35000);
-
-        outJs.value = j.file?.content || "";
-        setEdits(editsRemaining - 1);
-
-        outBadge.textContent = "Edited";
-        toast("Edit applied (game.js rebuilt).");
-        updateButtons();
-      }catch(e){
-        outBadge.textContent = "Error";
-        toast(e.message || "Edit failed.");
-        updateButtons();
-      }finally{
-        btnApplyEditJs.disabled = !(locked && built.js && editsRemaining > 0);
-      }
-    });
-
-    btnRebuildAllFromPlan.addEventListener("click", async () => {
-      try{
-        if (!locked) return;
-        if (!currentSpec){ toast("Missing plan."); return; }
-        if (!apiOnline){ toast("Builder is offline. Tap Reconnect."); return; }
-
-        outBadge.textContent = "Rebuilding…";
-        btnRebuildAllFromPlan.disabled = true;
-
-        // Clear outputs during regeneration
-        outHtml.value = "";
-        outCss.value = "";
-        outJs.value = "";
-        built.html = built.css = built.js = false;
-        enableEditBox(false);
-        updateButtons();
-
-        // Build HTML -> CSS -> JS
-        const html = await postJson("/api/build", { stage:"html", spec: currentSpec, templateId:"auto", idea: currentIdea }, 20000);
-        outHtml.value = html.file?.content || "";
-        built.html = true;
-        updateButtons();
-
-        const css = await postJson("/api/build", { stage:"css", spec: currentSpec, theme: themePayload(), templateId:"auto" }, 15000);
-        outCss.value = css.file?.content || "";
-        built.css = true;
-        updateButtons();
-
-        const js = await postJson("/api/build", { stage:"js", spec: currentSpec, idea: currentIdea, templateId:"auto" }, 30000);
-        outJs.value = js.file?.content || "";
-        built.js = true;
-
-        enableEditBox(true);
-        outBadge.textContent = "Complete";
-        toast("Rebuilt all files (same plan).");
-        updateButtons();
-      }catch(e){
-        outBadge.textContent = "Error";
-        toast(e.message || "Rebuild failed.");
-        updateButtons();
-      }finally{
-        btnRebuildAllFromPlan.disabled = !(locked && built.html && built.css && built.js);
-      }
-    });
-
-    // Reset
-    btnResetAll.addEventListener("click", () => {
-      resetAll();
-      toast("Reset.");
-    });
-
-    // Copy buttons (outputs only)
-    document.querySelectorAll("[data-copy]").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const id = btn.getAttribute("data-copy");
-        const el = document.getElementById(id);
-        const val = el ? el.value : "";
-        if (!val.trim()) { toast("Nothing to copy."); return; }
+    (function(){
+      // ---------------------------
+      // API base (NOT shown in UI)
+      // ---------------------------
+      const DEFAULT_API_BASE = "https://chattok-builder-api.onrender.com";
+
+      // Optional: dev override via ?api=... (not displayed)
+      function getApiBase(){
         try{
-          await navigator.clipboard.writeText(val);
-          toast("Copied.");
-        }catch{
-          el.focus();
-          el.select();
-          toast("Select + copy manually.");
+          const u = new URL(location.href);
+          const qp = u.searchParams.get("api");
+          const ls = localStorage.getItem("CT_API_BASE") || "";
+          const raw = (qp || ls || DEFAULT_API_BASE).trim();
+          // Normalize: no trailing slash
+          return raw.replace(/\/+$/, "");
+        }catch(e){
+          return DEFAULT_API_BASE;
         }
-      });
-    });
+      }
 
-    // Init
-    document.getElementById("year").textContent = String(new Date().getFullYear());
-    resetAll();
-    (async () => {
-      btnConnect.disabled = true;
-      await ping();
-      btnConnect.disabled = false;
-      if (!apiOnline) toast("Builder is offline. Tap Reconnect.");
+      const API_BASE = getApiBase();
+
+      // ---------------------------
+      // DOM
+      // ---------------------------
+      const apiDot = document.getElementById("apiDot");
+      const apiStatus = document.getElementById("apiStatus");
+
+      const flowBadge = document.getElementById("flowBadge");
+
+      const resetBtn = document.getElementById("resetBtn");
+      const clearOutputsBtn = document.getElementById("clearOutputsBtn");
+      const finishBtn = document.getElementById("finishBtn");
+
+      const ideaInput = document.getElementById("ideaInput");
+      const planBtn = document.getElementById("planBtn");
+
+      const planText = document.getElementById("planText");
+      const submitPlanEditsBtn = document.getElementById("submitPlanEditsBtn");
+      const continueBtn = document.getElementById("continueBtn");
+      const copyPlanBtn = document.getElementById("copyPlanBtn");
+
+      const swatches = document.getElementById("swatches");
+      const hexPrimary = document.getElementById("hexPrimary");
+      const hexSecondary = document.getElementById("hexSecondary");
+      const hexBg = document.getElementById("hexBg");
+      const applyHexBtn = document.getElementById("applyHexBtn");
+
+      const buildHtmlBtn = document.getElementById("buildHtmlBtn");
+      const buildCssBtn = document.getElementById("buildCssBtn");
+      const buildJsBtn = document.getElementById("buildJsBtn");
+
+      const statusLine = document.getElementById("statusLine");
+
+      const htmlOut = document.getElementById("htmlOut");
+      const cssOut = document.getElementById("cssOut");
+      const jsOut = document.getElementById("jsOut");
+
+      const dotHtml = document.getElementById("dotHtml");
+      const dotCss = document.getElementById("dotCss");
+      const dotJs = document.getElementById("dotJs");
+
+      const copyHtmlBtn = document.getElementById("copyHtmlBtn");
+      const copyCssBtn = document.getElementById("copyCssBtn");
+      const copyJsBtn = document.getElementById("copyJsBtn");
+
+      const editsBadge = document.getElementById("editsBadge");
+      const editInput = document.getElementById("editInput");
+      const applyEditBtn = document.getElementById("applyEditBtn");
+
+      const rebuildHtmlBtn = document.getElementById("rebuildHtmlBtn");
+      const rebuildCssBtn = document.getElementById("rebuildCssBtn");
+      const rebuildJsBtn = document.getElementById("rebuildJsBtn");
+      const unlockRebuildBtn = document.getElementById("unlockRebuildBtn");
+
+      // ---------------------------
+      // State
+      // ---------------------------
+      let planLocked = false;
+      let currentSpec = null; // object from /api/plan
+      let planTextCache = ""; // user-editable plan view
+      let remainingEdits = 3;
+
+      const currentFiles = {
+        "index.html": "",
+        "style.css": "",
+        "game.js": ""
+      };
+
+      // Default theme (ChatTok brand)
+      let theme = {
+        primary: "#ff0050",
+        secondary: "#00f2ea",
+        background: "#000000"
+      };
+
+      // Build locks
+      const built = { html:false, css:false, js:false };
+      const busy = { plan:false, build:false, edit:false };
+
+      // ---------------------------
+      // Utilities
+      // ---------------------------
+      function setPill(state){
+        if (state === "good"){
+          apiDot.className = "dot good";
+          apiStatus.textContent = "API: online";
+        } else if (state === "bad"){
+          apiDot.className = "dot bad";
+          apiStatus.textContent = "API: offline";
+        } else {
+          apiDot.className = "dot warn";
+          apiStatus.textContent = "API: checking…";
+        }
+      }
+
+      function setStatus(text){
+        statusLine.textContent = String(text || "Ready.");
+      }
+
+      function setStep(n){
+        flowBadge.textContent = "Step " + n;
+      }
+
+      function normalizeHex(v){
+        const s = String(v || "").trim();
+        if (!s) return "";
+        let x = s.startsWith("#") ? s : "#" + s;
+        if (/^#[0-9a-fA-F]{3}$/.test(x)){
+          x = "#" + x[1]+x[1]+x[2]+x[2]+x[3]+x[3];
+        }
+        if (!/^#[0-9a-fA-F]{6}$/.test(x)) return "";
+        return x.toLowerCase();
+      }
+
+      function setTheme(next){
+        theme = {
+          primary: normalizeHex(next.primary) || theme.primary,
+          secondary: normalizeHex(next.secondary) || theme.secondary,
+          background: normalizeHex(next.background) || theme.background
+        };
+        hexPrimary.value = theme.primary;
+        hexSecondary.value = theme.secondary;
+        hexBg.value = theme.background;
+        renderSwatchSelection();
+      }
+
+      function renderSwatchSelection(){
+        const nodes = swatches.querySelectorAll(".swatch");
+        nodes.forEach(n => n.classList.remove("sel"));
+        // Mark selected if it matches any preset
+        for (const n of nodes){
+          const p = n.getAttribute("data-primary");
+          const s = n.getAttribute("data-secondary");
+          const b = n.getAttribute("data-background");
+          if (p === theme.primary && s === theme.secondary && b === theme.background){
+            n.classList.add("sel");
+          }
+        }
+      }
+
+      function setDot(dotEl, mode){
+        dotEl.className = "dotSmall " + (mode === "ok" ? "ok" : mode === "wait" ? "wait" : "");
+      }
+
+      function enable(el, yes){
+        el.disabled = !yes;
+      }
+
+      function canBuild(){
+        return planLocked && currentSpec;
+      }
+
+      function updateControls(){
+        // Step 1
+        enable(planBtn, !busy.plan && !busy.build && !busy.edit);
+
+        // Step 2
+        enable(planText, !!currentSpec && !planLocked);
+        enable(submitPlanEditsBtn, !!currentSpec && !planLocked && !busy.plan);
+        enable(continueBtn, !!currentSpec && !planLocked && !busy.plan);
+
+        // Step 3 buttons (locked sequence)
+        enable(buildHtmlBtn, canBuild() && !busy.build && !built.html);
+        enable(buildCssBtn, canBuild() && !busy.build && built.html && !built.css);
+        enable(buildJsBtn,  canBuild() && !busy.build && built.html && built.css && !built.js);
+
+        // Copy buttons
+        enable(copyHtmlBtn, !!currentFiles["index.html"]);
+        enable(copyCssBtn, !!currentFiles["style.css"]);
+        enable(copyJsBtn,  !!currentFiles["game.js"]);
+        enable(copyPlanBtn, !!planLocked && !!planTextCache);
+
+        // Edit gating: only after all 3 files exist
+        const haveAll = !!currentFiles["index.html"] && !!currentFiles["style.css"] && !!currentFiles["game.js"];
+        enable(applyEditBtn, haveAll && remainingEdits > 0 && !busy.edit);
+
+        editsBadge.textContent = remainingEdits + " left";
+
+        // Rebuild controls: default locked until user presses "Unlock Rebuild"
+        const rebuildUnlocked = unlockRebuildBtn.getAttribute("data-unlocked") === "1";
+        enable(unlockRebuildBtn, haveAll && !busy.build && !busy.edit);
+        enable(rebuildHtmlBtn, rebuildUnlocked && canBuild() && !busy.build);
+        enable(rebuildCssBtn, rebuildUnlocked && canBuild() && !busy.build);
+        enable(rebuildJsBtn,  rebuildUnlocked && canBuild() && !busy.build);
+
+        // Update step indicator
+        if (!currentSpec) setStep(1);
+        else if (!planLocked) setStep(2);
+        else setStep(3);
+      }
+
+      async function safeCopy(text){
+        try{
+          await navigator.clipboard.writeText(String(text || ""));
+          return true;
+        }catch(e){
+          // fallback
+          try{
+            const ta = document.createElement("textarea");
+            ta.value = String(text || "");
+            ta.style.position = "fixed";
+            ta.style.left = "-9999px";
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            document.body.removeChild(ta);
+            return true;
+          }catch(_e){
+            return false;
+          }
+        }
+      }
+
+      function clearOutputs(){
+        currentFiles["index.html"] = "";
+        currentFiles["style.css"] = "";
+        currentFiles["game.js"] = "";
+        htmlOut.value = "";
+        cssOut.value = "";
+        jsOut.value = "";
+        setDot(dotHtml, "");
+        setDot(dotCss, "");
+        setDot(dotJs, "");
+        built.html = false;
+        built.css = false;
+        built.js = false;
+        unlockRebuildBtn.setAttribute("data-unlocked", "0");
+        updateControls();
+      }
+
+      function hardReset(){
+        planLocked = false;
+        currentSpec = null;
+        planTextCache = "";
+        planText.value = "";
+        planText.placeholder = "Your detailed plan/spec will appear here…";
+        enable(planText, false);
+        enable(submitPlanEditsBtn, false);
+        enable(continueBtn, false);
+        remainingEdits = 3;
+        editInput.value = "";
+        clearOutputs();
+        setStatus("Ready.");
+        updateControls();
+      }
+
+      async function apiHealth(){
+        setPill("warn");
+        try{
+          const r = await fetch(API_BASE + "/health", { method:"GET", cache:"no-store" });
+          if (!r.ok) throw new Error("health failed");
+          setPill("good");
+        }catch(e){
+          setPill("bad");
+        }
+      }
+
+      async function postJson(path, body){
+        const r = await fetch(API_BASE + path, {
+          method: "POST",
+          headers: { "Content-Type":"application/json" },
+          body: JSON.stringify(body || {}),
+          cache: "no-store"
+        });
+        let data = null;
+        try{ data = await r.json(); }catch(e){ data = null; }
+        if (!r.ok || !data || data.ok !== true){
+          const msg = (data && data.error) ? data.error : ("Request failed (" + r.status + ")");
+          const err = new Error(msg);
+          err._data = data;
+          err._status = r.status;
+          throw err;
+        }
+        return data;
+      }
+
+      // ---------------------------
+      // Theme presets
+      // ---------------------------
+      const PRESETS = [
+        { name:"ChatTok", primary:"#ff0050", secondary:"#00f2ea", background:"#000000" },
+        { name:"Midnight", primary:"#7c3aed", secondary:"#22c55e", background:"#050b17" },
+        { name:"Arcade", primary:"#ffb703", secondary:"#00f2ea", background:"#0b1022" },
+        { name:"Inferno", primary:"#ff0050", secondary:"#ffb347", background:"#0a0a0f" },
+        { name:"Ocean", primary:"#00f2ea", secondary:"#38bdf8", background:"#061326" },
+      ];
+
+      function renderSwatches(){
+        swatches.innerHTML = "";
+        PRESETS.forEach((p, idx) => {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "swatch" + (idx === 0 ? " sel" : "");
+          b.style.background = `linear-gradient(135deg, ${p.primary}, ${p.secondary})`;
+          b.title = p.name;
+          b.setAttribute("data-primary", p.primary);
+          b.setAttribute("data-secondary", p.secondary);
+          b.setAttribute("data-background", p.background);
+          b.addEventListener("click", () => setTheme(p));
+          swatches.appendChild(b);
+        });
+      }
+
+      // ---------------------------
+      // Plan flow
+      // ---------------------------
+      async function generatePlan(planEdits){
+        const idea = String(ideaInput.value || "").trim();
+        if (!idea){
+          setStatus("Please enter a game idea first.");
+          return;
+        }
+
+        busy.plan = true;
+        updateControls();
+        setStatus("Generating plan…");
+
+        try{
+          // If user is editing an existing plan, include currentSpec + edits
+          const data = await postJson("/api/plan", {
+            idea,
+            templateId: "boss",
+            currentSpec: currentSpec || undefined,
+            planEdits: planEdits ? String(planEdits) : ""
+          });
+
+          currentSpec = data.spec || null;
+
+          // Create a detailed, user-editable plan text (copy/paste friendly)
+          const s = currentSpec || {};
+          const lines = [];
+          lines.push(`TITLE: ${s.title || "ChatTok Live Game"}`);
+          lines.push(`SUBTITLE: ${s.subtitle || "Live Interactive"}`);
+          lines.push("");
+          lines.push("ONE-SENTENCE PROMISE:");
+          lines.push(`- ${s.oneSentence || ""}`);
+          lines.push("");
+          lines.push("HOST FLOW (what the host does):");
+          (Array.isArray(s.hostFlow) ? s.hostFlow : []).forEach((x) => lines.push(`- ${x}`));
+          lines.push("");
+          lines.push("VIEWER ACTIONS (TikTok → in-game effect):");
+          const va = s.viewerActions || {};
+          const addVA = (k, label) => {
+            const arr = Array.isArray(va[k]) ? va[k] : [];
+            lines.push(`- ${label}:`);
+            if (!arr.length) lines.push("  - (none)");
+            else arr.forEach((x) => lines.push(`  - ${x}`));
+          };
+          addVA("chat", "CHAT");
+          addVA("likes", "LIKES");
+          addVA("gifts", "GIFTS");
+          addVA("joins", "JOIN EVENTS");
+          addVA("shares", "SHARES");
+          lines.push("");
+          lines.push("DEFAULT COMMANDS (host can change these in settings):");
+          const d = s.defaults || {};
+          lines.push(`- Join command: ${d.joinCommand || "join"}`);
+          lines.push(`- Action command: ${d.actionCommand || "attack"}`);
+          lines.push("");
+          lines.push("HOW TO PLAY (on-screen instructions):");
+          (Array.isArray(s.howToPlay) ? s.howToPlay : []).forEach((x) => lines.push(`- ${x}`));
+
+          planTextCache = lines.join("\n");
+          planText.value = planTextCache;
+
+          planLocked = false;
+          enable(planText, true);
+          enable(submitPlanEditsBtn, true);
+          enable(continueBtn, true);
+
+          setStatus("Plan ready. Edit it if needed, then click Continue to Build.");
+        }catch(e){
+          setStatus("Plan error: " + (e && e.message ? e.message : "unknown"));
+        }finally{
+          busy.plan = false;
+          updateControls();
+        }
+      }
+
+      function lockPlan(){
+        planLocked = true;
+        planTextCache = String(planText.value || "").trim();
+        planText.value = planTextCache;
+        enable(planText, false);
+        enable(submitPlanEditsBtn, false);
+        enable(continueBtn, false);
+
+        // When plan locks, reset outputs
+        clearOutputs();
+        setStatus("Plan locked. Choose theme and build files in order.");
+        updateControls();
+      }
+
+      // ---------------------------
+      // Build flow
+      // ---------------------------
+      async function buildStage(stage){
+        if (!canBuild()){
+          setStatus("Generate and lock a plan first.");
+          return;
+        }
+
+        busy.build = true;
+        updateControls();
+
+        const ctx = { spec: currentSpec, templateId: "boss" };
+
+        try{
+          if (stage === "html"){
+            setStatus("Building index.html…");
+            setDot(dotHtml, "wait");
+            const data = await postJson("/api/generate", {
+              stage: "html",
+              idea: String(ideaInput.value || "").trim(),
+              templateId: "boss",
+              context: ctx,
+              theme
+            });
+            const content = data.file && data.file.content ? String(data.file.content) : "";
+            currentFiles["index.html"] = content;
+            htmlOut.value = content;
+            built.html = true;
+            setDot(dotHtml, content ? "ok" : "");
+            setStatus("index.html ready. Next: Build CSS.");
+          }
+
+          if (stage === "css"){
+            setStatus("Building style.css…");
+            setDot(dotCss, "wait");
+            const data = await postJson("/api/generate", {
+              stage: "css",
+              idea: String(ideaInput.value || "").trim(),
+              templateId: "boss",
+              context: ctx,
+              theme
+            });
+            const content = data.file && data.file.content ? String(data.file.content) : "";
+            currentFiles["style.css"] = content;
+            cssOut.value = content;
+            built.css = true;
+            setDot(dotCss, content ? "ok" : "");
+            setStatus("style.css ready. Next: Build game.js.");
+          }
+
+          if (stage === "js"){
+            setStatus("Building game.js…");
+            setDot(dotJs, "wait");
+            const data = await postJson("/api/generate", {
+              stage: "js",
+              idea: String(ideaInput.value || "").trim(),
+              templateId: "boss",
+              context: ctx,
+              theme
+            });
+            const content = data.file && data.file.content ? String(data.file.content) : "";
+            currentFiles["game.js"] = content;
+            jsOut.value = content;
+            built.js = true;
+            setDot(dotJs, content ? "ok" : "");
+            setStatus("game.js ready. You can now copy all three files, then use optional edits if needed.");
+          }
+        }catch(e){
+          const msg = e && e.message ? e.message : "unknown";
+          setStatus("Build error: " + msg);
+          if (stage === "html") setDot(dotHtml, "");
+          if (stage === "css") setDot(dotCss, "");
+          if (stage === "js") setDot(dotJs, "");
+        }finally{
+          busy.build = false;
+          updateControls();
+        }
+      }
+
+      // ---------------------------
+      // Edits flow
+      // ---------------------------
+      async function applyEdit(){
+        const text = String(editInput.value || "").trim();
+        if (!text){
+          setStatus("Describe an edit first.");
+          return;
+        }
+        if (remainingEdits <= 0){
+          setStatus("No edits remaining.");
+          return;
+        }
+
+        if (!currentFiles["game.js"] && !currentFiles["style.css"] && !currentFiles["index.html"]){
+          setStatus("Build files first.");
+          return;
+        }
+
+        busy.edit = true;
+        updateControls();
+        setStatus("Applying edit (safe AI_REGION)…");
+
+        try{
+          const data = await postJson("/api/edit", {
+            remainingEdits,
+            changeRequest: text,
+            templateId: "boss",
+            theme,
+            currentFiles
+          });
+
+          remainingEdits = Number(data.remainingEdits ?? (remainingEdits - 1));
+          const patches = Array.isArray(data.patches) ? data.patches : [];
+
+          patches.forEach(p => {
+            if (!p || !p.name) return;
+            const name = String(p.name);
+            const content = String(p.content || "");
+            currentFiles[name] = content;
+
+            if (name === "game.js"){
+              jsOut.value = content;
+              setDot(dotJs, content ? "ok" : "");
+            }
+            if (name === "style.css"){
+              cssOut.value = content;
+              setDot(dotCss, content ? "ok" : "");
+            }
+            if (name === "index.html"){
+              htmlOut.value = content;
+              setDot(dotHtml, content ? "ok" : "");
+            }
+          });
+
+          setStatus("Edit applied. Copy updated file(s), or unlock rebuild if you want to regenerate from the locked plan.");
+        }catch(e){
+          setStatus("Edit error: " + (e && e.message ? e.message : "unknown"));
+        }finally{
+          busy.edit = false;
+          updateControls();
+        }
+      }
+
+      // ---------------------------
+      // Events
+      // ---------------------------
+      planBtn.addEventListener("click", () => generatePlan(""));
+      submitPlanEditsBtn.addEventListener("click", () => {
+        // User edits the plan text; send it back as planEdits
+        const edits = String(planText.value || "").trim();
+        generatePlan(edits);
+      });
+      continueBtn.addEventListener("click", lockPlan);
+
+      buildHtmlBtn.addEventListener("click", () => buildStage("html"));
+      buildCssBtn.addEventListener("click", () => buildStage("css"));
+      buildJsBtn.addEventListener("click", () => buildStage("js"));
+
+      resetBtn.addEventListener("click", hardReset);
+      clearOutputsBtn.addEventListener("click", () => {
+        clearOutputs();
+        setStatus("Outputs cleared.");
+      });
+
+      applyHexBtn.addEventListener("click", () => {
+        const p = normalizeHex(hexPrimary.value);
+        const s = normalizeHex(hexSecondary.value);
+        const b = normalizeHex(hexBg.value);
+        if (!p || !s || !b){
+          setStatus("Please enter valid hex colors (example: #ff0050).");
+          return;
+        }
+        setTheme({ primary:p, secondary:s, background:b });
+        setStatus("Theme applied.");
+      });
+
+      copyHtmlBtn.addEventListener("click", async () => {
+        const ok = await safeCopy(currentFiles["index.html"]);
+        setStatus(ok ? "index.html copied." : "Copy failed (browser blocked clipboard).");
+      });
+      copyCssBtn.addEventListener("click", async () => {
+        const ok = await safeCopy(currentFiles["style.css"]);
+        setStatus(ok ? "style.css copied." : "Copy failed (browser blocked clipboard).");
+      });
+      copyJsBtn.addEventListener("click", async () => {
+        const ok = await safeCopy(currentFiles["game.js"]);
+        setStatus(ok ? "game.js copied." : "Copy failed (browser blocked clipboard).");
+      });
+      copyPlanBtn.addEventListener("click", async () => {
+        const ok = await safeCopy(planTextCache);
+        setStatus(ok ? "Plan copied." : "Copy failed (browser blocked clipboard).");
+      });
+
+      applyEditBtn.addEventListener("click", applyEdit);
+
+      unlockRebuildBtn.addEventListener("click", () => {
+        unlockRebuildBtn.setAttribute("data-unlocked", "1");
+        setStatus("Rebuild unlocked. Use rebuild buttons if you want to regenerate from the locked plan.");
+        updateControls();
+      });
+
+      rebuildHtmlBtn.addEventListener("click", () => buildStage("html"));
+      rebuildCssBtn.addEventListener("click", () => buildStage("css"));
+      rebuildJsBtn.addEventListener("click", () => buildStage("js"));
+
+      finishBtn.addEventListener("click", () => {
+        // This is allowed; no API URL exposed.
+        window.open("https://chattokgaming.com", "_blank", "noopener");
+      });
+
+      // Keep plan cache updated as user types (before lock)
+      planText.addEventListener("input", () => {
+        if (!planLocked) planTextCache = String(planText.value || "");
+      });
+
+      // ---------------------------
+      // Boot
+      // ---------------------------
+      renderSwatches();
+      setTheme(PRESETS[0]); // ChatTok
+
+      hardReset();
+      apiHealth();
+      // Re-check health in case Render sleeps; but keep it light.
+      setTimeout(apiHealth, 1800);
+
     })();
   </script>
 </body>
