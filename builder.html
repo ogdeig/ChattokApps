@@ -69,7 +69,7 @@
       color:var(--muted);
       font-size: 13.5px;
       line-height: 1.35;
-      max-width: 860px;
+      max-width: 920px;
     }
 
     .statusRow{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
@@ -399,6 +399,30 @@
       filter: saturate(.85);
     }
 
+    .editBox{
+      margin-top: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      overflow:hidden;
+    }
+    .editHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), transparent);
+    }
+    .editHead .name{
+      font-weight: 950;
+      letter-spacing:.2px;
+      color: rgba(247,247,251,.90);
+    }
+    .editBody{ padding: 10px; }
+    .editBody textarea{ min-height: 110px; }
+
     footer{
       margin-top: 16px;
       color: rgba(247,247,251,.60);
@@ -420,8 +444,10 @@
       <div class="brand">
         <h1>ChatTok Game Builder</h1>
         <p>
-          Build a TikTok LIVE interactive game in three simple steps: <strong>Describe → Review → Generate Files</strong>.
-          Then (optional) use edits to level it up.
+          <strong>Step 1:</strong> Describe your game idea. <strong>Step 2:</strong> Get a detailed build plan (you can edit it and resubmit).
+          <strong>Step 3:</strong> Pick colors and generate <em>index.html → style.css → game.js</em>.
+          <br />
+          After game.js is generated, optional edits (max 3) appear <strong>under the game.js box</strong>.
         </p>
       </div>
 
@@ -441,7 +467,7 @@
         <div class="panelHead">
           <div class="panelTitle">
             <h2>Steps</h2>
-            <p>Follow the flow and you’ll get clean, ready-to-paste files every time.</p>
+            <p>Simple locked flow. No confusion. No broken sequences.</p>
           </div>
           <div class="badge" id="editsBadge">Edits: 3</div>
         </div>
@@ -461,11 +487,11 @@
               <div class="stepBody">
                 <div class="label">Game idea</div>
                 <textarea id="ideaInput" placeholder="Write a detailed description:
-• What’s on screen?
-• What do viewers type in chat?
+• What’s on screen right away?
+• What do viewers type in chat to affect the game?
 • What do likes do?
 • What do gifts do?
-• How do you win/lose?"></textarea>
+• How do you win?"></textarea>
 
                 <div class="row">
                   <button id="btnMic" class="btn secondary" type="button">🎙 Talk to text</button>
@@ -473,7 +499,7 @@
                 </div>
 
                 <div class="hint">
-                  Tip: The best results come from describing the “main action” (movement, spawning, shooting, building, racing, etc.).
+                  If you want a specific archetype, say it: <em>runner</em>, <em>arena</em>, <em>tower defense</em>, <em>asteroids</em>, <em>racing</em>, etc.
                 </div>
               </div>
             </div>
@@ -483,7 +509,7 @@
               <div class="stepHead">
                 <div class="stepLeft">
                   <div class="stepNum">2</div>
-                  <strong>Review the plan (and adjust if needed)</strong>
+                  <strong>Plan preview (copy, edit, resubmit)</strong>
                 </div>
                 <span class="badge">Plan</span>
               </div>
@@ -494,7 +520,7 @@
                     <div class="v" id="planTitle">—</div>
                   </div>
                   <div class="mini">
-                    <div class="k">Round length</div>
+                    <div class="k">Round seconds</div>
                     <div class="v" id="planRound">—</div>
                   </div>
                   <div class="mini">
@@ -502,22 +528,24 @@
                     <div class="v" id="planGoal">—</div>
                   </div>
                   <div class="mini">
-                    <div class="k">Style</div>
+                    <div class="k">Mode</div>
                     <div class="v" id="planStyle">Arcade</div>
                   </div>
                 </div>
 
                 <div style="margin-top:10px">
-                  <div class="label">Optional changes</div>
-                  <textarea id="correctionsInput" placeholder="Only if needed: clarify controls, add a mechanic, change theme, make it faster/slower, change goal, etc."></textarea>
+                  <div class="label">Detailed build description (editable)</div>
+                  <textarea id="planText" placeholder="(Your full plan will appear here after Step 1)"></textarea>
 
                   <div class="row">
-                    <button id="btnApplyPlanChanges" class="btn secondary" type="button" disabled>Submit Changes</button>
-                    <button id="btnContinue" class="btn" type="button" disabled>Continue to Step 3</button>
+                    <button id="btnCopyPlan" class="btn secondary" type="button" disabled>Copy Plan</button>
+                    <button id="btnApplyPlanChanges" class="btn secondary" type="button" disabled>Submit Plan Edits</button>
+                    <button id="btnContinue" class="btn" type="button" disabled>Continue</button>
                   </div>
 
                   <div class="hint">
-                    When you continue, we’ll automatically generate your <strong>index.html</strong> and unlock CSS + game.js.
+                    This plan is written for humans. You can edit it directly (add mechanics, change chat commands, adjust difficulty),
+                    then click <strong>Submit Plan Edits</strong> to regenerate a cleaner plan. When it looks right, click <strong>Continue</strong>.
                   </div>
                 </div>
               </div>
@@ -528,7 +556,7 @@
               <div class="stepHead">
                 <div class="stepLeft">
                   <div class="stepNum">3</div>
-                  <strong>Generate your files</strong>
+                  <strong>Pick colors → Build files (locked order)</strong>
                 </div>
                 <span class="badge" id="buildBadge">Locked</span>
               </div>
@@ -571,33 +599,13 @@
                 </div>
 
                 <div class="hint">
-                  The buttons lock after each file is generated so the flow stays simple and consistent.
+                  Locked sequence on purpose: <strong>HTML → CSS → game.js</strong>. This prevents broken states and keeps results consistent.
                 </div>
               </div>
             </div>
 
-            <!-- STEP 4 (Optional) -->
-            <div class="stepCard disabledPanel" id="cardStep4">
-              <div class="stepHead">
-                <div class="stepLeft">
-                  <div class="stepNum">★</div>
-                  <strong>Optional — Improve it (edits)</strong>
-                </div>
-                <span class="badge">Optional</span>
-              </div>
-              <div class="stepBody">
-                <div class="label">Edit request</div>
-                <textarea id="editInput" placeholder="Example: Make it more exciting. Add more visible action, better animations, and make chat/likes/gifts feel powerful."></textarea>
-
-                <div class="row">
-                  <button id="btnApplyEditAll" class="btn" type="button" disabled>Apply Edit (Rebuild All)</button>
-                  <button id="btnResetAll" class="btn danger" type="button">Reset</button>
-                </div>
-
-                <div class="hint">
-                  Each edit rebuilds the plan + files so the change applies cleanly. You have a limited number of edits per run.
-                </div>
-              </div>
+            <div class="row">
+              <button id="btnResetAll" class="btn danger" type="button">Reset</button>
             </div>
 
           </div>
@@ -639,12 +647,33 @@
             <textarea id="outJs" class="codeArea" spellcheck="false" placeholder="(game.js will appear here)"></textarea>
           </div>
 
+          <!-- EDITS (MUST BE AFTER OUTPUTS + UNDER game.js) -->
+          <div id="editBox" class="editBox disabledPanel" aria-live="polite">
+            <div class="editHead">
+              <div class="name">Optional edits (max 3) — game.js only</div>
+              <div class="badge" id="editsRightBadge">Edits left: 3</div>
+            </div>
+            <div class="editBody">
+              <div class="label">Edit request</div>
+              <textarea id="editInput" placeholder="Example: Make it more exciting. Add more visible action, better animations, and make chat/likes/gifts feel powerful."></textarea>
+
+              <div class="row">
+                <button id="btnApplyEditJs" class="btn" type="button" disabled>Apply Edit (Rebuild game.js)</button>
+                <button id="btnRebuildAllFromPlan" class="btn secondary" type="button" disabled>Rebuild All (same plan)</button>
+              </div>
+
+              <div class="hint">
+                Edits are limited so testing stays cheap and predictable. If you need bigger changes, edit the plan in Step 2 and continue again.
+              </div>
+            </div>
+          </div>
+
           <div class="row" style="margin-top:12px">
             <a class="btn" href="https://chattokgaming.com" target="_blank" rel="noopener">Finish Build on ChatTokGaming</a>
           </div>
 
           <div class="hint" style="margin-top:10px">
-            After you launch on ChatTokGaming, the platform handles the TikTok connection using the standard client.
+            Note: ChatTokGaming preview may run games inside an embedded runner. Your generated game files are built to handle that environment.
           </div>
         </div>
       </div>
@@ -661,10 +690,14 @@
 
   <script>
     /* =========================================================
-       ChatTok Game Builder — Production UI (no dev settings)
+       ChatTok Game Builder — Locked 3-step flow
+       - Step 1: idea
+       - Step 2: detailed plan (editable, resubmittable)
+       - Step 3: theme + locked build (HTML -> CSS -> JS)
+       - Edits appear under game.js AFTER outputs (max 3)
        ========================================================= */
 
-    // API base (kept out of the UI). This must match your Render service.
+    // API base (kept out of UI text). Update to your Render service domain.
     const API_BASE = "https://chattok-builder-api.onrender.com";
 
     // Online indicator
@@ -673,14 +706,12 @@
     const btnConnect = document.getElementById("btnConnect");
 
     // Steps/cards
-    const cardStep1 = document.getElementById("cardStep1");
     const cardStep2 = document.getElementById("cardStep2");
     const cardStep3 = document.getElementById("cardStep3");
-    const cardStep4 = document.getElementById("cardStep4");
 
     // Inputs/outputs
     const ideaInput = document.getElementById("ideaInput");
-    const correctionsInput = document.getElementById("correctionsInput");
+    const planText = document.getElementById("planText");
     const editInput = document.getElementById("editInput");
 
     const outHtml = document.getElementById("outHtml");
@@ -690,6 +721,7 @@
     // Buttons
     const btnMic = document.getElementById("btnMic");
     const btnPlan = document.getElementById("btnPlan");
+    const btnCopyPlan = document.getElementById("btnCopyPlan");
     const btnApplyPlanChanges = document.getElementById("btnApplyPlanChanges");
     const btnContinue = document.getElementById("btnContinue");
 
@@ -697,8 +729,12 @@
     const btnBuildCss  = document.getElementById("btnBuildCss");
     const btnBuildJs   = document.getElementById("btnBuildJs");
 
-    const btnApplyEditAll = document.getElementById("btnApplyEditAll");
     const btnResetAll = document.getElementById("btnResetAll");
+
+    const editBox = document.getElementById("editBox");
+    const btnApplyEditJs = document.getElementById("btnApplyEditJs");
+    const btnRebuildAllFromPlan = document.getElementById("btnRebuildAllFromPlan");
+    const editsRightBadge = document.getElementById("editsRightBadge");
 
     // Badges/text
     const editsBadge = document.getElementById("editsBadge");
@@ -717,7 +753,7 @@
       toastEl.textContent = String(msg || "");
       toastEl.classList.add("show");
       clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1700);
+      toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1750);
     }
 
     // Theme pickers
@@ -809,14 +845,28 @@
     }
     btnMic.addEventListener("click", () => micOn ? stopMic() : startMic());
 
-    // API calls
+    // -----------------------------
+    // API helpers (timeout + clean errors)
+    // -----------------------------
     let apiOnline = false;
+
+    async function fetchWithTimeout(url, opts, ms){
+      const t = Number(ms || 15000);
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), t);
+      try{
+        const r = await fetch(url, { ...(opts||{}), signal: controller.signal });
+        return r;
+      } finally {
+        clearTimeout(id);
+      }
+    }
 
     async function ping(){
       apiDot.className = "dot warn";
       apiStatus.textContent = "Connecting…";
       try{
-        const r = await fetch(API_BASE + "/health", { method:"GET" });
+        const r = await fetchWithTimeout(API_BASE + "/health", { method:"GET" }, 8000);
         if (!r.ok) throw new Error("bad status");
         apiOnline = true;
         apiDot.className = "dot good";
@@ -837,12 +887,13 @@
       if (!apiOnline) toast("Builder is offline. Try again in a moment.");
     });
 
-    async function postJson(path, data){
-      const r = await fetch(API_BASE + path, {
+    async function postJson(path, data, timeoutMs){
+      const r = await fetchWithTimeout(API_BASE + path, {
         method:"POST",
         headers: { "Content-Type":"application/json" },
         body: JSON.stringify(data || {})
-      });
+      }, timeoutMs || 20000);
+
       const j = await r.json().catch(() => ({}));
       if (!r.ok || !j.ok){
         const msg = j && j.error ? j.error : ("Request failed (" + r.status + ")");
@@ -851,19 +902,21 @@
       return j;
     }
 
+    // -----------------------------
     // State
+    // -----------------------------
     let editsRemaining = 3;
     let locked = false;
 
     let currentIdea = "";
     let currentSpec = null;
-    let cachedHtml = "";
 
     const built = { html:false, css:false, js:false };
 
     function setEdits(n){
       editsRemaining = Math.max(0, Number(n||0));
       editsBadge.textContent = "Edits: " + editsRemaining;
+      editsRightBadge.textContent = "Edits left: " + editsRemaining;
     }
     setEdits(3);
 
@@ -871,9 +924,13 @@
       if (!card) return;
       card.classList.toggle("disabledPanel", !enabled);
     }
+    function enableEditBox(enabled){
+      editBox.classList.toggle("disabledPanel", !enabled);
+    }
 
     function updateButtons(){
       // Step 2 availability
+      btnCopyPlan.disabled = !currentSpec;
       btnApplyPlanChanges.disabled = !currentSpec;
       btnContinue.disabled = !currentSpec;
 
@@ -882,8 +939,10 @@
       btnBuildCss.disabled  = !locked || !built.html || built.css;
       btnBuildJs.disabled   = !locked || !built.css || built.js;
 
-      // Optional edit
-      btnApplyEditAll.disabled = !(locked && built.js && editsRemaining > 0);
+      // Edit flow (right side, under outputs)
+      const canEdit = (locked && built.js && editsRemaining > 0);
+      btnApplyEditJs.disabled = !canEdit;
+      btnRebuildAllFromPlan.disabled = !(locked && built.html && built.css && built.js);
 
       // Labels
       btnBuildHtml.textContent = built.html ? "HTML Built ✓" : "Build HTML";
@@ -892,22 +951,96 @@
       buildBadge.textContent = locked ? (built.js ? "Complete" : "Ready") : "Locked";
     }
 
-    function renderPlan(spec){
+    function renderPlanMini(spec){
       planTitle.textContent = spec?.title || "—";
       planRound.textContent = String(spec?.defaultSettings?.roundSeconds ?? "—");
       planGoal.textContent  = String(spec?.defaultSettings?.winGoal ?? "—");
       planStyle.textContent = "Arcade";
     }
 
-    function resetBuildState(){
+    function guessArchetype(idea){
+      const t = String(idea||"").toLowerCase();
+      if (/(tower|defend|base|lanes|waves)/.test(t)) return "Tower Defense";
+      if (/(race|racing|track|lap|car)/.test(t)) return "Racing";
+      if (/(runner|run|dash|jump|obstacle)/.test(t)) return "Runner";
+      if (/(arena|battle|brawl|duel|pvp)/.test(t)) return "Arena";
+      if (/(asteroid|space|ship|meteor)/.test(t)) return "Space / Asteroids";
+      return "Arcade Arena";
+    }
+
+    function makePlanNarrative(spec, idea){
+      const s = spec || {};
+      const title = s.title || "ChatTok Live Game";
+      const subtitle = s.subtitle || "Live Interactive";
+      const one = s.oneSentence || "Chat + likes + gifts power up the action.";
+      const roundSeconds = Number(s?.defaultSettings?.roundSeconds || 20);
+      const winGoal = Number(s?.defaultSettings?.winGoal || 100);
+      const how = Array.isArray(s.howToPlay) ? s.howToPlay.filter(Boolean) : [];
+      const archetype = guessArchetype(idea);
+
+      const howBullets = how.length
+        ? how.map((x,i)=>`${i+1}) ${x}`).join("\n")
+        : "1) Viewers interact in chat.\n2) Likes boost the action.\n3) Gifts trigger big power-ups.";
+
+      return [
+`TITLE: ${title} — ${subtitle}`,
+`ARCHETYPE: ${archetype}`,
+``,
+`WHAT YOU'LL SEE ON SCREEN (immediately):`,
+`- A full-screen 9:16 game area with a clear HUD (score/energy/status).`,
+`- Visible entities moving right away (no blank screen).`,
+`- Pop-out “flags” for chat/gift feedback (non-blocking).`,
+``,
+`CORE GAME LOOP:`,
+`- The game runs continuously and escalates as viewers interact.`,
+`- Every round lasts ~${roundSeconds}s (default) and progress pushes toward a win goal of ${winGoal}.`,
+`- A winner state can trigger a celebration and reset/continue (depending on the game).`,
+``,
+`VIEWER INTERACTIONS (TikTok → gameplay):`,
+`CHAT:`,
+`- Chat commands spawn or control entities (example: join/team commands, boosts, attacks).`,
+`- The game maps chat into real actions (not just text on screen).`,
+`LIKES:`,
+`- Likes fill an “Energy” meter that increases spawn rate / speed / buffs.`,
+`- Milestones (e.g., every 50 likes) trigger a small bonus effect.`,
+`GIFTS:`,
+`- Gifts trigger strong power-ups (shield, nuke, boss, mega-spawn, ultimate).`,
+`- Bigger gifts = bigger effect (visual + gameplay impact).`,
+`JOIN:`,
+`- When a user joins, the game creates/activates an entity tied to them (when available via events).`,
+``,
+`HOST ACTIONS (what the host does):`,
+`- The host sets their LIVE ID inside ChatTokGaming when launching (platform side).`,
+`- The host can explain the chat commands quickly on-stream and encourage interaction.`,
+`- The host can restart the game by reloading or launching a new round when desired.`,
+``,
+`HOW TO PLAY (quick rules):`,
+`${howBullets}`,
+``,
+`ONE-SENTENCE PITCH:`,
+`${one}`,
+``,
+`NOTES / CONSTRAINTS:`,
+`- We do NOT edit tiktok-client.js (platform-provided).`,
+`- The game must run even before TikTok connects (demo mode).`,
+`- ChatTokGaming preview may run inside iframe/srcdoc, so paths must be robust.`,
+``,
+`EDIT THIS PLAN IF YOU WANT CHANGES:`,
+`- Add exact chat commands you want (e.g., "!join", "red/blue", "A/B/C/D").`,
+`- Describe special gift effects you want (boss, nuke, shield, slowmo).`,
+`- Ask for “more action” / “bigger visuals” / “faster pacing”.`
+      ].join("\n");
+    }
+
+    function resetAll(){
       locked = false;
       currentIdea = "";
       currentSpec = null;
-      cachedHtml = "";
+
       built.html = built.css = built.js = false;
 
       ideaInput.value = "";
-      correctionsInput.value = "";
+      planText.value = "";
       editInput.value = "";
 
       outHtml.value = "";
@@ -921,15 +1054,17 @@
 
       enableCard(cardStep2, false);
       enableCard(cardStep3, false);
-      enableCard(cardStep4, false);
+      enableEditBox(false);
 
       outBadge.textContent = "Ready";
       setEdits(3);
       updateButtons();
     }
 
-    // STEP 1 -> STEP 2
-    async function generatePlan(ideaText){
+    // -----------------------------
+    // Step 1 -> Step 2 (Plan)
+    // -----------------------------
+    async function createPlanFromIdea(ideaText){
       if (!apiOnline){
         toast("Builder is offline. Tap Reconnect.");
         return false;
@@ -943,30 +1078,29 @@
       outBadge.textContent = "Planning…";
       btnPlan.disabled = true;
 
-      const j = await postJson("/api/generate", {
-        stage: "html",
+      const j = await postJson("/api/plan", {
         idea,
-        templateId: "auto",
-        theme: themePayload()
-      });
+        templateId: "auto"
+      }, 25000);
 
       currentIdea = idea;
-      currentSpec = j.context?.spec || null;
-      cachedHtml = j.file?.content || "";
+      currentSpec = j.spec || null;
 
-      if (!currentSpec) throw new Error("Plan failed: missing plan data.");
+      if (!currentSpec) throw new Error("Plan failed: missing spec.");
 
-      renderPlan(currentSpec);
+      renderPlanMini(currentSpec);
+      planText.value = makePlanNarrative(currentSpec, currentIdea);
+
       enableCard(cardStep2, true);
       outBadge.textContent = "Plan ready";
-      toast("Plan ready. Review it, then continue.");
+      toast("Plan ready. Edit it if needed, then Continue.");
       updateButtons();
       return true;
     }
 
     btnPlan.addEventListener("click", async () => {
       try{
-        await generatePlan(ideaInput.value);
+        await createPlanFromIdea(ideaInput.value);
       }catch(e){
         outBadge.textContent = "Error";
         toast(e.message || "Plan failed.");
@@ -975,68 +1109,126 @@
       }
     });
 
-    btnApplyPlanChanges.addEventListener("click", async () => {
+    btnCopyPlan.addEventListener("click", async () => {
+      const val = String(planText.value || "");
+      if (!val.trim()) { toast("Nothing to copy."); return; }
       try{
-        if (!currentSpec) return;
-        const extra = correctionsInput.value.trim();
-        const merged = extra ? (currentIdea + "\n\nChanges:\n" + extra) : currentIdea;
-        await generatePlan(merged);
-      }catch(e){
-        outBadge.textContent = "Error";
-        toast(e.message || "Update failed.");
+        await navigator.clipboard.writeText(val);
+        toast("Plan copied.");
+      }catch{
+        planText.focus();
+        planText.select();
+        toast("Select + copy manually.");
       }
     });
 
-    // STEP 2 -> STEP 3 (auto-build HTML)
+    btnApplyPlanChanges.addEventListener("click", async () => {
+      try{
+        if (!currentSpec) return;
+        if (!apiOnline){ toast("Builder is offline. Tap Reconnect."); return; }
+
+        const planEdits = String(planText.value || "").trim();
+        if (!planEdits){ toast("Plan is empty."); return; }
+
+        outBadge.textContent = "Updating plan…";
+        btnApplyPlanChanges.disabled = true;
+        btnContinue.disabled = true;
+
+        const j = await postJson("/api/plan", {
+          templateId: "auto",
+          spec: currentSpec,
+          planEdits
+        }, 25000);
+
+        currentSpec = j.spec || currentSpec;
+        renderPlanMini(currentSpec);
+        planText.value = makePlanNarrative(currentSpec, currentIdea);
+
+        outBadge.textContent = "Plan updated";
+        toast("Plan updated. Continue when ready.");
+        updateButtons();
+      }catch(e){
+        outBadge.textContent = "Error";
+        toast(e.message || "Plan update failed.");
+        updateButtons();
+      }finally{
+        btnApplyPlanChanges.disabled = !currentSpec;
+        btnContinue.disabled = !currentSpec;
+      }
+    });
+
+    // -----------------------------
+    // Step 2 -> Step 3 (lock plan)
+    // -----------------------------
     btnContinue.addEventListener("click", () => {
-      if (!currentSpec || !cachedHtml){
+      if (!currentSpec){
         toast("Create a plan first.");
         return;
       }
       locked = true;
       enableCard(cardStep3, true);
-
-      // Auto-build HTML immediately
-      outHtml.value = cachedHtml;
-      built.html = true;
-
-      outBadge.textContent = "HTML ready";
-      toast("Step 3 unlocked. Generate CSS, then game.js.");
+      outBadge.textContent = "Ready to build";
+      toast("Step 3 unlocked. Choose colors, then Build HTML → CSS → game.js.");
       updateButtons();
     });
 
-    // STEP 3 buttons (lock after each)
-    btnBuildHtml.addEventListener("click", () => {
-      if (!locked) return;
-      if (!cachedHtml){
-        toast("Missing HTML. Create a plan again.");
-        return;
+    // -----------------------------
+    // Step 3 (Build files)
+    // Uses /api/build (locked spec)
+    // -----------------------------
+    btnBuildHtml.addEventListener("click", async () => {
+      try{
+        if (!locked || built.html) return;
+        if (!currentSpec){ toast("Missing plan."); return; }
+        if (!apiOnline){ toast("Builder is offline. Tap Reconnect."); return; }
+
+        outBadge.textContent = "Building HTML…";
+        btnBuildHtml.disabled = true;
+        outHtml.value = "";
+
+        const j = await postJson("/api/build", {
+          stage: "html",
+          spec: currentSpec,
+          templateId: "auto",
+          idea: currentIdea
+        }, 20000);
+
+        outHtml.value = j.file?.content || "";
+        built.html = true;
+
+        outBadge.textContent = "HTML ready";
+        toast("HTML generated. Now build CSS.");
+        updateButtons();
+      }catch(e){
+        outBadge.textContent = "Error";
+        toast(e.message || "HTML failed.");
+        btnBuildHtml.disabled = false;
+        updateButtons();
       }
-      outHtml.value = cachedHtml;
-      built.html = true;
-      outBadge.textContent = "HTML ready";
-      toast("HTML generated.");
-      updateButtons();
     });
 
     btnBuildCss.addEventListener("click", async () => {
       try{
-        if (!locked || !built.html) return;
+        if (!locked || !built.html || built.css) return;
+        if (!currentSpec){ toast("Missing plan."); return; }
+        if (!apiOnline){ toast("Builder is offline. Tap Reconnect."); return; }
+
         outBadge.textContent = "Building CSS…";
         btnBuildCss.disabled = true;
+        outCss.value = "";
 
-        const j = await postJson("/api/generate", {
+        const j = await postJson("/api/build", {
           stage: "css",
+          spec: currentSpec,
           theme: themePayload(),
-          templateId: "auto",
-          context: { spec: currentSpec }
-        });
+          templateId: "auto"
+        }, 15000);
 
         outCss.value = j.file?.content || "";
         built.css = true;
 
         outBadge.textContent = "CSS ready";
-        toast("CSS generated.");
+        toast("CSS generated. Now build game.js.");
         updateButtons();
       }catch(e){
         outBadge.textContent = "Error";
@@ -1048,25 +1240,27 @@
 
     btnBuildJs.addEventListener("click", async () => {
       try{
-        if (!locked || !built.css) return;
-        if (!currentSpec){ toast("Missing plan. Create a plan again."); return; }
+        if (!locked || !built.css || built.js) return;
+        if (!currentSpec){ toast("Missing plan."); return; }
+        if (!apiOnline){ toast("Builder is offline. Tap Reconnect."); return; }
 
         outBadge.textContent = "Building game.js…";
         btnBuildJs.disabled = true;
+        outJs.value = "";
 
-        const j = await postJson("/api/generate", {
+        const j = await postJson("/api/build", {
           stage: "js",
+          spec: currentSpec,
           idea: currentIdea,
-          templateId: "auto",
-          context: { spec: currentSpec }
-        });
+          templateId: "auto"
+        }, 30000);
 
         outJs.value = j.file?.content || "";
         built.js = true;
 
-        enableCard(cardStep4, true);
+        enableEditBox(true);
         outBadge.textContent = "Complete";
-        toast("game.js generated. You’re ready to launch.");
+        toast("game.js generated. Optional edits are under game.js.");
         updateButtons();
       }catch(e){
         outBadge.textContent = "Error";
@@ -1076,69 +1270,102 @@
       }
     });
 
-    // STEP 4 (Optional) — edit = rebuild all files
-    btnApplyEditAll.addEventListener("click", async () => {
+    // -----------------------------
+    // Optional edits (after outputs)
+    // - Apply Edit: rebuild game.js only (counts down from 3)
+    // - Rebuild All (same plan): rebuild html/css/js without consuming edit
+    // -----------------------------
+    btnApplyEditJs.addEventListener("click", async () => {
       try{
         if (!locked || !built.js) return;
         if (editsRemaining <= 0){ toast("No edits remaining."); return; }
+        if (!currentSpec){ toast("Missing plan."); return; }
+        if (!apiOnline){ toast("Builder is offline. Tap Reconnect."); return; }
 
-        const changeRequest = editInput.value.trim();
+        const changeRequest = String(editInput.value || "").trim();
         if (!changeRequest){ toast("Type an edit request first."); return; }
 
-        outBadge.textContent = "Editing…";
-        btnApplyEditAll.disabled = true;
+        outBadge.textContent = "Editing game.js…";
+        btnApplyEditJs.disabled = true;
 
-        // Rebuild plan (HTML stage) with merged request
-        const merged = currentIdea + "\n\nEdit request:\n" + changeRequest;
-        const planOk = await generatePlan(merged);
-        if (!planOk) throw new Error("Edit failed: plan step.");
+        // Clear only JS during regeneration (strict)
+        outJs.value = "";
 
-        // Lock stays on; regenerate outputs in order
-        locked = true;
-        enableCard(cardStep3, true);
-
-        outHtml.value = cachedHtml;
-        built.html = true;
-
-        // Rebuild CSS
-        const css = await postJson("/api/generate", {
-          stage: "css",
-          theme: themePayload(),
-          templateId: "auto",
-          context: { spec: currentSpec }
-        });
-        outCss.value = css.file?.content || "";
-        built.css = true;
-
-        // Rebuild JS
-        const js = await postJson("/api/generate", {
+        const j = await postJson("/api/build", {
           stage: "js",
+          spec: currentSpec,
           idea: currentIdea,
           templateId: "auto",
-          context: { spec: currentSpec }
-        });
-        outJs.value = js.file?.content || "";
-        built.js = true;
+          changeRequest
+        }, 35000);
 
+        outJs.value = j.file?.content || "";
         setEdits(editsRemaining - 1);
+
         outBadge.textContent = "Edited";
-        toast("Edit applied. Rebuilt all files.");
+        toast("Edit applied (game.js rebuilt).");
         updateButtons();
       }catch(e){
         outBadge.textContent = "Error";
         toast(e.message || "Edit failed.");
         updateButtons();
       }finally{
-        btnApplyEditAll.disabled = !(locked && built.js && editsRemaining > 0);
+        btnApplyEditJs.disabled = !(locked && built.js && editsRemaining > 0);
       }
     });
 
+    btnRebuildAllFromPlan.addEventListener("click", async () => {
+      try{
+        if (!locked) return;
+        if (!currentSpec){ toast("Missing plan."); return; }
+        if (!apiOnline){ toast("Builder is offline. Tap Reconnect."); return; }
+
+        outBadge.textContent = "Rebuilding…";
+        btnRebuildAllFromPlan.disabled = true;
+
+        // Clear outputs during regeneration
+        outHtml.value = "";
+        outCss.value = "";
+        outJs.value = "";
+        built.html = built.css = built.js = false;
+        enableEditBox(false);
+        updateButtons();
+
+        // Build HTML -> CSS -> JS
+        const html = await postJson("/api/build", { stage:"html", spec: currentSpec, templateId:"auto", idea: currentIdea }, 20000);
+        outHtml.value = html.file?.content || "";
+        built.html = true;
+        updateButtons();
+
+        const css = await postJson("/api/build", { stage:"css", spec: currentSpec, theme: themePayload(), templateId:"auto" }, 15000);
+        outCss.value = css.file?.content || "";
+        built.css = true;
+        updateButtons();
+
+        const js = await postJson("/api/build", { stage:"js", spec: currentSpec, idea: currentIdea, templateId:"auto" }, 30000);
+        outJs.value = js.file?.content || "";
+        built.js = true;
+
+        enableEditBox(true);
+        outBadge.textContent = "Complete";
+        toast("Rebuilt all files (same plan).");
+        updateButtons();
+      }catch(e){
+        outBadge.textContent = "Error";
+        toast(e.message || "Rebuild failed.");
+        updateButtons();
+      }finally{
+        btnRebuildAllFromPlan.disabled = !(locked && built.html && built.css && built.js);
+      }
+    });
+
+    // Reset
     btnResetAll.addEventListener("click", () => {
-      resetBuildState();
+      resetAll();
       toast("Reset.");
     });
 
-    // Copy buttons
+    // Copy buttons (outputs only)
     document.querySelectorAll("[data-copy]").forEach(btn => {
       btn.addEventListener("click", async () => {
         const id = btn.getAttribute("data-copy");
@@ -1158,7 +1385,7 @@
 
     // Init
     document.getElementById("year").textContent = String(new Date().getFullYear());
-    resetBuildState();
+    resetAll();
     (async () => {
       btnConnect.disabled = true;
       await ping();
