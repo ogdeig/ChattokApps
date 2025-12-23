@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>ChatTok AI Game Builder</title>
+  <title>AI Live Interactive Game Builder</title>
 
   <style>
     :root{
@@ -17,630 +17,560 @@
       --text:#ffffff;
       --muted: rgba(255,255,255,.72);
 
-      --pink:#ff0050;
-      --aqua:#00f2ea;
-
       --good:#2ee59d;
-      --warn:#ffcc00;
       --bad:#ff4d4d;
 
       --shadowPanel: 0 14px 40px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.08);
       --r: 18px;
       --r2: 14px;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-
-      --btn: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
-      --btnHover: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.08));
-      --btnGood: linear-gradient(180deg, rgba(46,229,157,.30), rgba(46,229,157,.10));
-      --btnBad: linear-gradient(180deg, rgba(255,77,77,.26), rgba(255,77,77,.10));
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
     }
-
-    *{box-sizing:border-box}
-    html,body{height:100%}
+    *{ box-sizing:border-box; }
     body{
       margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-family:var(--sans);
       color:var(--text);
-      background:
-        radial-gradient(1200px 900px at 20% 0%, rgba(0,242,234,.10), transparent 55%),
-        radial-gradient(1200px 900px at 90% 30%, rgba(255,0,80,.12), transparent 55%),
-        linear-gradient(180deg, var(--bg0), var(--bg1));
+      background: radial-gradient(1200px 900px at 15% 10%, rgba(0,242,234,.14), transparent 60%),
+                  radial-gradient(1100px 800px at 85% 5%, rgba(255,0,80,.16), transparent 55%),
+                  linear-gradient(180deg, var(--bg0), var(--bg1));
+      min-height:100vh;
     }
-
     .wrap{
-      max-width: 1240px;
+      max-width: 1280px;
       margin: 0 auto;
-      padding: 18px 14px 26px;
+      padding: 20px 16px 34px;
     }
 
-    .topbar{
+    header{
       display:flex;
+      gap:14px;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
       margin-bottom: 14px;
     }
-
     .brand{
       display:flex;
-      align-items:center;
       gap:12px;
-      min-width: 260px;
+      align-items:center;
     }
-
-    .logoDot{
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      background:
-        radial-gradient(circle at 30% 25%, rgba(0,242,234,.85), rgba(0,242,234,.12) 60%, transparent 62%),
-        radial-gradient(circle at 70% 75%, rgba(255,0,80,.85), rgba(255,0,80,.10) 58%, transparent 60%),
-        linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.05));
-      box-shadow: 0 10px 26px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.10);
+    .logo{
+      width:42px;height:42px;border-radius:12px;
+      background: linear-gradient(135deg, #ff0050, #00f2ea);
+      box-shadow: 0 10px 26px rgba(0,0,0,.35);
     }
-
     h1{
-      font-size: 16px;
+      font-size: 18px;
       margin:0;
-      letter-spacing: .2px;
+      letter-spacing:.2px;
     }
     .sub{
-      font-size: 12px;
+      margin:0;
       color: var(--muted);
-      margin-top:2px;
-      line-height:1.2;
+      font-size: 12.5px;
     }
 
-    .statusPill{
+    .api-pill{
       display:flex;
       align-items:center;
       gap:10px;
       padding: 10px 12px;
       border-radius: 999px;
-      background: rgba(0,0,0,.24);
+      background: rgba(255,255,255,.06);
       border: 1px solid rgba(255,255,255,.10);
-      box-shadow: 0 12px 30px rgba(0,0,0,.25);
-      min-width: 260px;
-      justify-content:flex-end;
+      box-shadow: 0 10px 26px rgba(0,0,0,.25);
+      font-size: 12.5px;
+      color: var(--muted);
     }
     .dot{
-      width:10px;height:10px;border-radius:999px;
-      background: rgba(255,255,255,.22);
-      box-shadow: 0 0 0 3px rgba(255,255,255,.06);
+      width:9px;height:9px;border-radius:999px;
+      background: rgba(255,255,255,.25);
+      box-shadow: 0 0 0 2px rgba(255,255,255,.10);
     }
-    .dot.ok{ background: rgba(46,229,157,.95); box-shadow: 0 0 0 3px rgba(46,229,157,.16);}
-    .dot.bad{ background: rgba(255,77,77,.95); box-shadow: 0 0 0 3px rgba(255,77,77,.16);}
-    .pillText{
-      font-size: 12px;
-      color: var(--muted);
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-      max-width: 360px;
-    }
+    .dot.ok{ background: var(--good); box-shadow: 0 0 0 2px rgba(46,229,157,.22); }
+    .dot.bad{ background: var(--bad); box-shadow: 0 0 0 2px rgba(255,77,77,.20); }
 
     .grid{
       display:grid;
-      grid-template-columns: 1.05fr 1fr;
+      grid-template-columns: 420px 1fr;
       gap: 14px;
-      align-items:start;
+    }
+    @media (max-width: 1080px){
+      .grid{ grid-template-columns:1fr; }
     }
 
-    @media (max-width: 980px){
-      .grid{ grid-template-columns: 1fr; }
-      .statusPill{ min-width: 0; }
-      .brand{ min-width: 0; }
-    }
-
-    .card{
-      border-radius: var(--r);
+    .panel{
       background: var(--panel);
-      border: 1px solid rgba(255,255,255,.10);
+      border:1px solid var(--line);
+      border-radius: var(--r);
       box-shadow: var(--shadowPanel);
       overflow:hidden;
     }
-    .cardHead{
-      padding: 14px 14px 10px;
+    .panel .head{
+      padding: 14px 14px 12px;
+      border-bottom:1px solid var(--line);
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
-      gap: 10px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      gap:10px;
     }
-    .cardTitle{
+    .panel .head h2{
       margin:0;
-      font-size: 13px;
+      font-size: 13.8px;
       letter-spacing:.2px;
     }
-    .cardHint{
-      margin-top:6px;
+    .panel .head p{
+      margin:4px 0 0;
       font-size: 12px;
       color: var(--muted);
-      line-height: 1.35;
+      line-height:1.35;
     }
-    .cardBody{
+    .panel .body{
       padding: 14px;
     }
 
-    .stepNum{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      width: 26px; height: 26px;
-      border-radius: 10px;
-      background: rgba(0,0,0,.28);
-      border: 1px solid rgba(255,255,255,.10);
-      font-size: 12px;
-      color: rgba(255,255,255,.85);
-      margin-right: 8px;
-    }
-
     .row{ display:flex; gap:10px; flexsee: wrap; flex-wrap:wrap; }
-    .row > * { flex: 1; min-width: 220px; }
-
-    label{
-      display:block;
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-bottom: 12px;
+      width:100%;
+    }
+    label span{
       font-size: 12px;
       color: var(--muted);
-      margin-bottom: 6px;
     }
-
-    input[type="text"], input[type="number"], textarea, select{
+    textarea, input, select{
       width:100%;
-      padding: 10px 10px;
       border-radius: 12px;
-      background: rgba(0,0,0,.22);
-      border: 1px solid rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
       color: var(--text);
+      padding: 10px 11px;
       outline:none;
-      box-shadow: 0 0 0 1px rgba(255,255,255,.04) inset;
+      font-family: var(--sans);
+      font-size: 13.5px;
     }
+    textarea{ min-height: 92px; resize:vertical; }
 
-    textarea{
-      min-height: 140px;
-      resize: vertical;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      line-height: 1.35;
-    }
-
-    .mono{
-      font-family: var(--mono);
-      font-size: 12px;
-      line-height: 1.35;
-      white-space: pre;
-      overflow:auto;
-    }
-
-    .btnRow{
-      display:flex;
-      flex-wrap:wrap;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
+    .btnrow{ display:flex; flex-wrap:wrap; gap:10px; margin-top: 10px; }
     button{
-      cursor:pointer;
-      user-select:none;
       border: 1px solid rgba(255,255,255,.14);
-      background: var(--btn);
+      background: rgba(255,255,255,.08);
       color: var(--text);
       padding: 10px 12px;
       border-radius: 12px;
+      cursor:pointer;
+      font-size: 13px;
       font-weight: 650;
       letter-spacing:.2px;
-      transition: transform .06s ease, background .12s ease, opacity .12s ease;
-      box-shadow: 0 10px 26px rgba(0,0,0,.26);
+      transition: transform .08s ease, background .15s ease, border-color .15s ease;
+      user-select:none;
+    }
+    button:hover{ background: rgba(255,255,255,.11); border-color: rgba(255,255,255,.18); transform: translateY(-1px); }
+    button:disabled{
+      opacity:.45;
+      cursor:not-allowed;
+      transform:none;
+    }
+    .primary{
+      border-color: rgba(255,0,80,.35);
+      background: linear-gradient(135deg, rgba(255,0,80,.18), rgba(0,242,234,.12));
+    }
+    .danger{
+      border-color: rgba(255,77,77,.28);
+      background: rgba(255,77,77,.12);
+    }
+    .ghost{
+      background: rgba(255,255,255,.05);
     }
 
-    button:hover{ background: var(--btnHover); }
-    button:active{ transform: translateY(1px); }
-    button[disabled]{ opacity:.45; cursor:not-allowed; transform:none; }
-
-    .btnGood{ background: var(--btnGood); border-color: rgba(46,229,157,.35); }
-    .btnBad{ background: var(--btnBad); border-color: rgba(255,77,77,.35); }
-
-    .miniNote{
-      margin-top: 10px;
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.35;
-    }
-
-    .divider{
-      height:1px;
-      background: rgba(255,255,255,.08);
-      margin: 14px 0;
-    }
-
-    .lockTag{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      color: rgba(255,255,255,.84);
-      background: rgba(0,0,0,.22);
-      border: 1px solid rgba(255,255,255,.10);
-      white-space:nowrap;
-    }
-    .lockTag strong{ color: rgba(255,255,255,.95); font-weight: 800; }
-    .lockTag .tagDot{
-      width:8px;height:8px;border-radius:999px;background: rgba(255,255,255,.25);
-      box-shadow: 0 0 0 3px rgba(255,255,255,.06);
-    }
-    .lockTag.ok .tagDot{ background: rgba(46,229,157,.95); box-shadow: 0 0 0 3px rgba(46,229,157,.16); }
-    .lockTag.bad .tagDot{ background: rgba(255,77,77,.95); box-shadow: 0 0 0 3px rgba(255,77,77,.16); }
-
-    .outCard .cardBody{ padding: 12px; }
-    .outTop{
+    .step{
+      padding: 10px 14px;
+      border-top: 1px solid rgba(255,255,255,.10);
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
-      padding: 12px 12px 10px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      background: rgba(255,255,255,.03);
     }
-    .outName{
+    .step .left{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+    .tag{
+      padding: 4px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.12);
+      color: var(--muted);
+      font-weight: 650;
+      font-size: 11.5px;
+      letter-spacing:.2px;
+    }
+    .tag.ok{ border-color: rgba(46,229,157,.22); color: rgba(46,229,157,.95); background: rgba(46,229,157,.08); }
+    .tag.bad{ border-color: rgba(255,77,77,.22); color: rgba(255,77,77,.95); background: rgba(255,77,77,.08); }
+
+    .rightPanel .body{
+      padding: 0;
+    }
+    .outputs{
+      display:grid;
+      grid-template-rows: auto auto auto;
+    }
+    .outBlock{
+      border-top: 1px solid rgba(255,255,255,.10);
+      padding: 14px;
+    }
+    .outBlock:first-child{ border-top:none; }
+    .outHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 10px;
+    }
+    .outHead .title{
       display:flex; align-items:center; gap:10px;
       font-weight: 800;
-      letter-spacing: .2px;
-      font-size: 13px;
-    }
-    .outActions{
-      display:flex;
-      gap: 8px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
+      letter-spacing:.2px;
+      font-size: 13.5px;
     }
     .pill{
-      font-size: 12px;
-      padding: 7px 10px;
+      font-size: 11.5px;
+      padding: 3px 10px;
       border-radius: 999px;
-      background: rgba(0,0,0,.22);
-      border: 1px solid rgba(255,255,255,.10);
-      color: rgba(255,255,255,.84);
-      font-weight: 700;
-      cursor: default;
+      border:1px solid rgba(255,255,255,.14);
+      color: var(--muted);
+      background: rgba(0,0,0,.12);
       white-space:nowrap;
     }
-    .pill.good{ border-color: rgba(46,229,157,.35); }
-    .pill.warn{ border-color: rgba(255,204,0,.35); }
-    .pill.bad{ border-color: rgba(255,77,77,.35); }
-
-    .copyBtn{
-      padding: 8px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 800;
-    }
-    .tinyBtn{
-      padding: 8px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 800;
-      cursor:pointer;
+    .pill.good{
+      border-color: rgba(46,229,157,.22);
+      background: rgba(46,229,157,.08);
+      color: rgba(46,229,157,.95);
     }
 
-    .outText{
-      width:100%;
-      min-height: 220px;
-      background: rgba(0,0,0,.26);
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 14px;
-      padding: 10px;
-      color: rgba(255,255,255,.90);
-      font-family: var(--mono);
-      font-size: 12px;
-      line-height: 1.35;
-      resize: vertical;
-    }
-
-    .themeRow{
-      display:flex;
-      gap: 10px;
-      flex-wrap:wrap;
-      margin-top: 10px;
-    }
-
-    .swatch{
-      width: 34px;
-      height: 34px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.14);
-      box-shadow: 0 12px 26px rgba(0,0,0,.28);
-      cursor:pointer;
-      position:relative;
-      overflow:hidden;
-    }
-    .swatch::after{
-      content:"";
-      position:absolute; inset:0;
-      background: linear-gradient(180deg, rgba(255,255,255,.18), transparent 60%);
-      opacity:.45;
-      pointer-events:none;
-    }
-    .swatch.sel{
-      outline: 2px solid rgba(0,242,234,.65);
-      outline-offset: 2px;
-    }
-
-    .colorBlock{
-      display:grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      align-items:center;
-      margin-top: 8px;
-    }
+    .copyBtns{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .mini{ padding: 7px 10px; font-size: 12px; border-radius: 10px; }
 
     .toast{
       margin-top: 10px;
       border-radius: 14px;
       padding: 10px 12px;
-      background: rgba(0,0,0,.22);
-      border: 1px solid rgba(255,255,255,.10);
-      font-size: 12px;
-      line-height: 1.35;
-      color: rgba(255,255,255,.86);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.16);
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height:1.35;
+      white-space: pre-wrap;
     }
-    .toast.good{ border-color: rgba(46,229,157,.35); }
-    .toast.bad{ border-color: rgba(255,77,77,.35); }
-    .toast.warn{ border-color: rgba(255,204,0,.35); }
+    .toast.good{ border-color: rgba(46,229,157,.25); background: rgba(46,229,157,.10); color: rgba(255,255,255,.92); }
+    .toast.bad{ border-color: rgba(255,77,77,.25); background: rgba(255,77,77,.10); color: rgba(255,255,255,.92); }
+    .toast.warn{ border-color: rgba(250,204,21,.25); background: rgba(250,204,21,.09); color: rgba(255,255,255,.90); }
+    .hidden{ display:none; }
 
-    .hidden{ display:none !important; }
+    .divider{
+      height:1px;background: rgba(255,255,255,.10);
+      margin: 12px 0;
+    }
+
+    .themeRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:flex-end;
+      margin-top: 6px;
+    }
+    .swatches{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .swatch{
+      width:26px;height:26px;border-radius:10px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.08);
+      cursor:pointer;
+      position:relative;
+      overflow:hidden;
+    }
+    .swatch.sel::after{
+      content:"";
+      position:absolute; inset:6px;
+      border-radius:7px;
+      border:2px solid rgba(255,255,255,.90);
+      box-shadow: 0 0 0 2px rgba(0,0,0,.20);
+    }
+
+    .themeInputs{
+      display:grid;
+      grid-template-columns: 1fr 50px;
+      gap:8px;
+      align-items:center;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .themeInputs input[type="color"]{
+      height: 38px;
+      padding: 0;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      width: 50px;
+    }
+    .themeInputs input[type="text"]{
+      font-family: var(--mono);
+      letter-spacing:.2px;
+    }
+
+    .hint{
+      font-size: 12px;
+      color: var(--muted);
+      line-height:1.35;
+    }
+
+    .lockNotice{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height:1.35;
+      padding: 12px;
+      border: 1px dashed rgba(255,255,255,.14);
+      border-radius: 14px;
+      background: rgba(0,0,0,.10);
+    }
+
+    .kbd{
+      font-family: var(--mono);
+      padding: 2px 7px;
+      border-radius: 8px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.92);
+      font-size: 12px;
+    }
   </style>
 </head>
-
 <body>
   <div class="wrap">
-    <div class="topbar">
+    <header>
       <div class="brand">
-        <div class="logoDot" aria-hidden="true"></div>
+        <div class="logo" aria-hidden="true"></div>
         <div>
-          <h1>ChatTok AI Game Builder</h1>
-          <div class="sub">Build TikTok LIVE interactive games fast — then upload to ChatTokGaming.</div>
+          <h1>AI Live Interactive Game Builder</h1>
+          <p class="sub">Plan → Confirm → Build files → (Optional) 3 edits</p>
         </div>
       </div>
-      <div class="statusPill" title="API connectivity status">
-        <div id="apiDot" class="dot"></div>
-        <div id="apiPillText" class="pillText">API: checking…</div>
+
+      <div class="api-pill">
+        <span class="dot" id="apiDot"></span>
+        <span id="apiPillText">API: checking…</span>
       </div>
-    </div>
+    </header>
 
     <div class="grid">
-      <!-- LEFT: Step flow -->
-      <div class="card">
-        <div class="cardHead">
+      <!-- LEFT: Steps -->
+      <div class="panel">
+        <div class="head">
           <div>
-            <div class="cardTitle"><span class="stepNum">1</span>Describe the game</div>
-            <div class="cardHint">
-              Give a short idea, but include what viewers do in chat, what likes do, and what gifts do.
-              We’ll generate a detailed build plan next.
-            </div>
+            <h2>Step 1 — Describe the game</h2>
+            <p>Give a clear concept with actions, visuals, and viewer interactions. The plan step will lock in the spec.</p>
           </div>
-          <div class="lockTag" id="lockPlanTag">
-            <span class="tagDot"></span>
-            Plan: <strong id="planLockText">Not created</strong>
-          </div>
+          <span class="tag" id="lockPlanTag"><strong>Not created</strong></span>
         </div>
-        <div class="cardBody">
-          <div class="row">
-            <div>
-              <label for="gameIdea">Game idea</label>
-              <textarea id="gameIdea" placeholder="Example: Treasure hunt on a grid. Viewers type coordinates like B7 to guess. Likes charge a radar sweep. Gifts reveal big clues or spawn bonus treasures."></textarea>
-              <div class="miniNote">Tip: The better the idea, the better the first build.</div>
-            </div>
+        <div class="body">
+
+          <div class="field">
+            <label><span>Game idea (be specific)</span></label>
+            <textarea id="gameIdea" placeholder="Example: A neon arena where viewers join a team by typing RED/BLUE/YELLOW/GREEN, likes charge a team meter, gifts trigger power-ups, and chat answers cause projectiles to fire. Make it visually exciting even before connecting to TikTok."></textarea>
           </div>
 
-          <div class="row" style="margin-top:10px;">
-            <div>
-              <label for="templateId">Game style (optional)</label>
+          <div class="row">
+            <div class="field" style="flex:1; min-width:220px;">
+              <label><span>Template style</span></label>
               <select id="templateId">
-                <option value="arena" selected>Auto (Recommended)</option>
-                <option value="treasure">Treasure / Guessing</option>
-                <option value="runner">Runner / Dodger</option>
-                <option value="defense">Defense / Base</option>
+                <option value="arena">Arena (teams + combat)</option>
+                <option value="runner">Runner (endless dodge)</option>
+                <option value="defense">Defense (protect base)</option>
+                <option value="boss">Boss (raid style)</option>
               </select>
             </div>
-            <div>
-              <label>&nbsp;</label>
-              <button class="btnGood" id="btnPlan">Generate Plan</button>
+            <div class="field" style="flex:1; min-width:160px;">
+              <label><span>Plan</span></label>
+              <button class="primary" id="btnPlan">Generate Plan</button>
             </div>
           </div>
 
           <div id="planToast" class="toast hidden"></div>
-        </div>
 
-        <div class="divider"></div>
+          <div class="divider"></div>
 
-        <div class="cardHead">
-          <div>
-            <div class="cardTitle"><span class="stepNum">2</span>Review & edit the plan</div>
-            <div class="cardHint">
-              This is the detailed build description (what will be built, TikTok actions, host controls).
-              Edit it if needed, then submit to regenerate the plan. When it looks right, hit Continue.
-            </div>
+          <div class="field">
+            <label><span>Step 2 — Plan / Confirm (editable)</span></label>
+            <textarea id="planEditor" placeholder="Your plan/spec will appear here. You can edit it, then submit plan edits."></textarea>
+            <div class="hint">Tip: Add exact controls (chat keywords, how likes/gifts affect gameplay, win conditions), and call out what should always be visible on screen.</div>
           </div>
-          <div class="lockTag" id="lockBuildTag">
-            <span class="tagDot"></span>
-            Build: <strong id="buildLockText">Locked</strong>
-          </div>
-        </div>
 
-        <div class="cardBody">
-          <label for="planEditor">Plan / Spec (editable)</label>
-          <textarea id="planEditor" placeholder="Generate Plan first…"></textarea>
-
-          <div class="btnRow">
-            <button id="btnPlanEdit" disabled>Submit plan edits</button>
-            <button class="btnGood" id="btnContinue" disabled>Continue to Build</button>
+          <div class="btnrow">
+            <button id="btnPlanEdit" class="ghost" disabled>Submit Plan Edits</button>
+            <button id="btnContinue" class="primary" disabled>Continue to Build</button>
           </div>
 
           <div id="continueToast" class="toast hidden"></div>
+
         </div>
 
-        <div class="divider"></div>
-
-        <div class="cardHead">
-          <div>
-            <div class="cardTitle"><span class="stepNum">3</span>Choose theme & build files</div>
-            <div class="cardHint">
-              After you continue, choose colors then build files in order: HTML → CSS → game.js.
-            </div>
-          </div>
-          <div class="lockTag" id="lockFilesTag">
-            <span class="tagDot"></span>
-            Files: <strong id="filesLockText">Waiting</strong>
-          </div>
-        </div>
-
-        <div class="cardBody">
-          <div id="themeBlock" class="hidden">
-            <div class="row">
-              <div>
-                <label>Quick theme presets</label>
-                <div class="themeRow" id="presetRow"></div>
-                <div class="miniNote">Click a preset, then fine-tune below if you want.</div>
-              </div>
-            </div>
-
-            <div class="row" style="margin-top:10px;">
-              <div>
-                <label>Primary (accent)</label>
-                <div class="colorBlock">
-                  <input id="colorPrimary" type="text" value="#ff0050" />
-                  <input id="colorPrimaryPicker" type="color" value="#ff0050" />
-                </div>
-              </div>
-              <div>
-                <label>Secondary</label>
-                <div class="colorBlock">
-                  <input id="colorSecondary" type="text" value="#00f2ea" />
-                  <input id="colorSecondaryPicker" type="color" value="#00f2ea" />
-                </div>
-              </div>
-              <div>
-                <label>Background</label>
-                <div class="colorBlock">
-                  <input id="colorBackground" type="text" value="#050b17" />
-                  <input id="colorBackgroundPicker" type="color" value="#050b17" />
-                </div>
-              </div>
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="btnRow">
-              <button id="btnHtml" disabled>Build HTML</button>
-              <button id="btnCss" disabled>Build CSS</button>
-              <button id="btnJs" disabled>Build game.js</button>
-            </div>
-
-            <div id="buildToast" class="toast hidden"></div>
-
-            <div class="miniNote">
-              Note: We don’t ship platform scripts. ChatTokGaming preview/live injects them (TikTokClient + proto).
-            </div>
-          </div>
-
-          <div id="lockedBlock">
-            <div class="toast warn">
-              Step 3 is locked. Generate and confirm the plan first.
-            </div>
+        <div class="step">
+          <div class="left">
+            <span class="tag" id="lockBuildTag"><strong>Locked</strong></span>
+            <span>Build step is locked until plan is confirmed.</span>
           </div>
         </div>
       </div>
 
-      <!-- RIGHT: Outputs + (after JS) Edit panel -->
-      <div>
-        <div class="card outCard">
-          <div class="outTop">
-            <div class="outName">index.html</div>
-            <div class="outActions">
-              <div class="pill" id="htmlPill">Not built</div>
-              <button class="copyBtn" id="copyHtml" disabled>Copy</button>
-              <button class="tinyBtn" id="rebuildHtml" disabled title="Unlock HTML and anything after it">Rebuild</button>
-            </div>
+      <!-- RIGHT: Output + build -->
+      <div class="panel rightPanel">
+        <div class="head">
+          <div>
+            <h2>Step 3 — Build Files (locked sequence)</h2>
+            <p>Build in order: HTML → CSS → game.js. Then you can use up to <span class="kbd">3</span> safe edits.</p>
           </div>
-          <div class="cardBody">
-            <textarea id="outHtml" class="outText" spellcheck="false" placeholder="HTML output will appear here…"></textarea>
-          </div>
+          <span class="tag" id="lockFilesTag"><strong>Waiting</strong></span>
         </div>
 
-        <div style="height:12px"></div>
+        <div class="body">
 
-        <div class="card outCard">
-          <div class="outTop">
-            <div class="outName">style.css</div>
-            <div class="outActions">
-              <div class="pill" id="cssPill">Not built</div>
-              <button class="copyBtn" id="copyCss" disabled>Copy</button>
-              <button class="tinyBtn" id="rebuildCss" disabled title="Unlock CSS and anything after it">Rebuild</button>
-            </div>
-          </div>
-          <div class="cardBody">
-            <textarea id="outCss" class="outText" spellcheck="false" placeholder="CSS output will appear here…"></textarea>
-          </div>
-        </div>
-
-        <div style="height:12px"></div>
-
-        <div class="card outCard">
-          <div class="outTop">
-            <div class="outName">game.js</div>
-            <div class="outActions">
-              <div class="pill" id="jsPill">Not built</div>
-              <button class="copyBtn" id="copyJs" disabled>Copy</button>
-              <button class="tinyBtn" id="rebuildJs" disabled title="Unlock JS only">Rebuild</button>
-            </div>
-          </div>
-          <div class="cardBody">
-            <textarea id="outJs" class="outText" spellcheck="false" placeholder="JavaScript output will appear here…"></textarea>
-          </div>
-        </div>
-
-        <!-- ✅ EDIT PANEL MUST BE AFTER HTML/CSS/JS OUTPUTS -->
-        <div style="height:12px"></div>
-
-        <div class="card" id="editCard">
-          <div class="cardHead">
-            <div>
-              <div class="cardTitle">Optional edits (limited)</div>
-              <div class="cardHint">
-                You get up to <b>3</b> edits. Describe what to change and we’ll update the game logic safely.
+          <div style="padding:14px;">
+            <div id="lockedBlock" class="lockNotice">
+              <div>🔒</div>
+              <div>
+                <div style="font-weight:800;color:#fff;margin-bottom:2px;">Build is locked</div>
+                Generate a plan and click <span class="kbd">Continue to Build</span> to unlock file generation.
               </div>
             </div>
-            <div class="lockTag" id="editTag">
-              <span class="tagDot"></span>
-              Edits left: <strong id="editsLeft">3</strong>
+
+            <div id="themeBlock" class="hidden">
+              <div class="field" style="margin-bottom:6px;">
+                <label><span>Theme presets</span></label>
+                <div class="swatches" id="presetRow"></div>
+              </div>
+
+              <div class="field" style="margin-top:10px;">
+                <label><span>Theme colors</span></label>
+                <div class="themeRow">
+                  <div style="flex:1; min-width:240px;">
+                    <div class="hint">Choose colors that will be injected into the CSS variables. You can also type hex values.</div>
+
+                    <div class="themeInputs">
+                      <input type="text" id="colorPrimary" value="#ff0050" />
+                      <input type="color" id="colorPrimaryPicker" value="#ff0050" />
+                    </div>
+
+                    <div class="themeInputs">
+                      <input type="text" id="colorSecondary" value="#00f2ea" />
+                      <input type="color" id="colorSecondaryPicker" value="#00f2ea" />
+                    </div>
+
+                    <div class="themeInputs">
+                      <input type="text" id="colorBackground" value="#050b17" />
+                      <input type="color" id="colorBackgroundPicker" value="#050b17" />
+                    </div>
+                  </div>
+
+                  <div style="min-width:180px;">
+                    <div class="hint" style="margin-bottom:8px;">Build sequence</div>
+                    <div class="btnrow" style="margin-top:0;">
+                      <button class="primary" id="btnHtml">Build HTML</button>
+                      <button class="primary" id="btnCss" disabled>Build CSS</button>
+                      <button class="primary" id="btnJs" disabled>Build game.js</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="btnrow" style="margin-top:10px;">
+                <button id="rebuildHtml" class="ghost" disabled>Unlock HTML</button>
+                <button id="rebuildCss" class="ghost" disabled>Unlock CSS</button>
+                <button id="rebuildJs" class="ghost" disabled>Unlock game.js</button>
+              </div>
+
+              <div id="buildToast" class="toast hidden"></div>
             </div>
           </div>
-          <div class="cardBody">
-            <div id="editLockedMsg" class="toast warn">
-              Build game.js first to unlock edits.
+
+          <div class="outputs">
+            <div class="outBlock">
+              <div class="outHead">
+                <div class="title">
+                  index.html <span class="pill" id="htmlPill">Not built</span>
+                </div>
+                <div class="copyBtns">
+                  <button class="mini" id="copyHtml" disabled>Copy</button>
+                </div>
+              </div>
+              <textarea id="outHtml" placeholder="Generated index.html will appear here…" style="min-height: 170px; font-family: var(--mono);"></textarea>
             </div>
 
-            <div id="editUnlocked" class="hidden">
-              <label for="editRequest">Edit request</label>
-              <textarea id="editRequest" placeholder="Example: Make the treasure grid bigger, add a radar sweep visual for likes, and make gifts reveal 3 tiles."></textarea>
-              <div class="btnRow">
-                <button class="btnGood" id="btnApplyEdit">Apply JS edit</button>
+            <div class="outBlock">
+              <div class="outHead">
+                <div class="title">
+                  style.css <span class="pill" id="cssPill">Not built</span>
+                </div>
+                <div class="copyBtns">
+                  <button class="mini" id="copyCss" disabled>Copy</button>
+                </div>
               </div>
+              <textarea id="outCss" placeholder="Generated style.css will appear here…" style="min-height: 170px; font-family: var(--mono);"></textarea>
+            </div>
+
+            <div class="outBlock">
+              <div class="outHead">
+                <div class="title">
+                  game.js <span class="pill" id="jsPill">Not built</span>
+                </div>
+                <div class="copyBtns">
+                  <button class="mini" id="copyJs" disabled>Copy</button>
+                </div>
+              </div>
+              <textarea id="outJs" placeholder="Generated game.js will appear here…" style="min-height: 220px; font-family: var(--mono);"></textarea>
+
+              <div class="divider"></div>
+
+              <div class="field" style="margin-bottom: 6px;">
+                <label><span>Step 4 — Optional edits (safe, limited)</span></label>
+                <div class="hint">Edits remaining: <span class="kbd" id="editsLeftEl">3</span></div>
+              </div>
+
+              <div id="editLockedMsg" class="lockNotice">
+                <div>🔒</div>
+                <div>
+                  <div style="font-weight:800;color:#fff;margin-bottom:2px;">Edits are locked</div>
+                  Build <span class="kbd">game.js</span> to unlock edits.
+                </div>
+              </div>
+
+              <div id="editUnlocked" class="hidden">
+                <div class="field">
+                  <textarea id="editRequest" placeholder="Describe the change you want (example: Make chat command 'boom' spawn a bigger explosion and add a flashy banner)."></textarea>
+                </div>
+                <div class="btnrow" style="margin-top:0;">
+                  <button class="primary" id="btnApplyEdit">Apply Edit</button>
+                </div>
+              </div>
+
               <div id="editToast" class="toast hidden"></div>
-              <div class="miniNote">
-                Tip: Keep edits specific and short. This updates game.js only.
-              </div>
+
             </div>
           </div>
-        </div>
 
-        <div style="height:12px"></div>
-
-        <div class="toast">
-          After generating, upload <b>index.html</b>, <b>style.css</b>, <b>game.js</b> into ChatTokGaming.
-          In preview/live, platform scripts are injected automatically.
         </div>
       </div>
     </div>
@@ -648,37 +578,56 @@
 
   <script>
     // ===========================
-    // API base (do not show in UI)
+    // Config
     // ===========================
-    const API_BASE = "https://chattok-builder-api.onrender.com";
+    const API_BASE = (() => {
+      // Default Render API
+      const DEFAULT = "https://chattok-builder-api.onrender.com";
+
+      // Optional silent overrides (not shown in UI):
+      // - ?api=https://your-api.example.com
+      // - localStorage key: ct_api_base
+      try {
+        const u = new URL(window.location.href);
+        const qp = (u.searchParams.get("api") || "").trim();
+        if (qp) return qp.replace(/\/+$/, "");
+      } catch {}
+
+      try {
+        const ls = (localStorage.getItem("ct_api_base") || "").trim();
+        if (ls) return ls.replace(/\/+$/, "");
+      } catch {}
+
+      return DEFAULT;
+    })();
 
     // ===========================
-    // DOM refs
+    // Elements
     // ===========================
     const apiDot = document.getElementById("apiDot");
     const apiPillText = document.getElementById("apiPillText");
-
-    const lockPlanTag = document.getElementById("lockPlanTag");
-    const planLockText = document.getElementById("planLockText");
-    const lockBuildTag = document.getElementById("lockBuildTag");
-    const buildLockText = document.getElementById("buildLockText");
-    const lockFilesTag = document.getElementById("lockFilesTag");
-    const filesLockText = document.getElementById("filesLockText");
 
     const gameIdea = document.getElementById("gameIdea");
     const templateId = document.getElementById("templateId");
 
     const btnPlan = document.getElementById("btnPlan");
-    const planEditor = document.getElementById("planEditor");
     const btnPlanEdit = document.getElementById("btnPlanEdit");
     const btnContinue = document.getElementById("btnContinue");
 
-    const themeBlock = document.getElementById("themeBlock");
-    const lockedBlock = document.getElementById("lockedBlock");
+    const planEditor = document.getElementById("planEditor");
 
+    const lockPlanTag = document.getElementById("lockPlanTag");
+    const lockBuildTag = document.getElementById("lockBuildTag");
+    const lockFilesTag = document.getElementById("lockFilesTag");
+
+    const lockedBlock = document.getElementById("lockedBlock");
+    const themeBlock = document.getElementById("themeBlock");
+
+    const presetRow = document.getElementById("presetRow");
     const colorPrimary = document.getElementById("colorPrimary");
     const colorSecondary = document.getElementById("colorSecondary");
     const colorBackground = document.getElementById("colorBackground");
+
     const colorPrimaryPicker = document.getElementById("colorPrimaryPicker");
     const colorSecondaryPicker = document.getElementById("colorSecondaryPicker");
     const colorBackgroundPicker = document.getElementById("colorBackgroundPicker");
@@ -687,34 +636,32 @@
     const btnCss = document.getElementById("btnCss");
     const btnJs = document.getElementById("btnJs");
 
+    const rebuildHtml = document.getElementById("rebuildHtml");
+    const rebuildCss = document.getElementById("rebuildCss");
+    const rebuildJs = document.getElementById("rebuildJs");
+
     const outHtml = document.getElementById("outHtml");
     const outCss = document.getElementById("outCss");
     const outJs = document.getElementById("outJs");
-
-    const htmlPill = document.getElementById("htmlPill");
-    const cssPill = document.getElementById("cssPill");
-    const jsPill = document.getElementById("jsPill");
 
     const copyHtml = document.getElementById("copyHtml");
     const copyCss = document.getElementById("copyCss");
     const copyJs = document.getElementById("copyJs");
 
-    const rebuildHtml = document.getElementById("rebuildHtml");
-    const rebuildCss = document.getElementById("rebuildCss");
-    const rebuildJs = document.getElementById("rebuildJs");
+    const htmlPill = document.getElementById("htmlPill");
+    const cssPill = document.getElementById("cssPill");
+    const jsPill = document.getElementById("jsPill");
 
     const planToast = document.getElementById("planToast");
     const continueToast = document.getElementById("continueToast");
     const buildToast = document.getElementById("buildToast");
 
+    const editsLeftEl = document.getElementById("editsLeftEl");
     const editLockedMsg = document.getElementById("editLockedMsg");
     const editUnlocked = document.getElementById("editUnlocked");
     const editRequest = document.getElementById("editRequest");
     const btnApplyEdit = document.getElementById("btnApplyEdit");
     const editToast = document.getElementById("editToast");
-    const editsLeftEl = document.getElementById("editsLeft");
-
-    const presetRow = document.getElementById("presetRow");
 
     // ===========================
     // State
@@ -722,6 +669,7 @@
     const state = {
       planReady: false,
       buildReady: false,   // becomes true after Continue
+      api: { hasPlanEndpoint: false },
       idea: "",
       templateId: "arena",
       spec: null,
@@ -745,7 +693,7 @@
     };
 
     // ===========================
-    // Utils
+    // Utilities
     // ===========================
     function setApiStatus(ok, msg){
       apiDot.classList.remove("ok","bad");
@@ -762,6 +710,22 @@
       el.classList.add("hidden");
       el.textContent = "";
       el.classList.remove("good","bad","warn");
+    }
+
+    function formatApiError(label, e){
+      const status = e && e.status ? ` (HTTP ${e.status})` : "";
+      const msg = e && e.message ? e.message : "Unknown error";
+      const NL = String.fromCharCode(10);
+
+      let extra = "";
+      try{
+        const d = e && e.data ? e.data : null;
+        if (d && (d.error || d.details)){
+          extra = JSON.stringify(d, null, 2);
+        }
+      } catch {}
+
+      return `${label} error${status}: ${msg}${extra ? (NL + extra) : ""}`;
     }
 
     function setLockTag(tagEl, status, text){
@@ -783,17 +747,16 @@
       return s.toLowerCase();
     }
 
-    async function apiPost(path, body){
+    async function apiPost(path, payload){
       const res = await fetch(API_BASE + path, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body || {}),
+        headers: { "Content-Type":"application/json" },
+        body: JSON.stringify(payload || {}),
         cache: "no-store"
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok){
-        const msg = data && data.error ? data.error : ("Request failed (" + res.status + ")");
-        const err = new Error(msg);
+        const err = new Error((data && (data.error || data.message)) || "Request failed (" + res.status + ")");
         err.status = res.status;
         err.data = data;
         throw err;
@@ -1002,11 +965,94 @@
     // ===========================
     async function checkApi(){
       try{
-        await apiGet("/health");
+        const h = await apiGet("/health");
+        // Detect optional endpoints without showing URLs in the UI.
+        const eps = Array.isArray(h && h.endpoints) ? h.endpoints.map(String) : [];
+        state.api.hasPlanEndpoint = eps.some(x => x.toLowerCase().includes("/api/plan"));
         setApiStatus(true, "API: online");
       } catch {
+        state.api.hasPlanEndpoint = false;
         setApiStatus(false, "API: offline (check Render)");
       }
+    }
+
+    // ===========================
+    // Plan helpers (compatible with older/newer API)
+    // ===========================
+    function specToPlanText(spec, templateHint, idea){
+      const s = spec || {};
+      const how = Array.isArray(s.howToPlay) ? s.howToPlay : [];
+      const ds = s.defaultSettings || {};
+      const roundSeconds = Number(ds.roundSeconds || 20);
+      const winGoal = Number(ds.winGoal || 100);
+
+      const lines = [];
+      lines.push(`TITLE: ${s.title || "ChatTok Live Game"}`);
+      lines.push(`SUBTITLE: ${s.subtitle || "Live Interactive"}`);
+      lines.push("");
+      if (s.oneSentence) {
+        lines.push("ONE-SENTENCE HOOK:");
+        lines.push(`- ${s.oneSentence}`);
+        lines.push("");
+      }
+
+      lines.push("VIEWER INTERACTIONS (must be implemented in game.js):");
+      lines.push("- CHAT: players join / act by typing commands or answers (game-specific).");
+      lines.push("- LIKES: charge energy / speed up spawn / trigger small effects.");
+      lines.push("- GIFTS: trigger power-ups / reveals / boss spawns (bigger gift = bigger effect).");
+      lines.push("");
+
+      lines.push("HOW TO PLAY (on-screen bullets):");
+      if (how.length) {
+        for (const h of how.slice(0, 12)) lines.push(`- ${String(h)}`);
+      } else {
+        lines.push("- Chat to interact.");
+        lines.push("- Likes add energy.");
+        lines.push("- Gifts trigger power-ups.");
+      }
+      lines.push("");
+
+      lines.push("DEFAULT SETTINGS:");
+      lines.push(`- roundSeconds: ${roundSeconds}`);
+      lines.push(`- winGoal: ${winGoal}`);
+      lines.push("");
+
+      lines.push("STYLE / TEMPLATE HINT:");
+      lines.push(`- ${templateHint || "auto"}`);
+      lines.push("");
+      lines.push("ORIGINAL IDEA:");
+      lines.push(String(idea || "").trim());
+
+      return lines.join("\n").trim();
+    }
+
+    async function generatePlanViaApi(idea, templateHint){
+      // 1) Prefer dedicated plan endpoint if present
+      if (state.api && state.api.hasPlanEndpoint) {
+        try{
+          const d = await apiPost("/api/plan", { idea, templateId: templateHint });
+          const spec = d?.spec || d?.context?.spec || null;
+          const planText = (d?.planText || d?.plan || d?.plan_text || "").trim();
+          if (spec) {
+            return { spec, planText: planText || specToPlanText(spec, templateHint, idea), via: "plan" };
+          }
+        } catch (e){
+          // Fall back if the plan route exists but is failing.
+          if (!(e && (e.status === 404 || e.status === 405 || e.status === 500))) throw e;
+        }
+      }
+
+      // 2) Fallback: ask /api/generate for HTML (gets us a spec in context)
+      const d2 = await apiPost("/api/generate", {
+        stage: "html",
+        idea,
+        templateId: templateHint,
+        theme: state.theme,
+        context: {}
+      });
+      const spec2 = d2?.context?.spec || null;
+      if (!spec2) throw new Error("Plan fallback failed: missing spec from /api/generate.");
+      return { spec: spec2, planText: specToPlanText(spec2, templateHint, idea), via: "generate" };
     }
 
     // ===========================
@@ -1018,7 +1064,7 @@
       clearToast(buildToast);
 
       const idea = String(gameIdea.value || "").trim();
-      if (!idea){
+      if (!idea) {
         toast(planToast, "bad", "Please enter a game idea first.");
         return;
       }
@@ -1026,17 +1072,15 @@
       btnPlan.disabled = true;
       toast(planToast, "warn", "Generating plan…");
 
-      try{
+      try {
         state.idea = idea;
         state.templateId = String(templateId.value || "arena").trim();
 
-        const data = await apiPost("/api/plan", {
-          idea: state.idea,
-          templateId: state.templateId
-        });
+        // Try /api/plan first; fallback to /api/generate(stage=html) if needed.
+        const plan = await generatePlanViaApi(state.idea, state.templateId);
 
-        state.spec = data.spec || null;
-        state.planText = data.planText || "";
+        state.spec = plan.spec || null;
+        state.planText = plan.planText || "";
         planEditor.value = state.planText;
 
         setPlanReady(true);
@@ -1044,8 +1088,8 @@
 
         toast(planToast, "good", "Plan generated. Review it below, edit if needed, then Continue.");
         updateBuildButtons();
-      } catch (e){
-        toast(planToast, "bad", "Plan error: " + (e.message || "Unknown"));
+      } catch (e) {
+        toast(planToast, "bad", formatApiError("Plan", e));
         setPlanReady(false);
         setBuildReady(false);
       } finally {
@@ -1057,13 +1101,13 @@
       clearToast(continueToast);
       clearToast(planToast);
 
-      if (!state.planReady){
+      if (!state.planReady) {
         toast(planToast, "bad", "Generate a plan first.");
         return;
       }
 
       const edited = String(planEditor.value || "").trim();
-      if (!edited){
+      if (!edited) {
         toast(planToast, "bad", "Plan text is empty.");
         return;
       }
@@ -1072,20 +1116,17 @@
       btnContinue.disabled = true;
       toast(planToast, "warn", "Regenerating plan from your edits…");
 
-      try{
-        // Keep it simple: send the edited plan as the “idea” so the API re-creates a matching spec.
-        const data = await apiPost("/api/plan", {
-          idea: edited,
-          templateId: state.templateId
-        });
-
-        state.spec = data.spec || state.spec;
-        state.planText = data.planText || edited;
+      try {
+        const plan = await generatePlanViaApi(edited, state.templateId);
+        // Treat edited plan as the new idea text so future builds have a non-empty idea.
+        state.idea = edited;
+        state.spec = plan.spec || state.spec;
+        state.planText = plan.planText || edited;
         planEditor.value = state.planText;
 
         toast(planToast, "good", "Plan updated. If it looks good, hit Continue.");
-      } catch (e){
-        toast(planToast, "bad", "Plan edit error: " + (e.message || "Unknown"));
+      } catch (e) {
+        toast(planToast, "bad", formatApiError("Plan edit", e));
       } finally {
         btnPlanEdit.disabled = false;
         btnContinue.disabled = false;
@@ -1160,6 +1201,7 @@
       try{
         const data = await apiPost("/api/generate", {
           stage,
+          idea: state.idea,                 // REQUIRED by API for html/js stages
           templateId: state.templateId,
           theme: state.theme,
           context: { spec: state.spec }
@@ -1187,7 +1229,7 @@
 
         updateBuildButtons();
       } catch (e){
-        toast(buildToast, "bad", "Build error: " + (e.message || "Unknown"));
+        toast(buildToast, "bad", formatApiError("Build", e));
         updateBuildButtons();
       } finally {
         btnHtml.disabled = !state.buildReady || state.locks.html;
@@ -1265,28 +1307,39 @@
           remainingEdits: state.editsLeft,
           changeRequest: req,
           templateId: state.templateId,
-          context: { spec: state.spec },
-          currentFiles: { "game.js": state.files.js }
+          theme: state.theme,
+          currentFiles: {
+            "style.css": state.files.css || "",
+            "game.js": state.files.js || ""
+          }
         });
 
         const patches = Array.isArray(data.patches) ? data.patches : [];
-        const jsPatch = patches.find(p => p && p.name === "game.js");
-        if (jsPatch && typeof jsPatch.content === "string"){
-          state.files.js = jsPatch.content;
-          outJs.value = jsPatch.content;
+        for (const p of patches) {
+          if (!p || typeof p.name !== "string") continue;
+          if (p.name === "game.js" && typeof p.content === "string") {
+            state.files.js = p.content;
+            outJs.value = p.content;
+          }
+          if (p.name === "style.css" && typeof p.content === "string") {
+            state.files.css = p.content;
+            outCss.value = p.content;
+            // If CSS gets updated, consider it "built"
+            state.locks.css = true;
+          }
         }
 
         state.editsLeft = Number(data.remainingEdits ?? (state.editsLeft - 1));
         editsLeftEl.textContent = String(state.editsLeft);
 
-        toast(editToast, "good", "Edit applied to game.js.");
+        toast(editToast, "good", "Edit applied.");
         editRequest.value = "";
 
         if (state.editsLeft <= 0){
           toast(editToast, "warn", "No edits remaining.");
         }
       } catch (e){
-        toast(editToast, "bad", "Edit error: " + (e.message || "Unknown"));
+        toast(editToast, "bad", formatApiError("Edit", e));
       } finally {
         btnApplyEdit.disabled = false;
         updateBuildButtons();
