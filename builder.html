@@ -366,12 +366,12 @@
     </header>
 
     <div class="grid">
-      <!-- LEFT: Steps -->
+      <!-- LEFT -->
       <div class="panel">
         <div class="head">
           <div>
             <h2>Step 1 — Describe the game</h2>
-            <p>Generate a plan first. Builder will support multiple API response formats automatically.</p>
+            <p>Generate a plan first. Builder supports your API’s <span class="kbd">files.indexHtml/styleCss/gameJs</span> response.</p>
           </div>
           <span class="tag" id="lockPlanTag"><strong>Not created</strong></span>
         </div>
@@ -379,7 +379,7 @@
 
           <div class="field">
             <label><span>Game idea (be specific)</span></label>
-            <textarea id="gameIdea" placeholder="Example: A neon arena where viewers join a team by typing RED/BLUE/YELLOW/GREEN, likes charge a team meter, gifts trigger power-ups, and chat commands fire projectiles. Make it visually exciting even before connecting to TikTok."></textarea>
+            <textarea id="gameIdea" placeholder="Example: Seek & destroy grid, chat fires coordinates, hit/miss emojis, flashy PFP popups…"></textarea>
           </div>
 
           <div class="row">
@@ -404,8 +404,8 @@
 
           <div class="field">
             <label><span>Step 2 — Plan / Confirm (editable)</span></label>
-            <textarea id="planEditor" placeholder="Plan text will appear here. You can edit, then re-generate the plan object."></textarea>
-            <div class="hint">Edits here must still produce a valid plan/spec object from the API.</div>
+            <textarea id="planEditor" placeholder="Plan text will appear here…"></textarea>
+            <div class="hint">Edits here must still produce a valid plan/spec object.</div>
           </div>
 
           <div class="btnrow">
@@ -420,12 +420,12 @@
         <div class="step">
           <div class="left">
             <span class="tag" id="lockBuildTag"><strong>Locked</strong></span>
-            <span>Build step is locked until plan is confirmed.</span>
+            <span>Build is locked until plan is confirmed.</span>
           </div>
         </div>
       </div>
 
-      <!-- RIGHT: Output + build -->
+      <!-- RIGHT -->
       <div class="panel rightPanel">
         <div class="head">
           <div>
@@ -436,13 +436,12 @@
         </div>
 
         <div class="body">
-
           <div style="padding:14px;">
             <div id="lockedBlock" class="lockNotice">
               <div>🔒</div>
               <div>
                 <div style="font-weight:800;color:#fff;margin-bottom:2px;">Build is locked</div>
-                Generate a plan and click <span class="kbd">Continue to Build</span> to unlock file generation.
+                Generate a plan and click <span class="kbd">Continue to Build</span>.
               </div>
             </div>
 
@@ -490,36 +489,24 @@
           <div class="outputs">
             <div class="outBlock">
               <div class="outHead">
-                <div class="title">
-                  index.html <span class="pill" id="htmlPill">Not built</span>
-                </div>
-                <div class="copyBtns">
-                  <button class="mini" id="copyHtml" disabled>Copy</button>
-                </div>
+                <div class="title">index.html <span class="pill" id="htmlPill">Not built</span></div>
+                <div class="copyBtns"><button class="mini" id="copyHtml" disabled>Copy</button></div>
               </div>
               <textarea id="outHtml" placeholder="Generated index.html will appear here…" style="min-height: 170px; font-family: var(--mono);"></textarea>
             </div>
 
             <div class="outBlock">
               <div class="outHead">
-                <div class="title">
-                  style.css <span class="pill" id="cssPill">Not built</span>
-                </div>
-                <div class="copyBtns">
-                  <button class="mini" id="copyCss" disabled>Copy</button>
-                </div>
+                <div class="title">style.css <span class="pill" id="cssPill">Not built</span></div>
+                <div class="copyBtns"><button class="mini" id="copyCss" disabled>Copy</button></div>
               </div>
               <textarea id="outCss" placeholder="Generated style.css will appear here…" style="min-height: 170px; font-family: var(--mono);"></textarea>
             </div>
 
             <div class="outBlock">
               <div class="outHead">
-                <div class="title">
-                  game.js <span class="pill" id="jsPill">Not built</span>
-                </div>
-                <div class="copyBtns">
-                  <button class="mini" id="copyJs" disabled>Copy</button>
-                </div>
+                <div class="title">game.js <span class="pill" id="jsPill">Not built</span></div>
+                <div class="copyBtns"><button class="mini" id="copyJs" disabled>Copy</button></div>
               </div>
               <textarea id="outJs" placeholder="Generated game.js will appear here…" style="min-height: 220px; font-family: var(--mono);"></textarea>
 
@@ -540,7 +527,7 @@
 
               <div id="editUnlocked" class="hidden">
                 <div class="field">
-                  <textarea id="editRequest" placeholder="Describe the change you want (example: Make chat command 'boom' spawn a bigger explosion and add a flashy banner)."></textarea>
+                  <textarea id="editRequest" placeholder="Describe the change you want…"></textarea>
                 </div>
                 <div class="btnrow" style="margin-top:0;">
                   <button class="primary" id="btnApplyEdit">Apply Edit</button>
@@ -548,7 +535,6 @@
               </div>
 
               <div id="editToast" class="toast hidden"></div>
-
             </div>
           </div>
 
@@ -558,9 +544,6 @@
   </div>
 
   <script>
-    // ===========================
-    // Config
-    // ===========================
     const API_BASE = (() => {
       const DEFAULT = "https://chattok-builder-api.onrender.com";
       try {
@@ -575,9 +558,6 @@
       return DEFAULT;
     })();
 
-    // ===========================
-    // Elements
-    // ===========================
     const apiDot = document.getElementById("apiDot");
     const apiPillText = document.getElementById("apiPillText");
 
@@ -637,34 +617,19 @@
     const btnApplyEdit = document.getElementById("btnApplyEdit");
     const editToast = document.getElementById("editToast");
 
-    // ===========================
-    // State
-    // ===========================
     const state = {
       planReady: false,
       buildReady: false,
-
       idea: "",
       templateId: "arena",
-
-      // "plan" here really means "spec object" — must be object for maximum compatibility
       planObj: null,
       planText: "",
-
-      theme: {
-        primary: "#ff0050",
-        secondary: "#00f2ea",
-        background: "#050b17"
-      },
-
+      theme: { primary: "#ff0050", secondary: "#00f2ea", background: "#050b17" },
       files: { html: "", css: "", js: "" },
       locks: { html: false, css: false, js: false },
       editsLeft: 3
     };
 
-    // ===========================
-    // Utilities
-    // ===========================
     function setApiStatus(ok, msg){
       apiDot.classList.remove("ok","bad");
       apiDot.classList.add(ok ? "ok" : "bad");
@@ -885,9 +850,6 @@
       updateBuildButtons();
     }
 
-    // ===========================
-    // Presets
-    // ===========================
     const presets = [
       { name:"ChatTok", primary:"#ff0050", secondary:"#00f2ea", background:"#050b17" },
       { name:"Neon Night", primary:"#a855f7", secondary:"#22d3ee", background:"#030712" },
@@ -918,9 +880,6 @@
       });
     }
 
-    // ===========================
-    // API status check
-    // ===========================
     async function checkApi(){
       try{
         await apiGet("/health");
@@ -930,9 +889,6 @@
       }
     }
 
-    // ===========================
-    // Payload builder (send everything)
-    // ===========================
     function commonPayload(extra){
       const base = {
         prompt: state.idea || "",
@@ -973,13 +929,9 @@
       return "";
     }
 
-    // ===========================
-    // Robust file extraction (fixes your current issue)
-    // ===========================
-    function safeStr(v){
-      return (typeof v === "string") ? v : "";
-    }
+    function safeStr(v){ return (typeof v === "string") ? v : ""; }
 
+    // ✅ FIX: supports your API contract: files.indexHtml / files.styleCss / files.gameJs
     function extractBuiltContent(data, stage){
       const d = data || {};
       const st = String(stage || "").toLowerCase().trim();
@@ -993,41 +945,43 @@
       // 2) some APIs return { content: "..." }
       if (safeStr(d.content)) return d.content;
 
-      // 3) bundle keys (VERY common)
+      // 3) your API returns: { files: { indexHtml, styleCss, gameJs } }
+      if (d.files && typeof d.files === "object") {
+        if (st === "html") {
+          const c = safeStr(d.files.indexHtml) || safeStr(d.files.indexHTML) || safeStr(d.files.html);
+          if (c) return c;
+        }
+        if (st === "css") {
+          const c = safeStr(d.files.styleCss) || safeStr(d.files.styleCSS) || safeStr(d.files.css);
+          if (c) return c;
+        }
+        if (st === "js") {
+          const c = safeStr(d.files.gameJs) || safeStr(d.files.gameJS) || safeStr(d.files.js);
+          if (c) return c;
+        }
+      }
+
+      // 4) top-level bundle keys
       if (st === "html") {
         const c =
-          safeStr(d.index_html) ||
-          safeStr(d.indexHtml) ||
-          safeStr(d.html) ||
-          safeStr(d.files?.["index.html"]) ||
-          safeStr(d.files?.index_html) ||
-          safeStr(d.outputs?.["index.html"]);
+          safeStr(d.indexHtml) || safeStr(d.index_html) || safeStr(d.html) ||
+          safeStr(d.files?.["index.html"]) || safeStr(d.outputs?.["index.html"]);
         if (c) return c;
       }
-
       if (st === "css") {
         const c =
-          safeStr(d.style_css) ||
-          safeStr(d.styleCss) ||
-          safeStr(d.css) ||
-          safeStr(d.files?.["style.css"]) ||
-          safeStr(d.files?.style_css) ||
-          safeStr(d.outputs?.["style.css"]);
+          safeStr(d.styleCss) || safeStr(d.style_css) || safeStr(d.css) ||
+          safeStr(d.files?.["style.css"]) || safeStr(d.outputs?.["style.css"]);
         if (c) return c;
       }
-
       if (st === "js") {
         const c =
-          safeStr(d.game_js) ||
-          safeStr(d.gameJs) ||
-          safeStr(d.js) ||
-          safeStr(d.files?.["game.js"]) ||
-          safeStr(d.files?.game_js) ||
-          safeStr(d.outputs?.["game.js"]);
+          safeStr(d.gameJs) || safeStr(d.game_js) || safeStr(d.js) ||
+          safeStr(d.files?.["game.js"]) || safeStr(d.outputs?.["game.js"]);
         if (c) return c;
       }
 
-      // 4) array style: files: [{name, content}]
+      // 5) array style: files: [{name, content}]
       if (Array.isArray(d.files)) {
         const wanted = st === "html" ? "index.html" : st === "css" ? "style.css" : "game.js";
         const hit = d.files.find(x => x && (x.name === wanted || x.fileName === wanted));
@@ -1037,11 +991,7 @@
       return "";
     }
 
-    // ===========================
-    // Plan generation
-    // ===========================
     async function generatePlanObjectFromApi(promptText){
-      // Try /api/plan if it exists on your deployed API; otherwise fallback
       try{
         const d = await apiPost("/api/plan", {
           prompt: promptText,
@@ -1051,48 +1001,26 @@
         });
         const planObj = extractPlanObject(d);
         const planText = extractPlanText(d) || "";
-        if (planObj) return { planObj, planText: planText || JSON.stringify(planObj, null, 2), via: "/api/plan" };
+        if (planObj) return { planObj, planText: planText || JSON.stringify(planObj, null, 2) };
       } catch (_) {}
 
-      // Fallback: /api/generate stage=html (many APIs return spec in context)
-      const d2 = await apiPost("/api/generate", {
-        stage: "html",
-        prompt: promptText,
-        idea: promptText,
-        templateId: state.templateId,
-        theme: state.theme,
-        context: {}
-      });
-
-      const planObj2 = extractPlanObject(d2);
-      if (!planObj2) {
-        // Some APIs only return file content here; we can still proceed but planObj must be an object.
-        // If no object exists, we create a minimal spec object to satisfy later requests.
-        const minimal = {
-          title: "ChatTok Live Game",
-          subtitle: "Live Interactive",
-          oneSentence: "Chat and gifts power up the action.",
-          howToPlay: ["Chat to interact.", "Likes add energy.", "Gifts trigger power-ups."],
-          defaultSettings: { roundSeconds: 20, winGoal: 100 }
-        };
-        return { planObj: minimal, planText: JSON.stringify(minimal, null, 2), via: "/api/generate (fallback-minimal)" };
-      }
-      return { planObj: planObj2, planText: JSON.stringify(planObj2, null, 2), via: "/api/generate (fallback)" };
+      const minimal = {
+        title: "ChatTok Live Game",
+        subtitle: "Live Interactive",
+        oneSentence: "Chat and gifts power up the action.",
+        howToPlay: ["Chat to interact.", "Likes add energy.", "Gifts trigger power-ups."],
+        defaultSettings: { roundSeconds: 20, winGoal: 100 }
+      };
+      return { planObj: minimal, planText: JSON.stringify(minimal, null, 2) };
     }
 
-    // ===========================
-    // Step 2: Plan buttons
-    // ===========================
     btnPlan.addEventListener("click", async () => {
       clearToast(planToast);
       clearToast(continueToast);
       clearToast(buildToast);
 
       const idea = String(gameIdea.value || "").trim();
-      if (!idea) {
-        toast(planToast, "bad", "Please enter a game idea first.");
-        return;
-      }
+      if (!idea) return toast(planToast, "bad", "Please enter a game idea first.");
 
       btnPlan.disabled = true;
       toast(planToast, "warn", "Generating plan…");
@@ -1102,16 +1030,14 @@
         state.templateId = String(templateId.value || "arena").trim();
 
         const plan = await generatePlanObjectFromApi(state.idea);
-
         state.planObj = plan.planObj;
         state.planText = plan.planText || "";
+
         planEditor.value = state.planText || JSON.stringify(state.planObj, null, 2);
 
         setPlanReady(true);
         setBuildReady(false);
-
-        toast(planToast, "good", "Plan generated (object). Edit if needed, then Continue.");
-        updateBuildButtons();
+        toast(planToast, "good", "Plan generated. Edit if needed, then Continue.");
       } catch (e) {
         toast(planToast, "bad", formatApiError("Plan", e));
         state.planObj = null;
@@ -1126,31 +1052,18 @@
       clearToast(continueToast);
       clearToast(planToast);
 
-      if (!state.planReady) {
-        toast(planToast, "bad", "Generate a plan first.");
-        return;
-      }
+      if (!state.planReady) return toast(planToast, "bad", "Generate a plan first.");
 
       const edited = String(planEditor.value || "").trim();
-      if (!edited) {
-        toast(planToast, "bad", "Plan text is empty.");
-        return;
-      }
+      if (!edited) return toast(planToast, "bad", "Plan text is empty.");
 
       btnPlanEdit.disabled = true;
       btnContinue.disabled = true;
-      toast(planToast, "warn", "Regenerating plan object from your edits…");
+      toast(planToast, "warn", "Updating plan…");
 
       try {
-        state.idea = edited;
-
-        const plan = await generatePlanObjectFromApi(edited);
-
-        state.planObj = plan.planObj;
-        state.planText = plan.planText || "";
-        planEditor.value = state.planText || JSON.stringify(state.planObj, null, 2);
-
-        toast(planToast, "good", "Plan updated (object). Continue to Build when ready.");
+        state.planText = edited;
+        toast(planToast, "good", "Plan updated. Continue to Build when ready.");
       } catch (e) {
         toast(planToast, "bad", formatApiError("Plan edit", e));
       } finally {
@@ -1164,8 +1077,7 @@
       clearToast(buildToast);
 
       if (!state.planReady || !state.planObj || typeof state.planObj !== "object"){
-        toast(continueToast, "bad", "Plan is missing or not an object. Generate the plan again.");
-        return;
+        return toast(continueToast, "bad", "Plan/spec missing. Generate plan again.");
       }
 
       setBuildReady(true);
@@ -1173,9 +1085,6 @@
       updateBuildButtons();
     });
 
-    // ===========================
-    // Theme inputs
-    // ===========================
     function wireColorSync(textEl, pickerEl){
       textEl.addEventListener("change", () => {
         const v = normalizeHex(textEl.value);
@@ -1194,49 +1103,25 @@
     wireColorSync(colorSecondary, colorSecondaryPicker);
     wireColorSync(colorBackground, colorBackgroundPicker);
 
-    // ===========================
-    // Build steps (NOW reads any response format)
-    // ===========================
     async function buildStage(stage){
       clearToast(buildToast);
       applyThemeInputsToState();
 
       if (!state.buildReady || !state.planObj || typeof state.planObj !== "object"){
-        toast(buildToast, "bad", "Build is locked or plan/spec is missing. Generate/confirm the plan first.");
-        return;
+        return toast(buildToast, "bad", "Build locked or plan/spec missing.");
       }
-
-      if (stage === "css" && !state.locks.html){
-        toast(buildToast, "bad", "Build HTML first.");
-        return;
-      }
-      if (stage === "js" && (!state.locks.html || !state.locks.css)){
-        toast(buildToast, "bad", "Build HTML and CSS first.");
-        return;
-      }
+      if (stage === "css" && !state.locks.html) return toast(buildToast, "bad", "Build HTML first.");
+      if (stage === "js" && (!state.locks.html || !state.locks.css)) return toast(buildToast, "bad", "Build HTML and CSS first.");
 
       const label = stage === "html" ? "HTML" : stage === "css" ? "CSS" : "game.js";
       toast(buildToast, "warn", "Building " + label + "…");
 
-      if (stage === "html") btnHtml.disabled = true;
-      if (stage === "css") btnCss.disabled = true;
-      if (stage === "js") btnJs.disabled = true;
-
       try{
-        const payload = commonPayload({
-          stage: String(stage || "").toLowerCase().trim(),
-          planText: state.planText || "",
-          specText: state.planText || ""
-        });
-
-        const data = await apiPost("/api/generate", payload);
+        const data = await apiPost("/api/generate", commonPayload({ stage }));
 
         const content = extractBuiltContent(data, stage);
-
         if (!content){
-          // show raw response so we can see EXACT contract immediately
-          const raw = JSON.stringify(data, null, 2);
-          throw new Error("API returned no file content.\n\nRAW RESPONSE:\n" + raw);
+          throw new Error("API returned no file content.\n\nRAW RESPONSE:\n" + JSON.stringify(data, null, 2));
         }
 
         if (stage === "html"){
@@ -1249,21 +1134,16 @@
           state.locks.css = true;
           outCss.value = content;
           toast(buildToast, "good", "CSS built. Next: Build game.js.");
-        } else if (stage === "js"){
+        } else {
           state.files.js = content;
           state.locks.js = true;
           outJs.value = content;
-          toast(buildToast, "good", "game.js built. Optional edits are now unlocked below.");
+          toast(buildToast, "good", "game.js built. Edits are unlocked below.");
         }
 
         updateBuildButtons();
       } catch (e){
         toast(buildToast, "bad", formatApiError("Build", e));
-        updateBuildButtons();
-      } finally {
-        btnHtml.disabled = !state.buildReady || state.locks.html;
-        btnCss.disabled = !state.buildReady || !state.locks.html || state.locks.css;
-        btnJs.disabled  = !state.buildReady || !state.locks.css || state.locks.js;
       }
     }
 
@@ -1271,25 +1151,10 @@
     btnCss.addEventListener("click", () => buildStage("css"));
     btnJs.addEventListener("click", () => buildStage("js"));
 
-    // ===========================
-    // Rebuild unlocks
-    // ===========================
-    rebuildHtml.addEventListener("click", () => {
-      resetFilesAfter("html");
-      toast(buildToast, "warn", "HTML unlocked. Build HTML → CSS → game.js again.");
-    });
-    rebuildCss.addEventListener("click", () => {
-      resetFilesAfter("css");
-      toast(buildToast, "warn", "CSS unlocked. Build CSS → game.js again.");
-    });
-    rebuildJs.addEventListener("click", () => {
-      resetFilesAfter("js");
-      toast(buildToast, "warn", "game.js unlocked. Build game.js again.");
-    });
+    rebuildHtml.addEventListener("click", () => { resetFilesAfter("html"); toast(buildToast, "warn", "HTML unlocked."); });
+    rebuildCss.addEventListener("click", () => { resetFilesAfter("css"); toast(buildToast, "warn", "CSS unlocked."); });
+    rebuildJs.addEventListener("click", () => { resetFilesAfter("js"); toast(buildToast, "warn", "game.js unlocked."); });
 
-    // ===========================
-    // Copy buttons
-    // ===========================
     copyHtml.addEventListener("click", async () => {
       const ok = await copyToClipboard(outHtml.value);
       htmlPill.textContent = ok ? "Copied" : "Copy failed";
@@ -1306,27 +1171,14 @@
       setTimeout(() => jsPill.textContent = state.locks.js ? "Built" : "Not built", 1200);
     });
 
-    // ===========================
-    // Step 4: Optional edits
-    // ===========================
     btnApplyEdit.addEventListener("click", async () => {
       clearToast(editToast);
 
-      if (!state.locks.js){
-        toast(editToast, "bad", "Build game.js first.");
-        return;
-      }
-      if (state.editsLeft <= 0){
-        toast(editToast, "bad", "No edits remaining.");
-        updateBuildButtons();
-        return;
-      }
+      if (!state.locks.js) return toast(editToast, "bad", "Build game.js first.");
+      if (state.editsLeft <= 0) return toast(editToast, "bad", "No edits remaining.");
 
       const req = String(editRequest.value || "").trim();
-      if (!req){
-        toast(editToast, "bad", "Describe the change you want.");
-        return;
-      }
+      if (!req) return toast(editToast, "bad", "Describe the change you want.");
 
       btnApplyEdit.disabled = true;
       toast(editToast, "warn", "Applying edit…");
@@ -1336,6 +1188,7 @@
           remainingEdits: state.editsLeft,
           changeRequest: req,
           currentFiles: {
+            "index.html": state.files.html || "",
             "style.css": state.files.css || "",
             "game.js": state.files.js || ""
           }
@@ -1344,37 +1197,22 @@
         const patches = Array.isArray(data.patches) ? data.patches : [];
         for (const p of patches) {
           if (!p || typeof p.name !== "string") continue;
-          if (p.name === "game.js" && typeof p.content === "string") {
-            state.files.js = p.content;
-            outJs.value = p.content;
-          }
-          if (p.name === "style.css" && typeof p.content === "string") {
-            state.files.css = p.content;
-            outCss.value = p.content;
-            state.locks.css = true;
-          }
+          if (p.name === "index.html" && typeof p.content === "string") { state.files.html = p.content; outHtml.value = p.content; }
+          if (p.name === "style.css" && typeof p.content === "string") { state.files.css = p.content; outCss.value = p.content; }
+          if (p.name === "game.js" && typeof p.content === "string") { state.files.js = p.content; outJs.value = p.content; }
         }
 
         state.editsLeft = Number(data.remainingEdits ?? (state.editsLeft - 1));
-        editsLeftEl.textContent = String(state.editsLeft);
-
         toast(editToast, "good", "Edit applied.");
         editRequest.value = "";
-
-        if (state.editsLeft <= 0){
-          toast(editToast, "warn", "No edits remaining.");
-        }
+        updateBuildButtons();
       } catch (e){
         toast(editToast, "bad", formatApiError("Edit", e));
       } finally {
         btnApplyEdit.disabled = false;
-        updateBuildButtons();
       }
     });
 
-    // ===========================
-    // Init
-    // ===========================
     (function init(){
       renderPresets();
       applyThemeInputsToState();
