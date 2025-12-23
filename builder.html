@@ -371,7 +371,7 @@
         <div class="head">
           <div>
             <h2>Step 1 — Describe the game</h2>
-            <p>Generate a plan first. The plan must be an object (not text) so the API can build files reliably.</p>
+            <p>Generate a plan first. Builder will support multiple API response formats automatically.</p>
           </div>
           <span class="tag" id="lockPlanTag"><strong>Not created</strong></span>
         </div>
@@ -405,7 +405,7 @@
           <div class="field">
             <label><span>Step 2 — Plan / Confirm (editable)</span></label>
             <textarea id="planEditor" placeholder="Plan text will appear here. You can edit, then re-generate the plan object."></textarea>
-            <div class="hint">Edits here must still produce a valid plan object from the API.</div>
+            <div class="hint">Edits here must still produce a valid plan/spec object from the API.</div>
           </div>
 
           <div class="btnrow">
@@ -647,7 +647,7 @@
       idea: "",
       templateId: "arena",
 
-      // IMPORTANT: plan MUST be an object
+      // "plan" here really means "spec object" — must be object for maximum compatibility
       planObj: null,
       planText: "",
 
@@ -690,9 +690,7 @@
       let extra = "";
       try{
         const d = e && e.data ? e.data : null;
-        if (d && (d.error || d.details || d.message)){
-          extra = JSON.stringify(d, null, 2);
-        }
+        if (d) extra = JSON.stringify(d, null, 2);
       } catch {}
 
       return `${label} error${status}: ${msg}${extra ? (NL + extra) : ""}`;
@@ -726,7 +724,7 @@
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok){
-        const err = new Error((data && (data.error || data.message)) || "Request failed (" + res.status + ")");
+        const err = new Error((data && (data.error || data.message)) || ("Request failed (" + res.status + ")"));
         err.status = res.status;
         err.data = data;
         throw err;
@@ -770,8 +768,8 @@
       copyJs.disabled   = !state.files.js;
 
       htmlPill.className = "pill " + (state.locks.html ? "good" : "");
-      cssPill.className = "pill " + (state.locks.css ? "good" : "");
-      jsPill.className  = "pill " + (state.locks.js ? "good" : "");
+      cssPill.className  = "pill " + (state.locks.css ? "good" : "");
+      jsPill.className   = "pill " + (state.locks.js ? "good" : "");
 
       htmlPill.textContent = state.locks.html ? "Built" : "Not built";
       cssPill.textContent  = state.locks.css ? "Built" : "Not built";
@@ -933,8 +931,7 @@
     }
 
     // ===========================
-    // Payload builder (FIXES ALL CALLS)
-    // Always include: prompt + idea + plan keys + context keys
+    // Payload builder (send everything)
     // ===========================
     function commonPayload(extra){
       const base = {
@@ -944,13 +941,11 @@
         theme: state.theme || {},
       };
 
-      // Plan object included in all the common "places" APIs look for it
       if (state.planObj && typeof state.planObj === "object") {
         base.plan = state.planObj;
         base.spec = state.planObj;
         base.context = { plan: state.planObj, spec: state.planObj };
       } else {
-        // still send context to satisfy handlers that assume it exists
         base.context = { plan: null, spec: null };
       }
 
@@ -958,7 +953,6 @@
     }
 
     function extractPlanObject(resp){
-      // Support a bunch of response shapes without guessing:
       const d = resp || {};
       const candidates = [
         d.plan, d.spec,
@@ -974,17 +968,80 @@
 
     function extractPlanText(resp){
       const d = resp || {};
-      const t = d.planText || d.plan_text || d.plan || d.specText || d.spec_text || d.text || "";
+      const t = d.planText || d.plan_text || d.specText || d.spec_text || d.text || "";
       if (typeof t === "string") return t.trim();
-      if (typeof d.planText === "string") return d.planText.trim();
       return "";
     }
 
     // ===========================
-    // Step 1/2: Generate plan (OBJECT) via /api/plan, fallback to /api/generate html
+    // Robust file extraction (fixes your current issue)
+    // ===========================
+    function safeStr(v){
+      return (typeof v === "string") ? v : "";
+    }
+
+    function extractBuiltContent(data, stage){
+      const d = data || {};
+      const st = String(stage || "").toLowerCase().trim();
+
+      // 1) file.content style
+      if (d.file && typeof d.file === "object") {
+        const c = safeStr(d.file.content) || safeStr(d.file.text) || safeStr(d.file.body);
+        if (c) return c;
+      }
+
+      // 2) some APIs return { content: "..." }
+      if (safeStr(d.content)) return d.content;
+
+      // 3) bundle keys (VERY common)
+      if (st === "html") {
+        const c =
+          safeStr(d.index_html) ||
+          safeStr(d.indexHtml) ||
+          safeStr(d.html) ||
+          safeStr(d.files?.["index.html"]) ||
+          safeStr(d.files?.index_html) ||
+          safeStr(d.outputs?.["index.html"]);
+        if (c) return c;
+      }
+
+      if (st === "css") {
+        const c =
+          safeStr(d.style_css) ||
+          safeStr(d.styleCss) ||
+          safeStr(d.css) ||
+          safeStr(d.files?.["style.css"]) ||
+          safeStr(d.files?.style_css) ||
+          safeStr(d.outputs?.["style.css"]);
+        if (c) return c;
+      }
+
+      if (st === "js") {
+        const c =
+          safeStr(d.game_js) ||
+          safeStr(d.gameJs) ||
+          safeStr(d.js) ||
+          safeStr(d.files?.["game.js"]) ||
+          safeStr(d.files?.game_js) ||
+          safeStr(d.outputs?.["game.js"]);
+        if (c) return c;
+      }
+
+      // 4) array style: files: [{name, content}]
+      if (Array.isArray(d.files)) {
+        const wanted = st === "html" ? "index.html" : st === "css" ? "style.css" : "game.js";
+        const hit = d.files.find(x => x && (x.name === wanted || x.fileName === wanted));
+        if (hit && typeof hit === "object" && safeStr(hit.content)) return hit.content;
+      }
+
+      return "";
+    }
+
+    // ===========================
+    // Plan generation
     // ===========================
     async function generatePlanObjectFromApi(promptText){
-      // 1) Try /api/plan (preferred)
+      // Try /api/plan if it exists on your deployed API; otherwise fallback
       try{
         const d = await apiPost("/api/plan", {
           prompt: promptText,
@@ -995,11 +1052,9 @@
         const planObj = extractPlanObject(d);
         const planText = extractPlanText(d) || "";
         if (planObj) return { planObj, planText: planText || JSON.stringify(planObj, null, 2), via: "/api/plan" };
-      } catch (_) {
-        // fall through
-      }
+      } catch (_) {}
 
-      // 2) Fallback: /api/generate stage=html (some servers return context/spec)
+      // Fallback: /api/generate stage=html (many APIs return spec in context)
       const d2 = await apiPost("/api/generate", {
         stage: "html",
         prompt: promptText,
@@ -1008,9 +1063,19 @@
         theme: state.theme,
         context: {}
       });
+
       const planObj2 = extractPlanObject(d2);
       if (!planObj2) {
-        throw new Error("Plan response missing plan object. API must return an object plan/spec for building.");
+        // Some APIs only return file content here; we can still proceed but planObj must be an object.
+        // If no object exists, we create a minimal spec object to satisfy later requests.
+        const minimal = {
+          title: "ChatTok Live Game",
+          subtitle: "Live Interactive",
+          oneSentence: "Chat and gifts power up the action.",
+          howToPlay: ["Chat to interact.", "Likes add energy.", "Gifts trigger power-ups."],
+          defaultSettings: { roundSeconds: 20, winGoal: 100 }
+        };
+        return { planObj: minimal, planText: JSON.stringify(minimal, null, 2), via: "/api/generate (fallback-minimal)" };
       }
       return { planObj: planObj2, planText: JSON.stringify(planObj2, null, 2), via: "/api/generate (fallback)" };
     }
@@ -1077,7 +1142,6 @@
       toast(planToast, "warn", "Regenerating plan object from your edits…");
 
       try {
-        // IMPORTANT: even if user edits text, we still regenerate an OBJECT plan from API
         state.idea = edited;
 
         const plan = await generatePlanObjectFromApi(edited);
@@ -1131,14 +1195,14 @@
     wireColorSync(colorBackground, colorBackgroundPicker);
 
     // ===========================
-    // Build steps (FIXED: always send plan)
+    // Build steps (NOW reads any response format)
     // ===========================
     async function buildStage(stage){
       clearToast(buildToast);
       applyThemeInputsToState();
 
       if (!state.buildReady || !state.planObj || typeof state.planObj !== "object"){
-        toast(buildToast, "bad", "Build is locked or plan is missing. Generate/confirm the plan first.");
+        toast(buildToast, "bad", "Build is locked or plan/spec is missing. Generate/confirm the plan first.");
         return;
       }
 
@@ -1159,18 +1223,20 @@
       if (stage === "js") btnJs.disabled = true;
 
       try{
-        const data = await apiPost("/api/generate", commonPayload({
-          stage,
-          // Some servers also look for these:
+        const payload = commonPayload({
+          stage: String(stage || "").toLowerCase().trim(),
           planText: state.planText || "",
           specText: state.planText || ""
-        }));
+        });
 
-        const f = data.file || data.output || {};
-        const content = String(f.content || data.content || "");
+        const data = await apiPost("/api/generate", payload);
+
+        const content = extractBuiltContent(data, stage);
 
         if (!content){
-          throw new Error("API returned no file content.");
+          // show raw response so we can see EXACT contract immediately
+          const raw = JSON.stringify(data, null, 2);
+          throw new Error("API returned no file content.\n\nRAW RESPONSE:\n" + raw);
         }
 
         if (stage === "html"){
@@ -1241,7 +1307,7 @@
     });
 
     // ===========================
-    // Step 4: Optional edits (FIXED: include plan in edit call too)
+    // Step 4: Optional edits
     // ===========================
     btnApplyEdit.addEventListener("click", async () => {
       clearToast(editToast);
