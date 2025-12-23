@@ -129,7 +129,7 @@
       padding: 14px;
     }
 
-    .row{ display:flex; gap:10px; flexsee: wrap; flex-wrap:wrap; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; }
     .field{
       display:flex;
       flex-direction:column;
@@ -177,10 +177,6 @@
     .primary{
       border-color: rgba(255,0,80,.35);
       background: linear-gradient(135deg, rgba(255,0,80,.18), rgba(0,242,234,.12));
-    }
-    .danger{
-      border-color: rgba(255,77,77,.28);
-      background: rgba(255,77,77,.12);
     }
     .ghost{
       background: rgba(255,255,255,.05);
@@ -279,13 +275,6 @@
       margin: 12px 0;
     }
 
-    .themeRow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:flex-end;
-      margin-top: 6px;
-    }
     .swatches{
       display:flex;
       gap:8px;
@@ -382,7 +371,7 @@
         <div class="head">
           <div>
             <h2>Step 1 — Describe the game</h2>
-            <p>Give a clear concept with actions, visuals, and viewer interactions. The plan step will lock in the spec.</p>
+            <p>Generate a plan first. The plan must be an object (not text) so the API can build files reliably.</p>
           </div>
           <span class="tag" id="lockPlanTag"><strong>Not created</strong></span>
         </div>
@@ -390,7 +379,7 @@
 
           <div class="field">
             <label><span>Game idea (be specific)</span></label>
-            <textarea id="gameIdea" placeholder="Example: A neon arena where viewers join a team by typing RED/BLUE/YELLOW/GREEN, likes charge a team meter, gifts trigger power-ups, and chat answers cause projectiles to fire. Make it visually exciting even before connecting to TikTok."></textarea>
+            <textarea id="gameIdea" placeholder="Example: A neon arena where viewers join a team by typing RED/BLUE/YELLOW/GREEN, likes charge a team meter, gifts trigger power-ups, and chat commands fire projectiles. Make it visually exciting even before connecting to TikTok."></textarea>
           </div>
 
           <div class="row">
@@ -415,8 +404,8 @@
 
           <div class="field">
             <label><span>Step 2 — Plan / Confirm (editable)</span></label>
-            <textarea id="planEditor" placeholder="Your plan/spec will appear here. You can edit it, then submit plan edits."></textarea>
-            <div class="hint">Tip: Add exact controls (chat keywords, how likes/gifts affect gameplay, win conditions), and call out what should always be visible on screen.</div>
+            <textarea id="planEditor" placeholder="Plan text will appear here. You can edit, then re-generate the plan object."></textarea>
+            <div class="hint">Edits here must still produce a valid plan object from the API.</div>
           </div>
 
           <div class="btnrow">
@@ -441,7 +430,7 @@
         <div class="head">
           <div>
             <h2>Step 3 — Build Files (locked sequence)</h2>
-            <p>Build in order: HTML → CSS → game.js. Then you can use up to <span class="kbd">3</span> safe edits.</p>
+            <p>Build in order: HTML → CSS → game.js.</p>
           </div>
           <span class="tag" id="lockFilesTag"><strong>Waiting</strong></span>
         </div>
@@ -465,41 +454,33 @@
 
               <div class="field" style="margin-top:10px;">
                 <label><span>Theme colors</span></label>
-                <div class="themeRow">
-                  <div style="flex:1; min-width:240px;">
-                    <div class="hint">Choose colors that will be injected into the CSS variables. You can also type hex values.</div>
 
-                    <div class="themeInputs">
-                      <input type="text" id="colorPrimary" value="#ff0050" />
-                      <input type="color" id="colorPrimaryPicker" value="#ff0050" />
-                    </div>
-
-                    <div class="themeInputs">
-                      <input type="text" id="colorSecondary" value="#00f2ea" />
-                      <input type="color" id="colorSecondaryPicker" value="#00f2ea" />
-                    </div>
-
-                    <div class="themeInputs">
-                      <input type="text" id="colorBackground" value="#050b17" />
-                      <input type="color" id="colorBackgroundPicker" value="#050b17" />
-                    </div>
-                  </div>
-
-                  <div style="min-width:180px;">
-                    <div class="hint" style="margin-bottom:8px;">Build sequence</div>
-                    <div class="btnrow" style="margin-top:0;">
-                      <button class="primary" id="btnHtml">Build HTML</button>
-                      <button class="primary" id="btnCss" disabled>Build CSS</button>
-                      <button class="primary" id="btnJs" disabled>Build game.js</button>
-                    </div>
-                  </div>
+                <div class="themeInputs">
+                  <input type="text" id="colorPrimary" value="#ff0050" />
+                  <input type="color" id="colorPrimaryPicker" value="#ff0050" />
                 </div>
-              </div>
 
-              <div class="btnrow" style="margin-top:10px;">
-                <button id="rebuildHtml" class="ghost" disabled>Unlock HTML</button>
-                <button id="rebuildCss" class="ghost" disabled>Unlock CSS</button>
-                <button id="rebuildJs" class="ghost" disabled>Unlock game.js</button>
+                <div class="themeInputs">
+                  <input type="text" id="colorSecondary" value="#00f2ea" />
+                  <input type="color" id="colorSecondaryPicker" value="#00f2ea" />
+                </div>
+
+                <div class="themeInputs">
+                  <input type="text" id="colorBackground" value="#050b17" />
+                  <input type="color" id="colorBackgroundPicker" value="#050b17" />
+                </div>
+
+                <div class="btnrow" style="margin-top:10px;">
+                  <button class="primary" id="btnHtml">Build HTML</button>
+                  <button class="primary" id="btnCss" disabled>Build CSS</button>
+                  <button class="primary" id="btnJs" disabled>Build game.js</button>
+                </div>
+
+                <div class="btnrow" style="margin-top:10px;">
+                  <button id="rebuildHtml" class="ghost" disabled>Unlock HTML</button>
+                  <button id="rebuildCss" class="ghost" disabled>Unlock CSS</button>
+                  <button id="rebuildJs" class="ghost" disabled>Unlock game.js</button>
+                </div>
               </div>
 
               <div id="buildToast" class="toast hidden"></div>
@@ -587,12 +568,10 @@
         const qp = (u.searchParams.get("api") || "").trim();
         if (qp) return qp.replace(/\/+$/, "");
       } catch {}
-
       try {
         const ls = (localStorage.getItem("ct_api_base") || "").trim();
         if (ls) return ls.replace(/\/+$/, "");
       } catch {}
-
       return DEFAULT;
     })();
 
@@ -664,16 +643,20 @@
     const state = {
       planReady: false,
       buildReady: false,
-      api: { hasPlanEndpoint: true }, // we'll try it; fallback if it fails
+
       idea: "",
       templateId: "arena",
-      spec: null,
+
+      // IMPORTANT: plan MUST be an object
+      planObj: null,
       planText: "",
+
       theme: {
         primary: "#ff0050",
         secondary: "#00f2ea",
         background: "#050b17"
       },
+
       files: { html: "", css: "", js: "" },
       locks: { html: false, css: false, js: false },
       editsLeft: 3
@@ -780,7 +763,7 @@
 
       rebuildHtml.disabled = !state.locks.html;
       rebuildCss.disabled = !state.locks.css;
-      rebuildJs.disabled  = !state.locks.js;
+      rebuildJs.disabled = !state.locks.js;
 
       copyHtml.disabled = !state.files.html;
       copyCss.disabled  = !state.files.css;
@@ -788,11 +771,11 @@
 
       htmlPill.className = "pill " + (state.locks.html ? "good" : "");
       cssPill.className = "pill " + (state.locks.css ? "good" : "");
-      jsPill.className = "pill " + (state.locks.js ? "good" : "");
+      jsPill.className  = "pill " + (state.locks.js ? "good" : "");
 
       htmlPill.textContent = state.locks.html ? "Built" : "Not built";
-      cssPill.textContent = state.locks.css ? "Built" : "Not built";
-      jsPill.textContent = state.locks.js ? "Built" : "Not built";
+      cssPill.textContent  = state.locks.css ? "Built" : "Not built";
+      jsPill.textContent   = state.locks.js ? "Built" : "Not built";
 
       if (!state.buildReady){
         setLockTag(lockFilesTag, "", "Waiting");
@@ -950,92 +933,90 @@
     }
 
     // ===========================
-    // Plan helpers
+    // Payload builder (FIXES ALL CALLS)
+    // Always include: prompt + idea + plan keys + context keys
     // ===========================
-    function specToPlanText(spec, templateHint, idea){
-      const s = spec || {};
-      const how = Array.isArray(s.howToPlay) ? s.howToPlay : [];
-      const ds = s.defaultSettings || {};
-      const roundSeconds = Number(ds.roundSeconds || 20);
-      const winGoal = Number(ds.winGoal || 100);
-
-      const lines = [];
-      lines.push(`TITLE: ${s.title || "ChatTok Live Game"}`);
-      lines.push(`SUBTITLE: ${s.subtitle || "Live Interactive"}`);
-      lines.push("");
-      if (s.oneSentence) {
-        lines.push("ONE-SENTENCE HOOK:");
-        lines.push(`- ${s.oneSentence}`);
-        lines.push("");
-      }
-
-      lines.push("VIEWER INTERACTIONS (must be implemented in game.js):");
-      lines.push("- CHAT: players join / act by typing commands or answers (game-specific).");
-      lines.push("- LIKES: charge energy / speed up spawn / trigger small effects.");
-      lines.push("- GIFTS: trigger power-ups / reveals / boss spawns (bigger gift = bigger effect).");
-      lines.push("");
-
-      lines.push("HOW TO PLAY (on-screen bullets):");
-      if (how.length) {
-        for (const h of how.slice(0, 12)) lines.push(`- ${String(h)}`);
-      } else {
-        lines.push("- Chat to interact.");
-        lines.push("- Likes add energy.");
-        lines.push("- Gifts trigger power-ups.");
-      }
-      lines.push("");
-
-      lines.push("DEFAULT SETTINGS:");
-      lines.push(`- roundSeconds: ${roundSeconds}`);
-      lines.push(`- winGoal: ${winGoal}`);
-      lines.push("");
-
-      lines.push("STYLE / TEMPLATE HINT:");
-      lines.push(`- ${templateHint || "auto"}`);
-      lines.push("");
-      lines.push("ORIGINAL IDEA:");
-      lines.push(String(idea || "").trim());
-
-      return lines.join("\n").trim();
-    }
-
-    async function generatePlanViaApi(idea, templateHint){
-      // ✅ FIX: send prompt (what your server requires) AND idea (for other variants)
-      const payload = {
-        prompt: idea,
-        idea: idea,
-        templateId: templateHint,
-        theme: state.theme
+    function commonPayload(extra){
+      const base = {
+        prompt: state.idea || "",
+        idea: state.idea || "",
+        templateId: state.templateId || "arena",
+        theme: state.theme || {},
       };
 
-      // Try /api/plan first (now matches server's "prompt" requirement)
-      try{
-        const d = await apiPost("/api/plan", payload);
-        const spec = d?.spec || d?.context?.spec || d?.plan || d?.data?.spec || null;
-        const planText = (d?.planText || d?.plan_text || d?.planText || "").trim();
-        if (spec && typeof spec === "object") {
-          return { spec, planText: planText || specToPlanText(spec, templateHint, idea), via: "plan" };
-        }
-      } catch (e){
-        // fall through to fallback
+      // Plan object included in all the common "places" APIs look for it
+      if (state.planObj && typeof state.planObj === "object") {
+        base.plan = state.planObj;
+        base.spec = state.planObj;
+        base.context = { plan: state.planObj, spec: state.planObj };
+      } else {
+        // still send context to satisfy handlers that assume it exists
+        base.context = { plan: null, spec: null };
       }
 
-      // Fallback: /api/generate stage=html to retrieve spec from context
+      return Object.assign(base, extra || {});
+    }
+
+    function extractPlanObject(resp){
+      // Support a bunch of response shapes without guessing:
+      const d = resp || {};
+      const candidates = [
+        d.plan, d.spec,
+        d.context?.plan, d.context?.spec,
+        d.data?.plan, d.data?.spec,
+        d.result?.plan, d.result?.spec,
+      ];
+      for (const c of candidates){
+        if (c && typeof c === "object") return c;
+      }
+      return null;
+    }
+
+    function extractPlanText(resp){
+      const d = resp || {};
+      const t = d.planText || d.plan_text || d.plan || d.specText || d.spec_text || d.text || "";
+      if (typeof t === "string") return t.trim();
+      if (typeof d.planText === "string") return d.planText.trim();
+      return "";
+    }
+
+    // ===========================
+    // Step 1/2: Generate plan (OBJECT) via /api/plan, fallback to /api/generate html
+    // ===========================
+    async function generatePlanObjectFromApi(promptText){
+      // 1) Try /api/plan (preferred)
+      try{
+        const d = await apiPost("/api/plan", {
+          prompt: promptText,
+          idea: promptText,
+          templateId: state.templateId,
+          theme: state.theme
+        });
+        const planObj = extractPlanObject(d);
+        const planText = extractPlanText(d) || "";
+        if (planObj) return { planObj, planText: planText || JSON.stringify(planObj, null, 2), via: "/api/plan" };
+      } catch (_) {
+        // fall through
+      }
+
+      // 2) Fallback: /api/generate stage=html (some servers return context/spec)
       const d2 = await apiPost("/api/generate", {
         stage: "html",
-        idea,
-        prompt: idea,
-        templateId: templateHint,
+        prompt: promptText,
+        idea: promptText,
+        templateId: state.templateId,
         theme: state.theme,
         context: {}
       });
-      const spec2 = d2?.context?.spec || d2?.spec || null;
-      if (!spec2) throw new Error("Plan fallback failed: missing spec from /api/generate.");
-      return { spec: spec2, planText: specToPlanText(spec2, templateHint, idea), via: "generate" };
+      const planObj2 = extractPlanObject(d2);
+      if (!planObj2) {
+        throw new Error("Plan response missing plan object. API must return an object plan/spec for building.");
+      }
+      return { planObj: planObj2, planText: JSON.stringify(planObj2, null, 2), via: "/api/generate (fallback)" };
     }
 
     // ===========================
-    // Step 2: Plan
+    // Step 2: Plan buttons
     // ===========================
     btnPlan.addEventListener("click", async () => {
       clearToast(planToast);
@@ -1055,19 +1036,20 @@
         state.idea = idea;
         state.templateId = String(templateId.value || "arena").trim();
 
-        const plan = await generatePlanViaApi(state.idea, state.templateId);
+        const plan = await generatePlanObjectFromApi(state.idea);
 
-        state.spec = plan.spec || null;
+        state.planObj = plan.planObj;
         state.planText = plan.planText || "";
-        planEditor.value = state.planText;
+        planEditor.value = state.planText || JSON.stringify(state.planObj, null, 2);
 
         setPlanReady(true);
         setBuildReady(false);
 
-        toast(planToast, "good", "Plan generated. Review it below, edit if needed, then Continue.");
+        toast(planToast, "good", "Plan generated (object). Edit if needed, then Continue.");
         updateBuildButtons();
       } catch (e) {
         toast(planToast, "bad", formatApiError("Plan", e));
+        state.planObj = null;
         setPlanReady(false);
         setBuildReady(false);
       } finally {
@@ -1092,17 +1074,19 @@
 
       btnPlanEdit.disabled = true;
       btnContinue.disabled = true;
-      toast(planToast, "warn", "Regenerating plan from your edits…");
+      toast(planToast, "warn", "Regenerating plan object from your edits…");
 
       try {
-        const plan = await generatePlanViaApi(edited, state.templateId);
+        // IMPORTANT: even if user edits text, we still regenerate an OBJECT plan from API
+        state.idea = edited;
 
-        state.idea = edited; // keep non-empty for generate stages
-        state.spec = plan.spec || state.spec;
-        state.planText = plan.planText || edited;
-        planEditor.value = state.planText;
+        const plan = await generatePlanObjectFromApi(edited);
 
-        toast(planToast, "good", "Plan updated. If it looks good, hit Continue.");
+        state.planObj = plan.planObj;
+        state.planText = plan.planText || "";
+        planEditor.value = state.planText || JSON.stringify(state.planObj, null, 2);
+
+        toast(planToast, "good", "Plan updated (object). Continue to Build when ready.");
       } catch (e) {
         toast(planToast, "bad", formatApiError("Plan edit", e));
       } finally {
@@ -1115,13 +1099,13 @@
       clearToast(continueToast);
       clearToast(buildToast);
 
-      if (!state.planReady || !state.spec){
-        toast(continueToast, "bad", "Generate a plan first.");
+      if (!state.planReady || !state.planObj || typeof state.planObj !== "object"){
+        toast(continueToast, "bad", "Plan is missing or not an object. Generate the plan again.");
         return;
       }
 
       setBuildReady(true);
-      toast(continueToast, "good", "Build unlocked. Choose colors, then build HTML → CSS → game.js.");
+      toast(continueToast, "good", "Build unlocked. Now build HTML → CSS → game.js.");
       updateBuildButtons();
     });
 
@@ -1147,14 +1131,14 @@
     wireColorSync(colorBackground, colorBackgroundPicker);
 
     // ===========================
-    // Build steps
+    // Build steps (FIXED: always send plan)
     // ===========================
     async function buildStage(stage){
       clearToast(buildToast);
       applyThemeInputsToState();
 
-      if (!state.buildReady || !state.spec){
-        toast(buildToast, "bad", "Build is locked. Generate and confirm the plan first.");
+      if (!state.buildReady || !state.planObj || typeof state.planObj !== "object"){
+        toast(buildToast, "bad", "Build is locked or plan is missing. Generate/confirm the plan first.");
         return;
       }
 
@@ -1175,17 +1159,19 @@
       if (stage === "js") btnJs.disabled = true;
 
       try{
-        const data = await apiPost("/api/generate", {
+        const data = await apiPost("/api/generate", commonPayload({
           stage,
-          idea: state.idea,     // ✅ required by your API
-          prompt: state.idea,   // ✅ supports prompt-based server variants too
-          templateId: state.templateId,
-          theme: state.theme,
-          context: { spec: state.spec }
-        });
+          // Some servers also look for these:
+          planText: state.planText || "",
+          specText: state.planText || ""
+        }));
 
-        const f = data.file || {};
-        const content = String(f.content || "");
+        const f = data.file || data.output || {};
+        const content = String(f.content || data.content || "");
+
+        if (!content){
+          throw new Error("API returned no file content.");
+        }
 
         if (stage === "html"){
           state.files.html = content;
@@ -1255,7 +1241,7 @@
     });
 
     // ===========================
-    // Step 4: Optional edits
+    // Step 4: Optional edits (FIXED: include plan in edit call too)
     // ===========================
     btnApplyEdit.addEventListener("click", async () => {
       clearToast(editToast);
@@ -1280,16 +1266,14 @@
       toast(editToast, "warn", "Applying edit…");
 
       try{
-        const data = await apiPost("/api/edit", {
+        const data = await apiPost("/api/edit", commonPayload({
           remainingEdits: state.editsLeft,
           changeRequest: req,
-          templateId: state.templateId,
-          theme: state.theme,
           currentFiles: {
             "style.css": state.files.css || "",
             "game.js": state.files.js || ""
           }
-        });
+        }));
 
         const patches = Array.isArray(data.patches) ? data.patches : [];
         for (const p of patches) {
