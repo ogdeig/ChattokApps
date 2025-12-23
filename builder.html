@@ -581,12 +581,7 @@
     // Config
     // ===========================
     const API_BASE = (() => {
-      // Default Render API
       const DEFAULT = "https://chattok-builder-api.onrender.com";
-
-      // Optional silent overrides (not shown in UI):
-      // - ?api=https://your-api.example.com
-      // - localStorage key: ct_api_base
       try {
         const u = new URL(window.location.href);
         const qp = (u.searchParams.get("api") || "").trim();
@@ -668,8 +663,8 @@
     // ===========================
     const state = {
       planReady: false,
-      buildReady: false,   // becomes true after Continue
-      api: { hasPlanEndpoint: false },
+      buildReady: false,
+      api: { hasPlanEndpoint: true }, // we'll try it; fallback if it fails
       idea: "",
       templateId: "arena",
       spec: null,
@@ -679,16 +674,8 @@
         secondary: "#00f2ea",
         background: "#050b17"
       },
-      files: {
-        html: "",
-        css: "",
-        js: ""
-      },
-      locks: {
-        html: false,
-        css: false,
-        js: false
-      },
+      files: { html: "", css: "", js: "" },
+      locks: { html: false, css: false, js: false },
       editsLeft: 3
     };
 
@@ -720,7 +707,7 @@
       let extra = "";
       try{
         const d = e && e.data ? e.data : null;
-        if (d && (d.error || d.details)){
+        if (d && (d.error || d.details || d.message)){
           extra = JSON.stringify(d, null, 2);
         }
       } catch {}
@@ -787,7 +774,6 @@
     }
 
     function updateBuildButtons(){
-      // Must be buildReady
       btnHtml.disabled = !state.buildReady || state.locks.html;
       btnCss.disabled = !state.buildReady || !state.locks.html || state.locks.css;
       btnJs.disabled  = !state.buildReady || !state.locks.css || state.locks.js;
@@ -800,7 +786,6 @@
       copyCss.disabled  = !state.files.css;
       copyJs.disabled   = !state.files.js;
 
-      // pills
       htmlPill.className = "pill " + (state.locks.html ? "good" : "");
       cssPill.className = "pill " + (state.locks.css ? "good" : "");
       jsPill.className = "pill " + (state.locks.js ? "good" : "");
@@ -809,7 +794,6 @@
       cssPill.textContent = state.locks.css ? "Built" : "Not built";
       jsPill.textContent = state.locks.js ? "Built" : "Not built";
 
-      // files tag
       if (!state.buildReady){
         setLockTag(lockFilesTag, "", "Waiting");
       } else if (state.locks.html && state.locks.css && state.locks.js){
@@ -818,7 +802,6 @@
         setLockTag(lockFilesTag, "", "In progress");
       }
 
-      // edits unlock (only after js built)
       editsLeftEl.textContent = String(state.editsLeft);
       if (state.locks.js && state.editsLeft > 0){
         editLockedMsg.classList.add("hidden");
@@ -840,7 +823,6 @@
       state.theme.secondary = s;
       state.theme.background = b;
 
-      // sync pickers
       colorPrimary.value = p; colorPrimaryPicker.value = p;
       colorSecondary.value = s; colorSecondaryPicker.value = s;
       colorBackground.value = b; colorBackgroundPicker.value = b;
@@ -851,7 +833,6 @@
         await navigator.clipboard.writeText(String(text || ""));
         return true;
       } catch {
-        // fallback
         try{
           const ta = document.createElement("textarea");
           ta.value = String(text || "");
@@ -885,7 +866,6 @@
       state.buildReady = !!ready;
       if (ready){
         setLockTag(lockBuildTag, "ok", "Unlocked");
-        filesLockText.textContent = "In progress";
       } else {
         setLockTag(lockBuildTag, "", "Locked");
       }
@@ -894,7 +874,6 @@
     }
 
     function resetFilesAfter(stage){
-      // Used when rebuilding
       if (stage === "html"){
         state.files.html = "";
         state.files.css = "";
@@ -917,7 +896,6 @@
         state.locks.js = false;
         outJs.value = "";
       }
-      // edits reset only if we blow away js on rebuild html/css
       if (stage === "html" || stage === "css"){
         state.editsLeft = 3;
         clearToast(editToast);
@@ -951,7 +929,6 @@
           colorPrimary.value = p.primary; colorPrimaryPicker.value = p.primary;
           colorSecondary.value = p.secondary; colorSecondaryPicker.value = p.secondary;
           colorBackground.value = p.background; colorBackgroundPicker.value = p.background;
-          // mark selected
           [...presetRow.children].forEach(x => x.classList.remove("sel"));
           d.classList.add("sel");
         });
@@ -965,19 +942,15 @@
     // ===========================
     async function checkApi(){
       try{
-        const h = await apiGet("/health");
-        // Detect optional endpoints without showing URLs in the UI.
-        const eps = Array.isArray(h && h.endpoints) ? h.endpoints.map(String) : [];
-        state.api.hasPlanEndpoint = eps.some(x => x.toLowerCase().includes("/api/plan"));
+        await apiGet("/health");
         setApiStatus(true, "API: online");
       } catch {
-        state.api.hasPlanEndpoint = false;
         setApiStatus(false, "API: offline (check Render)");
       }
     }
 
     // ===========================
-    // Plan helpers (compatible with older/newer API)
+    // Plan helpers
     // ===========================
     function specToPlanText(spec, templateHint, idea){
       const s = spec || {};
@@ -1027,30 +1000,36 @@
     }
 
     async function generatePlanViaApi(idea, templateHint){
-      // 1) Prefer dedicated plan endpoint if present
-      if (state.api && state.api.hasPlanEndpoint) {
-        try{
-          const d = await apiPost("/api/plan", { idea, templateId: templateHint });
-          const spec = d?.spec || d?.context?.spec || null;
-          const planText = (d?.planText || d?.plan || d?.plan_text || "").trim();
-          if (spec) {
-            return { spec, planText: planText || specToPlanText(spec, templateHint, idea), via: "plan" };
-          }
-        } catch (e){
-          // Fall back if the plan route exists but is failing.
-          if (!(e && (e.status === 404 || e.status === 405 || e.status === 500))) throw e;
+      // ✅ FIX: send prompt (what your server requires) AND idea (for other variants)
+      const payload = {
+        prompt: idea,
+        idea: idea,
+        templateId: templateHint,
+        theme: state.theme
+      };
+
+      // Try /api/plan first (now matches server's "prompt" requirement)
+      try{
+        const d = await apiPost("/api/plan", payload);
+        const spec = d?.spec || d?.context?.spec || d?.plan || d?.data?.spec || null;
+        const planText = (d?.planText || d?.plan_text || d?.planText || "").trim();
+        if (spec && typeof spec === "object") {
+          return { spec, planText: planText || specToPlanText(spec, templateHint, idea), via: "plan" };
         }
+      } catch (e){
+        // fall through to fallback
       }
 
-      // 2) Fallback: ask /api/generate for HTML (gets us a spec in context)
+      // Fallback: /api/generate stage=html to retrieve spec from context
       const d2 = await apiPost("/api/generate", {
         stage: "html",
         idea,
+        prompt: idea,
         templateId: templateHint,
         theme: state.theme,
         context: {}
       });
-      const spec2 = d2?.context?.spec || null;
+      const spec2 = d2?.context?.spec || d2?.spec || null;
       if (!spec2) throw new Error("Plan fallback failed: missing spec from /api/generate.");
       return { spec: spec2, planText: specToPlanText(spec2, templateHint, idea), via: "generate" };
     }
@@ -1076,7 +1055,6 @@
         state.idea = idea;
         state.templateId = String(templateId.value || "arena").trim();
 
-        // Try /api/plan first; fallback to /api/generate(stage=html) if needed.
         const plan = await generatePlanViaApi(state.idea, state.templateId);
 
         state.spec = plan.spec || null;
@@ -1084,7 +1062,7 @@
         planEditor.value = state.planText;
 
         setPlanReady(true);
-        setBuildReady(false); // still locked until Continue
+        setBuildReady(false);
 
         toast(planToast, "good", "Plan generated. Review it below, edit if needed, then Continue.");
         updateBuildButtons();
@@ -1118,8 +1096,8 @@
 
       try {
         const plan = await generatePlanViaApi(edited, state.templateId);
-        // Treat edited plan as the new idea text so future builds have a non-empty idea.
-        state.idea = edited;
+
+        state.idea = edited; // keep non-empty for generate stages
         state.spec = plan.spec || state.spec;
         state.planText = plan.planText || edited;
         planEditor.value = state.planText;
@@ -1142,7 +1120,6 @@
         return;
       }
 
-      // Lock plan and unlock build
       setBuildReady(true);
       toast(continueToast, "good", "Build unlocked. Choose colors, then build HTML → CSS → game.js.");
       updateBuildButtons();
@@ -1181,7 +1158,6 @@
         return;
       }
 
-      // enforce order
       if (stage === "css" && !state.locks.html){
         toast(buildToast, "bad", "Build HTML first.");
         return;
@@ -1201,7 +1177,8 @@
       try{
         const data = await apiPost("/api/generate", {
           stage,
-          idea: state.idea,                 // REQUIRED by API for html/js stages
+          idea: state.idea,     // ✅ required by your API
+          prompt: state.idea,   // ✅ supports prompt-based server variants too
           templateId: state.templateId,
           theme: state.theme,
           context: { spec: state.spec }
@@ -1278,7 +1255,7 @@
     });
 
     // ===========================
-    // Step 4: Optional edits (JS only)
+    // Step 4: Optional edits
     // ===========================
     btnApplyEdit.addEventListener("click", async () => {
       clearToast(editToast);
@@ -1324,7 +1301,6 @@
           if (p.name === "style.css" && typeof p.content === "string") {
             state.files.css = p.content;
             outCss.value = p.content;
-            // If CSS gets updated, consider it "built"
             state.locks.css = true;
           }
         }
