@@ -23,9 +23,10 @@
     textarea,input,select{width:100%;border:1px solid var(--line);border-radius:12px;background:#0b1220;color:#fff;padding:10px 12px}
     textarea{min-height:130px;resize:vertical}
     .row{display:flex;gap:12px}
-    .btn,.btnGood,.btnWarn{border:1px solid var(--line);border-radius:12px;background:#121a2c;color:#fff;padding:10px 12px;cursor:pointer}
-    .btnGood{background:linear-gradient(135deg,#00f2ea33,#00f2ea18)}
-    .btnWarn{background:linear-gradient(135deg,#ffcc6633,#ffcc6618)}
+    .btn{border:1px solid var(--line);border-radius:12px;background:#121a2c;color:#fff;padding:10px 12px;cursor:pointer}
+    .btnGood{border:1px solid rgba(46,229,157,.35);background:linear-gradient(135deg,#00f2ea33,#00f2ea18)}
+    .btnWarn{border:1px solid rgba(255,204,102,.35);background:linear-gradient(135deg,#ffcc6633,#ffcc6618)}
+    .pill{display:inline-flex;gap:8px;align-items:center;padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.06)}
     .toast{margin-top:10px;padding:10px 12px;border-radius:12px;border:1px solid var(--line)}
     .toast.good{border-color:rgba(46,229,157,.35);background:rgba(46,229,157,.08)}
     .toast.bad{border-color:rgba(255,77,77,.35);background:rgba(255,77,77,.08)}
@@ -35,11 +36,6 @@
     .lockTag{display:flex;gap:8px;align-items:center;margin-top:10px;padding:10px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.18);color:rgba(255,255,255,.88);font-size:12px}
     .lockTag.ok{ border-color: rgba(46,229,157,.35); background: rgba(46,229,157,.10); }
     .lockTag.bad{ border-color: rgba(255,77,77,.35); background: rgba(255,77,77,.10); }
-    .lockTag strong{font-weight:800}
-    .divider{height:1px;background:var(--line);margin:12px 0}
-    .btnRow{display:flex;gap:8px;flex-wrap:wrap}
-    .copyRow{display:flex;gap:8px;align-items:center}
-    .small{font-size:12px;color:var(--muted)}
     .spinner{display:inline-block;width:14px;height:14px;border-radius:999px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;animation:sp .8s linear infinite;margin-left:8px}
     @keyframes sp{to{transform:rotate(1turn)}}
   </style>
@@ -51,130 +47,66 @@
         <div class="logoDot"></div>
         <div>
           <h1>ChatTok AI Game Builder</h1>
-          <div class="sub">Plan → Confirm → Build files (HTML → CSS → game.js) + optional edits</div>
+          <div class="sub">Plan → Confirm → Build files (HTML → CSS → game.js)</div>
         </div>
       </div>
-      <div class="statusPill">
-        <div id="apiDot" class="dot"></div>
-        <div id="apiPillText" class="pillText">API: checking…</div>
-      </div>
+      <div class="statusPill"><div id="apiDot" class="dot"></div><div id="apiPillText">API: checking…</div></div>
     </div>
 
     <div class="grid">
-      <!-- LEFT -->
       <div class="card">
-        <div class="cardHead">
-          <div>
-            <div class="cardTitle"><span class="stepNum">1</span> Describe your game</div>
-            <div class="cardHint">We’ll produce a plan first, then build the files.</div>
+        <div class="cardHead"><div><div class="cardTitle">1. Describe your game</div><div class="cardHint">We’ll produce a plan first, then build the files.</div></div></div>
+        <label for="gameIdea">Game idea</label>
+        <textarea id="gameIdea" placeholder="Example: Neon Meteor Defense. Viewers type 'join' & 'fire'. Likes charge power; gifts boost."></textarea>
+        <div class="row" style="margin-top:10px">
+          <div style="flex:1">
+            <label for="templateId">Template</label>
+            <select id="templateId">
+              <option value="defense">Defense (default)</option>
+              <option value="arena">Arena</option>
+              <option value="runner">Runner</option>
+              <option value="boss">Boss Fight</option>
+            </select>
           </div>
+          <div><label>&nbsp;</label><button id="btnPlan" class="btn btnGood" style="width:100%">Generate Plan</button></div>
         </div>
-        <div class="cardBody">
-          <label for="gameIdea">Game idea</label>
-          <textarea id="gameIdea" placeholder="Example: Battleship-like grid. Viewers fire via chat: A4. Hits show 💥, misses 💦. Include live ID input and grid size."></textarea>
-
-          <div class="row" style="margin-top:10px;">
-            <div>
-              <label for="templateId">Template</label>
-              <select id="templateId">
-                <option value="arena">Arena (default)</option>
-                <option value="runner">Runner</option>
-                <option value="defense">Defense</option>
-                <option value="boss">Boss Fight</option>
-              </select>
-            </div>
-            <div>
-              <label>&nbsp;</label>
-              <button id="btnPlan" class="btnGood" style="width:100%;">Generate Plan</button>
-            </div>
-          </div>
-
-          <div id="planToast" class="toast hidden"></div>
-
-          <div class="divider"></div>
-
-          <div class="cardTitle"><span class="stepNum">2</span> Review / edit plan</div>
-          <div class="cardHint">Edit the plan text and regenerate if needed. Then click Continue to unlock builds.</div>
-
-          <textarea id="planEditor" class="code" placeholder="Plan JSON appears here…"></textarea>
-          <div class="btnRow" style="margin-top:8px">
-            <button id="btnPlanEdit" class="btn">Regenerate from my plan text</button>
-            <button id="btnContinue" class="btnGood">Continue</button>
-          </div>
-          <div id="continueToast" class="toast hidden"></div>
+        <div id="planToast" class="toast hidden"></div>
+        <div class="cardTitle" style="margin-top:12px">2. Review / edit plan</div>
+        <div class="cardHint">Edit if needed, then Continue to unlock the build step.</div>
+        <textarea id="planEditor" class="code" placeholder="Plan JSON appears here…"></textarea>
+        <div class="row" style="margin-top:8px">
+          <button id="btnPlanEdit" class="btn">Regenerate from my plan text</button>
+          <button id="btnContinue" class="btn btnGood">Continue</button>
         </div>
+        <div id="continueToast" class="toast hidden"></div>
       </div>
 
-      <!-- RIGHT -->
       <div class="card">
-        <div class="cardHead">
-          <div class="cardTitle"><span class="stepNum">3</span> Theme</div>
-          <div class="cardHint">Colors apply to CSS tokens used by the template.</div>
-        </div>
-        <div class="cardBody">
-          <div class="row">
-            <div style="flex:1">
-              <label>Primary</label>
-              <input id="colorPrimary" placeholder="#ff0050"/>
-            </div>
-            <div><label>&nbsp;</label><input id="colorPrimaryPicker" type="color" value="#ff0050"/></div>
-          </div>
-          <div class="row">
-            <div style="flex:1">
-              <label>Secondary</label>
-              <input id="colorSecondary" placeholder="#00f2ea"/>
-            </div>
-            <div><label>&nbsp;</label><input id="colorSecondaryPicker" type="color" value="#00f2ea"/></div>
-          </div>
-          <div class="row">
-            <div style="flex:1">
-              <label>Background</label>
-              <input id="colorBackground" placeholder="#050b17"/>
-            </div>
-            <div><label>&nbsp;</label><input id="colorBackgroundPicker" type="color" value="#050b17"/></div>
-          </div>
+        <div class="cardHead"><div><div class="cardTitle">3. Theme</div><div class="cardHint">Applies to CSS variables in the template.</div></div></div>
+        <div class="row"><div style="flex:1"><label>Primary</label><input id="colorPrimary" placeholder="#ff0050" value="#ff0050"/></div><div><label>&nbsp;</label><input id="colorPrimaryPicker" type="color" value="#ff0050"/></div></div>
+        <div class="row"><div style="flex:1"><label>Secondary</label><input id="colorSecondary" placeholder="#00f2ea" value="#00f2ea"/></div><div><label>&nbsp;</label><input id="colorSecondaryPicker" type="color" value="#00f2ea"/></div></div>
+        <div class="row"><div style="flex:1"><label>Background</label><input id="colorBackground" placeholder="#050b17" value="#050b17"/></div><div><label>&nbsp;</label><input id="colorBackgroundPicker" type="color" value="#050b17"/></div></div>
 
-          <div class="divider"></div>
-          <div class="cardHead" style="margin-top:6px">
-            <div class="cardTitle"><span class="stepNum">4</span> Build files</div>
-            <div class="cardHint">Build in order: HTML → CSS → game.js</div>
-          </div>
+        <div class="lockTag bad" id="lockFilesTag"><strong>Locked</strong> — Generate and Continue first.</div>
 
-          <div id="lockFilesTag" class="lockTag"><strong>Locked</strong> — Generate and Continue first.</div>
+        <div class="row" style="margin-top:10px"><button id="btnHtml" class="btn" disabled>Build HTML</button><span id="htmlPill" class="pill">HTML: pending</span></div>
+        <textarea id="outHtml" class="code" placeholder="index.html output…" readonly></textarea>
+        <div class="row"><button id="copyHtml" class="btn">Copy HTML</button><span class="pill">Paste as <b>index.html</b></span></div>
 
-          <div class="btnRow" style="margin-top:10px">
-            <button id="btnHtml" class="btn" disabled>Build HTML</button>
-            <span id="htmlPill" class="pill">HTML: pending</span>
-          </div>
-          <textarea id="outHtml" class="code" placeholder="index.html output…" readonly></textarea>
-          <div class="copyRow"><button id="copyHtml" class="btn">Copy HTML</button><span class="small">Paste into your game folder as <b>index.html</b></span></div>
+        <div class="row" style="margin-top:10px"><button id="btnCss" class="btn" disabled>Build CSS</button><span id="cssPill" class="pill">CSS: pending</span></div>
+        <textarea id="outCss" class="code" placeholder="style.css output…" readonly></textarea>
+        <div class="row"><button id="copyCss" class="btn">Copy CSS</button><span class="pill">Paste as <b>style.css</b></span></div>
 
-          <div class="btnRow" style="margin-top:10px">
-            <button id="btnCss" class="btn" disabled>Build CSS</button>
-            <span id="cssPill" class="pill">CSS: pending</span>
-          </div>
-          <textarea id="outCss" class="code" placeholder="style.css output…" readonly></textarea>
-          <div class="copyRow"><button id="copyCss" class="btn">Copy CSS</button><span class="small">Paste as <b>style.css</b></span></div>
+        <div class="row" style="margin-top:10px"><button id="btnJs" class="btn" disabled>Build game.js</button><span id="jsPill" class="pill">JS: pending</span></div>
+        <textarea id="outJs" class="code" placeholder="game.js output…" readonly></textarea>
+        <div class="row"><button id="copyJs" class="btn">Copy JS</button><span class="pill">Paste as <b>game.js</b></span></div>
 
-          <div class="btnRow" style="margin-top:10px">
-            <button id="btnJs" class="btn" disabled>Build game.js</button>
-            <span id="jsPill" class="pill">JS: pending</span>
-          </div>
-          <textarea id="outJs" class="code" placeholder="game.js output…" readonly></textarea>
-          <div class="copyRow"><button id="copyJs" class="btn">Copy JS</button><span class="small">Paste as <b>game.js</b></span></div>
+        <div id="buildToast" class="toast hidden" style="margin-top:8px"></div>
 
-          <div id="buildToast" class="toast hidden"></div>
-
-          <div class="divider"></div>
-          <div class="cardTitle"><span class="stepNum">5</span> Optional edits (3)</div>
-          <div class="cardHint">Enter a brief change request (e.g., “larger fonts”, “slower meteors”).</div>
-          <textarea id="editRequest" placeholder="Describe a precise change (one thing at a time)…"></textarea>
-          <div class="btnRow">
-            <button id="btnApplyEdit" class="btnWarn">Apply edit</button>
-            <span id="editsLeft" class="pill">Edits left: 3</span>
-          </div>
-          <div id="editToast" class="toast hidden"></div>
-        </div>
+        <div class="cardTitle" style="margin-top:12px">4. Optional edits (3)</div>
+        <textarea id="editRequest" placeholder="e.g., Slower meteors, larger fonts…"></textarea>
+        <div class="row"><button id="btnApplyEdit" class="btn btnWarn">Apply edit</button><span id="editsLeft" class="pill">Edits left: 3</span></div>
+        <div id="editToast" class="toast hidden"></div>
       </div>
     </div>
   </div>
@@ -182,296 +114,102 @@
   <script>
     const API_BASE = "https://chattok-builder-api.onrender.com";
 
-    const apiDot = document.getElementById("apiDot");
-    const apiPillText = document.getElementById("apiPillText");
+    const $ = (id)=>document.getElementById(id);
+    const apiDot=$("apiDot"), apiPillText=$("apiPillText");
 
-    const btnPlan = document.getElementById("btnPlan");
-    const btnContinue = document.getElementById("btnContinue");
-    const btnPlanEdit = document.getElementById("btnPlanEdit");
-    const planEditor = document.getElementById("planEditor");
-    const gameIdea = document.getElementById("gameIdea");
-    const templateId = document.getElementById("templateId");
+    const btnPlan=$("btnPlan"), btnPlanEdit=$("btnPlanEdit"), btnContinue=$("btnContinue");
+    const gameIdea=$("gameIdea"), templateId=$("templateId"), planEditor=$("planEditor");
+    const planToast=$("planToast"), continueToast=$("continueToast"), buildToast=$("buildToast");
 
-    const colorPrimary = document.getElementById("colorPrimary");
-    const colorSecondary = document.getElementById("colorSecondary");
-    const colorBackground = document.getElementById("colorBackground");
-    const colorPrimaryPicker = document.getElementById("colorPrimaryPicker");
-    const colorSecondaryPicker = document.getElementById("colorSecondaryPicker");
-    const colorBackgroundPicker = document.getElementById("colorBackgroundPicker");
+    const btnHtml=$("btnHtml"), btnCss=$("btnCss"), btnJs=$("btnJs");
+    const htmlPill=$("htmlPill"), cssPill=$("cssPill"), jsPill=$("jsPill"), lockFilesTag=$("lockFilesTag");
+    const outHtml=$("outHtml"), outCss=$("outCss"), outJs=$("outJs");
+    const copyHtml=$("copyHtml"), copyCss=$("copyCss"), copyJs=$("copyJs");
+    const colorPrimary=$("colorPrimary"), colorSecondary=$("colorSecondary"), colorBackground=$("colorBackground");
+    const colorPrimaryPicker=$("colorPrimaryPicker"), colorSecondaryPicker=$("colorSecondaryPicker"), colorBackgroundPicker=$("colorBackgroundPicker");
+    const editRequest=$("editRequest"), btnApplyEdit=$("btnApplyEdit"), editsLeftEl=$("editsLeft");
 
-    const btnHtml = document.getElementById("btnHtml");
-    const btnCss = document.getElementById("btnCss");
-    const btnJs = document.getElementById("btnJs");
-    const outHtml = document.getElementById("outHtml");
-    const outCss = document.getElementById("outCss");
-    const outJs = document.getElementById("outJs");
-    const copyHtml = document.getElementById("copyHtml");
-    const copyCss = document.getElementById("copyCss");
-    const copyJs = document.getElementById("copyJs");
+    const state={ spec:null, idea:"", theme:{primary:"#ff0050",secondary:"#00f2ea",background:"#050b17"}, planReady:false, buildReady:false, locks:{html:false,css:false,js:false}, editsLeft:3, files:{html:"",css:"",js:""} };
 
-    const planToast = document.getElementById("planToast");
-    const continueToast = document.getElementById("continueToast");
-    const buildToast = document.getElementById("buildToast");
+    const toast=(el,k,t)=>{ el.classList.remove("hidden","good","bad","warn"); el.classList.add(k); el.textContent=t; };
+    const clearToast=(el)=>{ el.classList.add("hidden"); el.textContent=""; el.classList.remove("good","bad","warn"); };
+    const setApi=(ok,txt)=>{ apiDot.classList.toggle("ok",!!ok); apiPillText.textContent=txt; };
+    const animBtn=(btn,base)=>{ let i=0; const dots=["",".","..","..."]; btn.dataset.anim="1"; btn.textContent=base+dots[i]; const sp=document.createElement("span"); sp.className="spinner"; btn.appendChild(sp); const id=setInterval(()=>{ if(btn.dataset.anim!=="1"){clearInterval(id);return;} i=(i+1)%dots.length; btn.firstChild.nodeValue=base+dots[i]; },300); return ()=>{ btn.dataset.anim="0"; clearInterval(id); btn.textContent=base; }; };
 
-    const htmlPill = document.getElementById("htmlPill");
-    const cssPill = document.getElementById("cssPill");
-    const jsPill = document.getElementById("jsPill");
-    const lockFilesTag = document.getElementById("lockFilesTag");
-
-    const editRequest = document.getElementById("editRequest");
-    const btnApplyEdit = document.getElementById("btnApplyEdit");
-    const editsLeftEl = document.getElementById("editsLeft");
-    const editToast = document.getElementById("editToast");
-
-    const state = {
-      idea: "",
-      templateId: "arena",
-      spec: null,
-      planText: "",
-      planReady: false,
-      buildReady: false,
-      theme: { primary: "#ff0050", secondary: "#00f2ea", background: "#050b17" },
-      files: { html: "", css: "", js: "" },
-      locks: { html: false, css: false, js: false },
-      editsLeft: 3,
-      anim: { timer: 0 }
-    };
-
-    const setApiStatus = (ok, msg) => { apiDot.classList.toggle("ok", !!ok); apiPillText.textContent = msg; };
-    const toast = (el, kind, text) => { el.classList.remove("hidden","good","bad","warn"); el.classList.add(kind); el.textContent = text; };
-    const clearToast = (el) => { el.classList.add("hidden"); el.textContent = ""; el.classList.remove("good","bad","warn"); };
-
-    function setLockTag(tagEl, status){
-      tagEl.classList.remove("ok","bad");
-      tagEl.classList.add(status === "ok" ? "ok" : "bad");
-      tagEl.innerHTML = status === "ok"
-        ? "<strong>Unlocked</strong> — Build in order: HTML → CSS → game.js."
-        : "<strong>Locked</strong> — Generate and Continue first.";
-    }
-
-    function normalizeHex(v){
-      let s = String(v || "").trim();
-      if (!s) return "";
-      if (!s.startsWith("#")) s = "#" + s;
-      if (/^#[0-9a-fA-F]{3}$/.test(s)){ s = "#" + s[1] + s[1] + s[2] + s[2] + s[3] + s[3]; }
-      if (!/^#[0-9a-fA-F]{6}$/.test(s)) return "";
-      return s.toLowerCase();
-    }
-
-    async function apiGet(path){
-      const res = await fetch(API_BASE + path, { method:"GET", cache:"no-store" });
-      if (!res.ok) throw new Error("Request failed");
-      return res.json();
-    }
-
-    async function apiPost(path, body){
-      const res = await fetch(API_BASE + path, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body || {}),
-        cache: "no-store"
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok){
-        const msg = data && data.error ? data.error : ("Request failed (" + res.status + ")");
-        const err = new Error(msg); err.status = res.status; err.data = data; throw err;
-      }
+    async function api(path, body){
+      const res=await fetch(API_BASE+path,{ method: body?"POST":"GET", headers:{"Content-Type":"application/json"}, body: body?JSON.stringify(body):undefined, cache:"no-store" });
+      const data=await res.json().catch(()=>({}));
+      if(!res.ok){ const m=data?.error||("HTTP "+res.status); throw new Error(m); }
       return data;
     }
 
-    const pickSpec = (data) => (data?.plan || data?.spec || data?.context?.spec || data?.context?.plan || null);
-    const toPlanText = (spec) => { try{ return JSON.stringify(spec || {}, null, 2);}catch{ return "";} };
+    function unlockBuild(){ state.buildReady=true; lockFilesTag.classList.remove("bad"); lockFilesTag.classList.add("ok"); lockFilesTag.innerHTML="<strong>Unlocked</strong> — Build in order: HTML → CSS → game.js."; updateButtons(); }
+    function updateButtons(){ btnHtml.disabled=!state.buildReady||state.locks.html; btnCss.disabled=!state.locks.html||state.locks.css; btnJs.disabled=!state.locks.css||state.locks.js; htmlPill.textContent="HTML: "+(state.locks.html?"built":"pending"); cssPill.textContent="CSS: "+(state.locks.css?"built":"pending"); jsPill.textContent="JS: "+(state.locks.js?"built":"pending"); editsLeftEl.textContent="Edits left: "+state.editsLeft; }
 
-    const extractFile = (data, stage) => {
-      const d = data && typeof data === "object" ? data : {};
-      const s = String(stage || "").toLowerCase();
-      if (d.file?.content) return d.file.content;
-      const f = d.files || {};
-      if (s==="html") return f.indexHtml || f.index_html || f.html || f.index || "";
-      if (s==="css")  return f.styleCss || f.style_css || f.css || f.style || "";
-      if (s==="js")   return f.gameJs || f.game_js || f.js || f.game || "";
-      return "";
-    };
+    function normHex(v){ let s=String(v||"").trim(); if(!s) return ""; if(!s.startsWith("#")) s="#"+s; if(/^#[0-9a-f]{3}$/i.test(s)) s="#"+s[1]+s[1]+s[2]+s[2]+s[3]+s[3]; return /^#[0-9a-f]{6}$/i.test(s)?s.toLowerCase():""; }
+    function syncColor(txt,pkr){ txt.addEventListener("change",()=>{ const v=normHex(txt.value)||pkr.value; txt.value=v; pkr.value=v; state.theme[txt.id==="colorPrimary"?"primary":txt.id==="colorSecondary"?"secondary":"background"]=v; }); pkr.addEventListener("input",()=>{ txt.value=pkr.value; state.theme[txt.id==="colorPrimary"?"primary":txt.id==="colorSecondary"?"secondary":"background"]=pkr.value; }); }
+    syncColor(colorPrimary,colorPrimaryPicker); syncColor(colorSecondary,colorSecondaryPicker); syncColor(colorBackground,colorBackgroundPicker);
 
-    function setPlanReady(v){ state.planReady = !!v; }
-    function setBuildReady(v){ state.buildReady = !!v; setLockTag(lockFilesTag, v ? "ok" : "bad"); }
-    function applyTheme(){ const p = normalizeHex(colorPrimary.value) || colorPrimaryPicker.value; const s = normalizeHex(colorSecondary.value) || colorSecondaryPicker.value; const b = normalizeHex(colorBackground.value) || colorBackgroundPicker.value; state.theme = { primary:p, secondary:s, background:b }; }
+    async function checkApi(){ try{ await api("/health"); setApi(true,"API: online"); }catch{ setApi(false,"API: offline"); } }
 
-    function updateButtons(){
-      const ready = state.buildReady;
-      btnHtml.disabled = !ready || state.locks.html;
-      btnCss.disabled  = !ready || !state.locks.html || state.locks.css;
-      btnJs.disabled   = !ready || !state.locks.css  || state.locks.js;
-      htmlPill.textContent = "HTML: " + (state.locks.html ? "built" : "pending");
-      cssPill.textContent  = "CSS: " + (state.locks.css  ? "built" : "pending");
-      jsPill.textContent   = "JS: "  + (state.locks.js   ? "built" : "pending");
-      editsLeftEl.textContent = "Edits left: " + state.editsLeft;
-    }
-
-    function animateBtn(btn, base){
-      let i=0; const dots=["",".","..","..."];
-      btn.dataset.anim = "1";
-      btn.textContent = base + dots[i];
-      const span = document.createElement("span"); span.className = "spinner"; btn.appendChild(span);
-      const id = setInterval(()=> {
-        if (btn.dataset.anim !== "1"){ clearInterval(id); return; }
-        i = (i+1)%dots.length; btn.firstChild.nodeValue = base + dots[i];
-      }, 300);
-      return () => { btn.dataset.anim = "0"; clearInterval(id); btn.textContent = base; };
-    }
-
-    async function checkApi(){
-      try{ await apiGet("/health"); setApiStatus(true, "API: online"); }
-      catch{ setApiStatus(false, "API: offline"); }
-    }
-
-    // PLAN
-    btnPlan.addEventListener("click", async () => {
-      clearToast(planToast); clearToast(continueToast); clearToast(buildToast);
-      const idea = String(gameIdea.value || "").trim();
-      if (!idea){ toast(planToast, "bad", "Please enter a game idea first."); return; }
-
-      const stopAnim = animateBtn(btnPlan, "Generating plan");
-      btnPlan.disabled = true;
-
-      try{
-        state.idea = idea;
-        state.templateId = String(templateId.value || "arena").trim();
-        const data = await apiPost("/api/plan", { idea: state.idea, prompt: state.idea, templateId: state.templateId });
-        state.spec = pickSpec(data);
-        state.planText = toPlanText(state.spec);
-        planEditor.value = state.planText;
-
-        setPlanReady(true); setBuildReady(false);
-        toast(planToast, "good", "Plan generated. Review it below, edit if needed, then Continue.");
-        updateButtons();
-      } catch (e){
-        toast(planToast, "bad", "Plan error: " + (e?.message || "Server error"));
-        setPlanReady(false); setBuildReady(false);
-      } finally { stopAnim(); btnPlan.disabled = false; }
+    btnPlan.addEventListener("click", async ()=>{
+      clearToast(planToast); const idea=(gameIdea.value||"").trim(); if(!idea){ toast(planToast,"bad","Please enter a game idea first."); return; }
+      const stop=animBtn(btnPlan,"Generating plan"); btnPlan.disabled=true;
+      try{ const r=await api("/api/plan",{ prompt:idea }); state.spec=r.plan; planEditor.value=JSON.stringify(state.spec,null,2); state.idea=idea; state.planReady=true; state.buildReady=false; toast(planToast,"good","Plan generated. Review then Continue."); }
+      catch(e){ toast(planToast,"bad","Plan error: "+e.message); }
+      finally{ stop(); btnPlan.disabled=false; updateButtons(); }
     });
 
-    btnPlanEdit.addEventListener("click", async () => {
-      clearToast(continueToast); clearToast(planToast);
-      if (!state.planReady){ toast(planToast, "bad", "Generate a plan first."); return; }
-
-      const edited = String(planEditor.value || "").trim();
-      if (!edited){ toast(planToast, "bad", "Plan text is empty."); return; }
-
-      const stopAnim = animateBtn(btnPlanEdit, "Regenerating");
-      btnPlanEdit.disabled = true; btnContinue.disabled = true;
-      try{
-        const data = await apiPost("/api/plan", { idea: edited, prompt: edited, templateId: state.templateId });
-        const newSpec = pickSpec(data) || state.spec;
-        state.spec = newSpec;
-        state.planText = toPlanText(newSpec);
-        planEditor.value = state.planText;
-        toast(planToast, "good", "Plan updated. If it looks good, hit Continue.");
-      } catch (e){
-        toast(planToast, "bad", "Plan edit error: " + (e?.message || "Server error"));
-      } finally {
-        stopAnim(); btnPlanEdit.disabled = false; btnContinue.disabled = false;
-      }
+    btnPlanEdit.addEventListener("click", async ()=>{
+      clearToast(planToast); clearToast(continueToast); const edited=(planEditor.value||"").trim(); if(!edited){ toast(planToast,"bad","Plan text is empty."); return; }
+      const stop=animBtn(btnPlanEdit,"Regenerating"); btnPlanEdit.disabled=true;
+      try{ const r=await api("/api/plan",{ prompt:edited }); state.spec=r.plan; planEditor.value=JSON.stringify(state.spec,null,2); toast(planToast,"good","Plan updated. Click Continue to build."); }
+      catch(e){ toast(planToast,"bad","Plan edit error: "+e.message); }
+      finally{ stop(); btnPlanEdit.disabled=false; }
     });
 
-    btnContinue.addEventListener("click", () => {
-      clearToast(continueToast); clearToast(buildToast);
-      if (!state.planReady || !state.spec){ toast(continueToast, "bad", "Generate a plan first."); return; }
-      setBuildReady(true);
-      toast(continueToast, "good", "Build unlocked. Choose colors, then build HTML → CSS → game.js.");
-      updateButtons();
-    });
+    btnContinue.addEventListener("click", ()=>{ if(!state.spec){ toast(continueToast,"bad","Generate a plan first."); return; } unlockBuild(); toast(continueToast,"good","Build unlocked. Build HTML → CSS → game.js"); });
 
-    function wireColor(textEl, pickerEl){
-      textEl.addEventListener("change", () => { const v = normalizeHex(textEl.value); if (v){ textEl.value = v; pickerEl.value = v; applyTheme(); } });
-      pickerEl.addEventListener("input", () => { textEl.value = pickerEl.value; applyTheme(); });
-    }
-    wireColor(colorPrimary, colorPrimaryPicker);
-    wireColor(colorSecondary, colorSecondaryPicker);
-    wireColor(colorBackground, colorBackgroundPicker);
-
-    async function buildStage(stage){
+    async function build(stage){
       clearToast(buildToast);
-      applyTheme();
+      if(stage==="css" && !state.locks.html) { toast(buildToast,"bad","Build HTML first."); return; }
+      if(stage==="js" && !state.locks.css) { toast(buildToast,"bad","Build CSS first."); return; }
 
-      if (!state.buildReady || !state.spec){ toast(buildToast, "bad", "Build is locked. Generate and confirm the plan first."); return; }
-      if (stage === "css" && !state.locks.html){ toast(buildToast, "bad", "Build HTML first."); return; }
-      if (stage === "js" && (!state.locks.html || !state.locks.css)){ toast(buildToast, "bad", "Build HTML and CSS first."); return; }
-
-      const label = stage === "html" ? "Building HTML" : stage === "css" ? "Building CSS" : "Building game.js";
       const btn = stage==="html"?btnHtml:stage==="css"?btnCss:btnJs;
-      btn.disabled = true;
-      const stopAnim = animateBtn(btn, label);
+      const stop=animBtn(btn, stage==="html"?"Building HTML":stage==="css"?"Building CSS":"Building game.js"); btn.disabled=true;
 
       try{
-        const data = await apiPost("/api/generate", {
-          stage, idea: state.idea, prompt: state.idea, templateId: state.templateId, theme: state.theme,
-          spec: state.spec, plan: state.spec, context: { spec: state.spec, plan: state.spec }
-        });
-
-        if (data?.context?.spec || data?.context?.plan) state.spec = data.context.spec || data.context.plan;
-
-        const content = String(extractFile(data, stage) || "");
-        if (!content.trim()) throw new Error("API returned no file content.");
-
-        if (stage === "html"){ state.files.html = content; state.locks.html = true; outHtml.value = content; toast(buildToast, "good", "HTML built. Next: Build CSS."); }
-        else if (stage === "css"){ state.files.css = content; state.locks.css = true; outCss.value = content; toast(buildToast, "good", "CSS built. Next: Build game.js."); }
-        else { state.files.js = content; state.locks.js = true; outJs.value = content; toast(buildToast, "good", "game.js built. Optional edits are now unlocked below."); }
-
-        updateButtons();
-      } catch (e){
-        toast(buildToast, "bad", "Build error: " + (e?.message || "Server error"));
-      } finally {
-        stopAnim(); updateButtons();
-      }
+        const r=await api("/api/generate",{ stage, prompt: state.idea, plan: state.spec, theme: state.theme });
+        const f=r.files||{};
+        if(stage==="html"){ state.files.html=f.indexHtml||""; if(!state.files.html) throw new Error("API returned no file content."); outHtml.value=state.files.html; state.locks.html=true; toast(buildToast,"good","HTML built. Next: CSS."); }
+        if(stage==="css"){ state.files.css=f.styleCss||""; if(!state.files.css) throw new Error("API returned no file content."); outCss.value=state.files.css; state.locks.css=true; toast(buildToast,"good","CSS built. Next: game.js."); }
+        if(stage==="js"){ state.files.js=f.gameJs||""; if(!state.files.js) throw new Error("API returned no file content."); outJs.value=state.files.js; state.locks.js=true; toast(buildToast,"good","game.js built."); }
+      }catch(e){ toast(buildToast,"bad","Build error: "+e.message); }
+      finally{ stop(); updateButtons(); }
     }
+    btnHtml.addEventListener("click", ()=>build("html"));
+    btnCss .addEventListener("click", ()=>build("css"));
+    btnJs  .addEventListener("click", ()=>build("js"));
 
-    btnHtml.addEventListener("click", () => buildStage("html"));
-    btnCss.addEventListener("click", () => buildStage("css"));
-    btnJs.addEventListener("click", () => buildStage("js"));
-
-    btnApplyEdit.addEventListener("click", async () => {
+    btnApplyEdit.addEventListener("click", async ()=>{
       clearToast(editToast);
-      if (!state.locks.js || state.editsLeft <= 0){ toast(editToast, "bad", "Edits are locked."); return; }
-
-      const req = String(editRequest.value || "").trim();
-      if (!req){ toast(editToast, "bad", "Type an edit request first."); return; }
-
-      const stopAnim = animateBtn(btnApplyEdit, "Applying edit");
-      btnApplyEdit.disabled = true;
-
+      if(!state.locks.js || state.editsLeft<=0){ toast(editToast,"bad","Edits are locked."); return; }
+      const req=(editRequest.value||"").trim(); if(!req){ toast(editToast,"bad","Type an edit request first."); return; }
+      const stop=animBtn(btnApplyEdit,"Applying edit"); btnApplyEdit.disabled=true;
       try{
-        const data = await apiPost("/api/edit", {
-          remainingEdits: state.editsLeft, changeRequest: req, templateId: state.templateId, theme: state.theme,
-          currentFiles: { "index.html": state.files.html, "style.css": state.files.css, "game.js": state.files.js }
-        });
-
-        if (data && data.files){
-          state.files.html = String(data.files.indexHtml || state.files.html);
-          state.files.css  = String(data.files.styleCss || state.files.css);
-          state.files.js   = String(data.files.gameJs || state.files.js);
-          outHtml.value = state.files.html; outCss.value = state.files.css; outJs.value = state.files.js;
-          state.locks.js = true;
-          state.editsLeft = Math.max(0, state.editsLeft - 1);
-          toast(editToast, "good", "Edit applied.");
-          editRequest.value = "";
-        } else {
-          throw new Error("Edit failed.");
-        }
-        updateButtons();
-      } catch (e){
-        toast(editToast, "bad", "Edit error: " + (e?.message || "Server error"));
-      } finally {
-        stopAnim(); btnApplyEdit.disabled = false; updateButtons();
-      }
+        const r=await api("/api/edit",{ prompt:req, currentFiles:{ "index.html":state.files.html, "style.css":state.files.css, "game.js":state.files.js } });
+        const f=r.files||{}; state.files.html=f.indexHtml||state.files.html; state.files.css=f.styleCss||state.files.css; state.files.js=f.gameJs||state.files.js;
+        outHtml.value=state.files.html; outCss.value=state.files.css; outJs.value=state.files.js;
+        state.editsLeft=Math.max(0,state.editsLeft-1); toast(editToast,"good","Edit applied.");
+      }catch(e){ toast(editToast,"bad","Edit error: "+e.message); }
+      finally{ stop(); btnApplyEdit.disabled=false; updateButtons(); }
     });
 
-    copyHtml.addEventListener("click", async () => { await navigator.clipboard.writeText(outHtml.value || ""); });
-    copyCss.addEventListener("click", async () => { await navigator.clipboard.writeText(outCss.value || ""); });
-    copyJs.addEventListener("click", async () => { await navigator.clipboard.writeText(outJs.value || ""); });
+    copyHtml.addEventListener("click",()=>navigator.clipboard.writeText(outHtml.value||""));
+    copyCss .addEventListener("click",()=>navigator.clipboard.writeText(outCss.value||""));
+    copyJs  .addEventListener("click",()=>navigator.clipboard.writeText(outJs.value||""));
 
-    // Init
-    setTimeout(() => { applyTheme(); updateButtons(); checkApi(); }, 0);
+    (async()=>{ try{ await api("/health"); setApi(true,"API: online"); }catch{ setApi(false,"API: offline"); } updateButtons(); })();
   </script>
 </body>
 </html>
