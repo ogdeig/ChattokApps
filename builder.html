@@ -19,12 +19,11 @@
     .cardHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
     .cardTitle{font-weight:800}
     .cardHint{color:var(--muted);font-size:12px;margin-top:2px}
-    .pillRow{display:flex;gap:6px} .pill{border:1px solid var(--line);border-radius:999px;padding:4px 8px;color:var(--muted);font-size:12px}
     label{display:block;margin:6px 0 4px;font-weight:700;font-size:12px}
     textarea,input,select{width:100%;border:1px solid var(--line);border-radius:12px;background:#0b1220;color:#fff;padding:10px 12px}
     textarea{min-height:130px;resize:vertical}
     .row{display:flex;gap:12px}
-    .btnGood,.btn,.btnWarn{border:1px solid var(--line);border-radius:12px;background:#121a2c;color:#fff;padding:10px 12px;cursor:pointer}
+    .btn,.btnGood,.btnWarn{border:1px solid var(--line);border-radius:12px;background:#121a2c;color:#fff;padding:10px 12px;cursor:pointer}
     .btnGood{background:linear-gradient(135deg,#00f2ea33,#00f2ea18)}
     .btnWarn{background:linear-gradient(135deg,#ffcc6633,#ffcc6618)}
     .toast{margin-top:10px;padding:10px 12px;border-radius:12px;border:1px solid var(--line)}
@@ -41,6 +40,8 @@
     .btnRow{display:flex;gap:8px;flex-wrap:wrap}
     .copyRow{display:flex;gap:8px;align-items:center}
     .small{font-size:12px;color:var(--muted)}
+    .spinner{display:inline-block;width:14px;height:14px;border-radius:999px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;animation:sp .8s linear infinite;margin-left:8px}
+    @keyframes sp{to{transform:rotate(1turn)}}
   </style>
 </head>
 <body>
@@ -67,7 +68,6 @@
             <div class="cardTitle"><span class="stepNum">1</span> Describe your game</div>
             <div class="cardHint">We’ll produce a plan first, then build the files.</div>
           </div>
-          <div class="pillRow"><span class="pill">Fast</span><span class="pill">Low cost</span></div>
         </div>
         <div class="cardBody">
           <label for="gameIdea">Game idea</label>
@@ -233,19 +233,20 @@
       theme: { primary: "#ff0050", secondary: "#00f2ea", background: "#050b17" },
       files: { html: "", css: "", js: "" },
       locks: { html: false, css: false, js: false },
-      editsLeft: 3
+      editsLeft: 3,
+      anim: { timer: 0 }
     };
 
-    function setApiStatus(ok, msg){ apiDot.classList.toggle("ok", !!ok); apiPillText.textContent = msg; }
-    function toast(el, kind, text){ el.classList.remove("hidden","good","bad","warn"); el.classList.add(kind); el.textContent = text; }
-    function clearToast(el){ el.classList.add("hidden"); el.textContent = ""; el.classList.remove("good","bad","warn"); }
+    const setApiStatus = (ok, msg) => { apiDot.classList.toggle("ok", !!ok); apiPillText.textContent = msg; };
+    const toast = (el, kind, text) => { el.classList.remove("hidden","good","bad","warn"); el.classList.add(kind); el.textContent = text; };
+    const clearToast = (el) => { el.classList.add("hidden"); el.textContent = ""; el.classList.remove("good","bad","warn"); };
 
-    function setLockTag(tagEl, status, text){
+    function setLockTag(tagEl, status){
       tagEl.classList.remove("ok","bad");
-      if (status === "ok") tagEl.classList.add("ok");
-      if (status === "bad") tagEl.classList.add("bad");
-      const strong = tagEl.querySelector("strong");
-      if (strong) strong.textContent = text;
+      tagEl.classList.add(status === "ok" ? "ok" : "bad");
+      tagEl.innerHTML = status === "ok"
+        ? "<strong>Unlocked</strong> — Build in order: HTML → CSS → game.js."
+        : "<strong>Locked</strong> — Generate and Continue first.";
     }
 
     function normalizeHex(v){
@@ -278,46 +279,25 @@
       return data;
     }
 
-    function pickSpecFromPlanResponse(data){
-      const d = data && typeof data === "object" ? data : {};
-      return d.plan || d.spec || (d.context && (d.context.spec || d.context.plan)) || null;
-    }
+    const pickSpec = (data) => (data?.plan || data?.spec || data?.context?.spec || data?.context?.plan || null);
+    const toPlanText = (spec) => { try{ return JSON.stringify(spec || {}, null, 2);}catch{ return "";} };
 
-    function toPlanText(spec){ try{ return JSON.stringify(spec || {}, null, 2); }catch{ return ""; } }
-
-    function extractFileContent(data, stage){
+    const extractFile = (data, stage) => {
       const d = data && typeof data === "object" ? data : {};
       const s = String(stage || "").toLowerCase();
-
-      // preferred: data.file.content
-      if (d.file && typeof d.file.content === "string" && d.file.content.trim()){
-        return d.file.content;
-      }
-      // builder-friendly: data.files.{indexHtml,styleCss,gameJs}
-      const files = d.files && typeof d.files === "object" ? d.files : null;
-      if (files){
-        if (s === "html"){ const c = files.indexHtml || files.index_html || files.html || files.index; if (typeof c === "string") return c; }
-        if (s === "css"){ const c = files.styleCss || files.style_css || files.css || files.style; if (typeof c === "string") return c; }
-        if (s === "js"){ const c = files.gameJs || files.game_js || files.js || files.game; if (typeof c === "string") return c; }
-      }
+      if (d.file?.content) return d.file.content;
+      const f = d.files || {};
+      if (s==="html") return f.indexHtml || f.index_html || f.html || f.index || "";
+      if (s==="css")  return f.styleCss || f.style_css || f.css || f.style || "";
+      if (s==="js")   return f.gameJs || f.game_js || f.js || f.game || "";
       return "";
-    }
+    };
 
     function setPlanReady(v){ state.planReady = !!v; }
-    function setBuildReady(v){
-      state.buildReady = !!v;
-      lockFilesTag.innerHTML = v ? "<strong>Unlocked</strong> — Build in order: HTML → CSS → game.js." : "<strong>Locked</strong> — Generate and Continue first.";
-      setLockTag(lockFilesTag, v ? "ok" : "bad", v ? "Unlocked" : "Locked");
-    }
+    function setBuildReady(v){ state.buildReady = !!v; setLockTag(lockFilesTag, v ? "ok" : "bad"); }
+    function applyTheme(){ const p = normalizeHex(colorPrimary.value) || colorPrimaryPicker.value; const s = normalizeHex(colorSecondary.value) || colorSecondaryPicker.value; const b = normalizeHex(colorBackground.value) || colorBackgroundPicker.value; state.theme = { primary:p, secondary:s, background:b }; }
 
-    function applyThemeInputsToState(){
-      const p = normalizeHex(colorPrimary.value) || colorPrimaryPicker.value;
-      const s = normalizeHex(colorSecondary.value) || colorSecondaryPicker.value;
-      const b = normalizeHex(colorBackground.value) || colorBackgroundPicker.value;
-      state.theme = { primary: p, secondary: s, background: b };
-    }
-
-    function updateBuildButtons(){
+    function updateButtons(){
       const ready = state.buildReady;
       btnHtml.disabled = !ready || state.locks.html;
       btnCss.disabled  = !ready || !state.locks.html || state.locks.css;
@@ -328,36 +308,47 @@
       editsLeftEl.textContent = "Edits left: " + state.editsLeft;
     }
 
-    async function checkApi(){
-      try{ await apiGet("/health"); setApiStatus(true, "API: online"); }
-      catch{ setApiStatus(false, "API: offline (check Render)"); }
+    function animateBtn(btn, base){
+      let i=0; const dots=["",".","..","..."];
+      btn.dataset.anim = "1";
+      btn.textContent = base + dots[i];
+      const span = document.createElement("span"); span.className = "spinner"; btn.appendChild(span);
+      const id = setInterval(()=> {
+        if (btn.dataset.anim !== "1"){ clearInterval(id); return; }
+        i = (i+1)%dots.length; btn.firstChild.nodeValue = base + dots[i];
+      }, 300);
+      return () => { btn.dataset.anim = "0"; clearInterval(id); btn.textContent = base; };
     }
 
-    // Step 2: Plan
+    async function checkApi(){
+      try{ await apiGet("/health"); setApiStatus(true, "API: online"); }
+      catch{ setApiStatus(false, "API: offline"); }
+    }
+
+    // PLAN
     btnPlan.addEventListener("click", async () => {
       clearToast(planToast); clearToast(continueToast); clearToast(buildToast);
       const idea = String(gameIdea.value || "").trim();
       if (!idea){ toast(planToast, "bad", "Please enter a game idea first."); return; }
 
+      const stopAnim = animateBtn(btnPlan, "Generating plan");
       btnPlan.disabled = true;
-      toast(planToast, "warn", "Generating plan…");
 
       try{
         state.idea = idea;
         state.templateId = String(templateId.value || "arena").trim();
         const data = await apiPost("/api/plan", { idea: state.idea, prompt: state.idea, templateId: state.templateId });
-        state.spec = pickSpecFromPlanResponse(data);
-        state.planText = (data && data.planText) ? String(data.planText) : toPlanText(state.spec);
+        state.spec = pickSpec(data);
+        state.planText = toPlanText(state.spec);
         planEditor.value = state.planText;
 
-        setPlanReady(true);
-        setBuildReady(false);
+        setPlanReady(true); setBuildReady(false);
         toast(planToast, "good", "Plan generated. Review it below, edit if needed, then Continue.");
-        updateBuildButtons();
+        updateButtons();
       } catch (e){
-        toast(planToast, "bad", "Plan error: " + (e && e.message ? e.message : "Server error"));
+        toast(planToast, "bad", "Plan error: " + (e?.message || "Server error"));
         setPlanReady(false); setBuildReady(false);
-      } finally { btnPlan.disabled = false; }
+      } finally { stopAnim(); btnPlan.disabled = false; }
     });
 
     btnPlanEdit.addEventListener("click", async () => {
@@ -367,19 +358,19 @@
       const edited = String(planEditor.value || "").trim();
       if (!edited){ toast(planToast, "bad", "Plan text is empty."); return; }
 
+      const stopAnim = animateBtn(btnPlanEdit, "Regenerating");
       btnPlanEdit.disabled = true; btnContinue.disabled = true;
-      toast(planToast, "warn", "Regenerating plan from your edits…");
       try{
         const data = await apiPost("/api/plan", { idea: edited, prompt: edited, templateId: state.templateId });
-        const newSpec = pickSpecFromPlanResponse(data) || state.spec;
+        const newSpec = pickSpec(data) || state.spec;
         state.spec = newSpec;
-        state.planText = (data && data.planText) ? String(data.planText) : toPlanText(newSpec);
+        state.planText = toPlanText(newSpec);
         planEditor.value = state.planText;
         toast(planToast, "good", "Plan updated. If it looks good, hit Continue.");
       } catch (e){
-        toast(planToast, "bad", "Plan edit error: " + (e && e.message ? e.message : "Server error"));
+        toast(planToast, "bad", "Plan edit error: " + (e?.message || "Server error"));
       } finally {
-        btnPlanEdit.disabled = false; btnContinue.disabled = false;
+        stopAnim(); btnPlanEdit.disabled = false; btnContinue.disabled = false;
       }
     });
 
@@ -388,61 +379,50 @@
       if (!state.planReady || !state.spec){ toast(continueToast, "bad", "Generate a plan first."); return; }
       setBuildReady(true);
       toast(continueToast, "good", "Build unlocked. Choose colors, then build HTML → CSS → game.js.");
-      updateBuildButtons();
+      updateButtons();
     });
 
-    function wireColorSync(textEl, pickerEl){
-      textEl.addEventListener("change", () => {
-        const v = normalizeHex(textEl.value);
-        if (v){ textEl.value = v; pickerEl.value = v; applyThemeInputsToState(); }
-      });
-      pickerEl.addEventListener("input", () => { textEl.value = pickerEl.value; applyThemeInputsToState(); });
+    function wireColor(textEl, pickerEl){
+      textEl.addEventListener("change", () => { const v = normalizeHex(textEl.value); if (v){ textEl.value = v; pickerEl.value = v; applyTheme(); } });
+      pickerEl.addEventListener("input", () => { textEl.value = pickerEl.value; applyTheme(); });
     }
-    wireColorSync(colorPrimary, colorPrimaryPicker);
-    wireColorSync(colorSecondary, colorSecondaryPicker);
-    wireColorSync(colorBackground, colorBackgroundPicker);
+    wireColor(colorPrimary, colorPrimaryPicker);
+    wireColor(colorSecondary, colorSecondaryPicker);
+    wireColor(colorBackground, colorBackgroundPicker);
 
     async function buildStage(stage){
       clearToast(buildToast);
-      applyThemeInputsToState();
+      applyTheme();
 
       if (!state.buildReady || !state.spec){ toast(buildToast, "bad", "Build is locked. Generate and confirm the plan first."); return; }
       if (stage === "css" && !state.locks.html){ toast(buildToast, "bad", "Build HTML first."); return; }
       if (stage === "js" && (!state.locks.html || !state.locks.css)){ toast(buildToast, "bad", "Build HTML and CSS first."); return; }
 
-      const label = stage === "html" ? "HTML" : stage === "css" ? "CSS" : "game.js";
-      toast(buildToast, "warn", "Building " + label + "…");
-
-      if (stage === "html") btnHtml.disabled = true;
-      if (stage === "css") btnCss.disabled = true;
-      if (stage === "js") btnJs.disabled = true;
+      const label = stage === "html" ? "Building HTML" : stage === "css" ? "Building CSS" : "Building game.js";
+      const btn = stage==="html"?btnHtml:stage==="css"?btnCss:btnJs;
+      btn.disabled = true;
+      const stopAnim = animateBtn(btn, label);
 
       try{
         const data = await apiPost("/api/generate", {
           stage, idea: state.idea, prompt: state.idea, templateId: state.templateId, theme: state.theme,
-          // Send plan/spec in many shapes for maximum compatibility
           spec: state.spec, plan: state.spec, context: { spec: state.spec, plan: state.spec }
         });
 
-        if (data && data.context && (data.context.spec || data.context.plan)) {
-          state.spec = data.context.spec || data.context.plan;
-        }
+        if (data?.context?.spec || data?.context?.plan) state.spec = data.context.spec || data.context.plan;
 
-        const content = String(extractFileContent(data, stage) || "");
-        if (!content.trim()) { const err = new Error("API returned no file content."); err.data = data; throw err; }
+        const content = String(extractFile(data, stage) || "");
+        if (!content.trim()) throw new Error("API returned no file content.");
 
         if (stage === "html"){ state.files.html = content; state.locks.html = true; outHtml.value = content; toast(buildToast, "good", "HTML built. Next: Build CSS."); }
         else if (stage === "css"){ state.files.css = content; state.locks.css = true; outCss.value = content; toast(buildToast, "good", "CSS built. Next: Build game.js."); }
-        else if (stage === "js"){ state.files.js = content; state.locks.js = true; outJs.value = content; toast(buildToast, "good", "game.js built. Optional edits are now unlocked below."); }
+        else { state.files.js = content; state.locks.js = true; outJs.value = content; toast(buildToast, "good", "game.js built. Optional edits are now unlocked below."); }
 
-        updateBuildButtons();
+        updateButtons();
       } catch (e){
-        toast(buildToast, "bad", "Build error: " + (e && e.message ? e.message : "Server error"));
-        updateBuildButtons();
+        toast(buildToast, "bad", "Build error: " + (e?.message || "Server error"));
       } finally {
-        btnHtml.disabled = !state.buildReady || state.locks.html;
-        btnCss.disabled = !state.buildReady || !state.locks.html || state.locks.css;
-        btnJs.disabled  = !state.buildReady || !state.locks.css || state.locks.js;
+        stopAnim(); updateButtons();
       }
     }
 
@@ -457,8 +437,8 @@
       const req = String(editRequest.value || "").trim();
       if (!req){ toast(editToast, "bad", "Type an edit request first."); return; }
 
+      const stopAnim = animateBtn(btnApplyEdit, "Applying edit");
       btnApplyEdit.disabled = true;
-      toast(editToast, "warn", "Applying edit…");
 
       try{
         const data = await apiPost("/api/edit", {
@@ -478,11 +458,11 @@
         } else {
           throw new Error("Edit failed.");
         }
-        updateBuildButtons();
+        updateButtons();
       } catch (e){
-        toast(editToast, "bad", "Edit error: " + (e && e.message ? e.message : "Server error"));
+        toast(editToast, "bad", "Edit error: " + (e?.message || "Server error"));
       } finally {
-        btnApplyEdit.disabled = false; updateBuildButtons();
+        stopAnim(); btnApplyEdit.disabled = false; updateButtons();
       }
     });
 
@@ -491,11 +471,7 @@
     copyJs.addEventListener("click", async () => { await navigator.clipboard.writeText(outJs.value || ""); });
 
     // Init
-    function wireColorSync(textEl, pickerEl){
-      textEl.addEventListener("change", () => { const v = normalizeHex(textEl.value); if (v){ textEl.value = v; pickerEl.value = v; applyThemeInputsToState(); } });
-      pickerEl.addEventListener("input", () => { textEl.value = pickerEl.value; applyThemeInputsToState(); });
-    }
-    setTimeout(() => { applyThemeInputsToState(); updateBuildButtons(); checkApi(); }, 0);
+    setTimeout(() => { applyTheme(); updateButtons(); checkApi(); }, 0);
   </script>
 </body>
 </html>
