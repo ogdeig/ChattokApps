@@ -2,1333 +2,206 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>ChatTok Gaming — AI Game Builder</title>
-
-  <style>
-    :root{
-      --bg0:#050b17;
-      --bg1:#071a35;
-
-      --panel: rgba(255,255,255,.06);
-      --panel2: rgba(255,255,255,.04);
-      --line: rgba(255,255,255,.10);
-
-      --text:#ffffff;
-      --muted: rgba(255,255,255,.72);
-
-      --good:#2ee59d;
-      --bad:#ff4d4d;
-      --warn:#ffcc66;
-
-      --shadowPanel: 0 14px 40px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.08);
-      --r: 18px;
-      --r2: 14px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-
-      --pink:#ff0050;
-      --aqua:#00f2ea;
-
-      --btn: linear-gradient(135deg, rgba(0,242,234,.22), rgba(255,0,80,.22));
-      --btn2: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
-    }
-
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
-    body{
-      margin:0;
-      font-family: var(--sans);
-      color: var(--text);
-      background:
-        radial-gradient(1000px 600px at 12% -10%, rgba(0,242,234,.18), transparent 58%),
-        radial-gradient(900px 520px at 86% -12%, rgba(255,0,80,.16), transparent 56%),
-        radial-gradient(1200px 900px at 50% 120%, rgba(0,0,0,.72), transparent 55%),
-        linear-gradient(180deg, #020611 0%, var(--bg0) 48%, #01040c 100%);
-      overflow-x:hidden;
-    }
-
-    .wrap{
-      max-width: 1220px;
-      margin: 0 auto;
-      padding: 22px 16px 40px;
-    }
-
-    .header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:14px;
-      padding: 14px 16px;
-      border-radius: var(--r);
-      background: rgba(255,255,255,.05);
-      border: 1px solid rgba(255,255,255,.10);
-      box-shadow: var(--shadowPanel);
-      position: sticky;
-      top: 10px;
-      z-index: 10;
-      backdrop-filter: blur(10px);
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      min-width: 260px;
-    }
-    .logo{
-      width:40px;height:40px;border-radius:14px;
-      background: linear-gradient(135deg, rgba(255,0,80,.85), rgba(0,242,234,.85));
-      box-shadow: 0 14px 26px rgba(0,0,0,.35);
-      display:grid;
-      place-items:center;
-      font-weight: 900;
-      letter-spacing: .5px;
-      user-select:none;
-    }
-    .brand h1{
-      margin:0;
-      font-size: 16px;
-      line-height: 1.1;
-      font-weight: 900;
-      letter-spacing:.2px;
-    }
-    .brand p{
-      margin:3px 0 0;
-      font-size: 12px;
-      color: var(--muted);
-      line-height:1.2;
-    }
-
-    .statusbar{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap: wrap;
-      justify-content:flex-end;
-    }
-
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
-      color: rgba(255,255,255,.86);
-      font-size: 12px;
-      user-select:none;
-      white-space:nowrap;
-    }
-    .dot{
-      width:10px;height:10px;border-radius:999px;
-      background: rgba(255,255,255,.35);
-      box-shadow: 0 0 0 3px rgba(255,255,255,.10);
-    }
-    .pill.good .dot{ background: var(--good); box-shadow:0 0 0 3px rgba(46,229,157,.18); }
-    .pill.bad .dot{ background: var(--bad); box-shadow:0 0 0 3px rgba(255,77,77,.18); }
-    .pill.warn .dot{ background: var(--warn); box-shadow:0 0 0 3px rgba(255,204,102,.18); }
-    .pill code{ font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.88); }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-top: 14px;
-    }
-    @media (max-width: 980px){
-      .grid{ grid-template-columns: 1fr; }
-      .brand{ min-width: unset; }
-      .header{ position: relative; top:auto; }
-    }
-
-    .card{
-      border-radius: var(--r);
-      background: var(--panel);
-      border: 1px solid rgba(255,255,255,.10);
-      box-shadow: var(--shadowPanel);
-      overflow:hidden;
-    }
-
-    .cardHead{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap: 12px;
-      padding: 14px 14px 10px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-    }
-
-    .cardTitle{
-      display:flex;
-      flex-direction:column;
-      gap: 4px;
-    }
-    .cardTitle .t{
-      font-weight: 900;
-      letter-spacing:.2px;
-      font-size: 14px;
-      margin:0;
-    }
-    .cardTitle .s{
-      margin:0;
-      font-size: 12px;
-      color: var(--muted);
-      line-height:1.3;
-    }
-
-    .cardBody{
-      padding: 14px;
-    }
-
-    label{
-      display:block;
-      font-size: 12px;
-      color: rgba(255,255,255,.82);
-      margin-bottom: 6px;
-      font-weight: 800;
-      letter-spacing:.2px;
-    }
-
-    input[type="text"], textarea, select{
-      width:100%;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      color: rgba(255,255,255,.92);
-      padding: 11px 12px;
-      outline:none;
-      font-size: 13px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
-    }
-    textarea{
-      min-height: 110px;
-      resize: vertical;
-      font-family: var(--sans);
-      line-height:1.35;
-    }
-    .mono{
-      font-family: var(--mono);
-      font-size: 12px;
-      min-height: 150px;
-    }
-
-    .row{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    @media (max-width: 680px){
-      .row{ grid-template-columns: 1fr; }
-    }
-
-    .btnRow{
-      display:flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items:center;
-      justify-content:flex-start;
-      margin-top: 10px;
-    }
-
-    button{
-      border: 1px solid rgba(255,255,255,.14);
-      background: var(--btn2);
-      color: rgba(255,255,255,.92);
-      padding: 10px 12px;
-      border-radius: 14px;
-      cursor:pointer;
-      font-weight: 900;
-      letter-spacing: .2px;
-      font-size: 13px;
-      box-shadow: 0 14px 28px rgba(0,0,0,.28);
-      transition: transform .08s ease, opacity .08s ease;
-      user-select:none;
-    }
-    button:hover{ transform: translateY(-1px); }
-    button:active{ transform: translateY(0px); opacity:.92; }
-    button:disabled{ opacity:.45; cursor:not-allowed; transform:none; }
-
-    .primary{
-      background: var(--btn);
-      border: 1px solid rgba(255,255,255,.18);
-    }
-    .ghost{
-      background: rgba(0,0,0,.14);
-    }
-    .tiny{
-      padding: 8px 10px;
-      font-size: 12px;
-      border-radius: 12px;
-      box-shadow: none;
-    }
-
-    .hint{
-      margin-top: 10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.16);
-      color: rgba(255,255,255,.78);
-      font-size: 12px;
-      line-height:1.35;
-    }
-    .hint b{ color: rgba(255,255,255,.92); }
-
-    .toast{
-      margin-top: 10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.20);
-      font-size: 12px;
-      line-height:1.35;
-      display:none;
-    }
-    .toast.good{ border-color: rgba(46,229,157,.28); background: rgba(46,229,157,.10); display:block; }
-    .toast.bad{ border-color: rgba(255,77,77,.28); background: rgba(255,77,77,.10); display:block; }
-    .toast.warn{ border-color: rgba(255,204,102,.28); background: rgba(255,204,102,.10); display:block; }
-
-    .split{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-
-    .lockTag{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
-      font-size: 12px;
-      color: rgba(255,255,255,.82);
-      user-select:none;
-      white-space:nowrap;
-    }
-    .lockTag.ok{ border-color: rgba(46,229,157,.30); background: rgba(46,229,157,.10); }
-    .lockTag .miniDot{
-      width:8px;height:8px;border-radius:999px;background: rgba(255,255,255,.35);
-    }
-    .lockTag.ok .miniDot{ background: var(--good); }
-
-    .outActions{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      justify-content:flex-end;
-      flex-wrap:wrap;
-    }
-
-    .hr{
-      height:1px;
-      background: rgba(255,255,255,.08);
-      margin: 12px 0;
-    }
-
-    .swatches{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-      margin-top: 10px;
-    }
-    .swatch{
-      width: 46px;
-      height: 30px;
-      border-radius: 12px;
-      border: 2px solid rgba(255,255,255,.12);
-      cursor:pointer;
-      box-shadow: 0 10px 20px rgba(0,0,0,.22);
-      transition: transform .08s ease, border-color .08s ease;
-    }
-    .swatch:hover{ transform: translateY(-1px); }
-    .swatch.sel{ border-color: rgba(255,255,255,.55); }
-
-    .hidden{ display:none !important; }
-
-    .fileHeader{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom: 8px;
-    }
-    .fileHeader .name{
-      font-weight: 900;
-      letter-spacing:.2px;
-      font-size: 13px;
-      color: rgba(255,255,255,.92);
-    }
-    .mutedSmall{ color: var(--muted); font-size: 12px; line-height:1.3; }
-  </style>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>ChatTokApps • Game Builder</title>
+  <link rel="stylesheet" href="./app.css" />
 </head>
-
 <body>
-  <div class="wrap">
-    <div class="header">
-      <div class="brand">
-        <div class="logo">CT</div>
-        <div>
-          <h1>AI Game Builder</h1>
-          <p>Plan → Build (HTML → CSS → JS) → Optional edits (up to 3)</p>
-        </div>
-      </div>
-
-      <div class="statusbar">
-        <div class="pill warn" id="apiPill" title="API health">
-          <span class="dot"></span>
-          <span id="apiText">API: checking…</span>
-        </div>
-        <div class="pill" title="Contract mode">
-          <span class="dot" style="opacity:.6"></span>
-          <span id="contractMode">Contract: auto-detect</span>
-        </div>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logoDot" aria-hidden="true"></div>
+      <div class="brandText">
+        <div class="brandTitle">ChatTokApps • Game Builder</div>
+        <div class="brandSub">Prompt → Spec → index.html + style.css + game.js (9:16 TikTok Live games)</div>
       </div>
     </div>
 
-    <div class="grid">
+    <div class="topActions">
+      <button id="btnPing" class="btn ghost">Ping API</button>
+      <button id="btnReset" class="btn ghost">Reset UI</button>
+    </div>
+  </header>
 
-      <!-- LEFT: Setup + Plan -->
+  <main class="wrap">
+    <section class="grid">
+      <!-- LEFT PANEL -->
       <div class="card">
-        <div class="cardHead">
-          <div class="cardTitle">
-            <p class="t">1) Describe the game</p>
-            <p class="s">Be specific: gameplay loop, chat commands, gifts/likes, win condition, and visuals.</p>
-          </div>
-          <span class="lockTag" id="planLock">
-            <span class="miniDot"></span>
-            <span id="planLockText">Waiting</span>
-          </span>
-        </div>
+        <h2>Builder Settings</h2>
 
-        <div class="cardBody">
-          <label for="templateId">Template flavor</label>
-          <select id="templateId">
-            <option value="arena">Arena (action)</option>
-            <option value="trivia">Trivia (rounds)</option>
-            <option value="wheel">Spin Wheel (random)</option>
-            <option value="boss">Boss Fight (team vs boss)</option>
-          </select>
-
-          <div class="hr"></div>
-
-          <label for="gameIdea">Game idea prompt</label>
-          <textarea id="gameIdea" placeholder="Example: Seek & Destroy — viewers type coordinates like A4 to fire at hidden targets on a grid. Hits show 💥 + the shooter's profile pop. Misses show 💦. Gifts can reveal a tile or add an extra shot. Likes charge a radar sweep. Must feel good with 3–4s chat delay."></textarea>
-
-          <div class="btnRow">
-            <button class="primary" id="btnPlan">Generate Plan / Spec</button>
-            <button class="ghost" id="btnPlanEdit" disabled>Rebuild Spec from edited plan</button>
-            <button class="primary" id="btnContinue" disabled>Continue → Build</button>
-          </div>
-
-          <div class="toast" id="planToast"></div>
-          <div class="toast" id="continueToast"></div>
-
-          <div class="hr"></div>
-
-          <label for="planEditor">Plan / Spec (editable)</label>
-          <textarea id="planEditor" class="mono" placeholder="Your generated plan/spec will appear here. You can tweak it, then click 'Rebuild Spec from edited plan'."></textarea>
-
+        <div class="field">
+          <label class="label">Render API Base URL</label>
+          <input id="apiBase" class="input mono" spellcheck="false" />
           <div class="hint">
-            <b>Notes:</b> Builder automatically adapts to the API’s contract. If the API provides <code>/api/plan</code>, we use it.
-            Otherwise we derive the plan from the spec returned by <code>/api/generate</code>.
+            Default is your Render API. You can change it temporarily for testing.
           </div>
+        </div>
+
+        <div class="fieldRow">
+          <div class="field">
+            <label class="label">Spec Endpoint</label>
+            <input id="specPath" class="input mono" spellcheck="false" />
+            <div class="hint">Example: <span class="mono">/api/spec</span> or <span class="mono">/api/plan</span></div>
+          </div>
+          <div class="field">
+            <label class="label">Build Endpoint</label>
+            <input id="buildPath" class="input mono" spellcheck="false" />
+            <div class="hint">Example: <span class="mono">/api/build</span></div>
+          </div>
+        </div>
+
+        <div class="fieldRow">
+          <div class="field">
+            <label class="label">Edit Endpoint</label>
+            <input id="editPath" class="input mono" spellcheck="false" />
+            <div class="hint">Example: <span class="mono">/api/edit</span></div>
+          </div>
+          <div class="field">
+            <label class="label">Ping Endpoint</label>
+            <input id="pingPath" class="input mono" spellcheck="false" />
+            <div class="hint">Example: <span class="mono">/api/ping</span></div>
+          </div>
+        </div>
+
+        <hr class="hr" />
+
+        <h2>Theme Colors</h2>
+        <p class="muted">
+          These values are passed into the spec/build requests so the AI can generate a consistent professional style.
+        </p>
+
+        <div class="colors">
+          <div class="colorRow">
+            <label>Primary</label>
+            <input id="cPrimary" type="color" value="#ff0050" />
+            <input id="tPrimary" class="input mono" value="#ff0050" spellcheck="false" />
+          </div>
+          <div class="colorRow">
+            <label>Secondary</label>
+            <input id="cSecondary" type="color" value="#00f2ea" />
+            <input id="tSecondary" class="input mono" value="#00f2ea" spellcheck="false" />
+          </div>
+          <div class="colorRow">
+            <label>Background</label>
+            <input id="cBg" type="color" value="#050b17" />
+            <input id="tBg" class="input mono" value="#050b17" spellcheck="false" />
+          </div>
+          <div class="colorRow">
+            <label>Surface</label>
+            <input id="cSurface" type="color" value="#0b1632" />
+            <input id="tSurface" class="input mono" value="#0b1632" spellcheck="false" />
+          </div>
+          <div class="colorRow">
+            <label>Text</label>
+            <input id="cText" type="color" value="#ffffff" />
+            <input id="tText" class="input mono" value="#ffffff" spellcheck="false" />
+          </div>
+        </div>
+
+        <div class="preview">
+          <div class="chip" id="chipPrimary">Primary</div>
+          <div class="chip" id="chipSecondary">Secondary</div>
+          <div class="chip chipSurface" id="chipSurface">Surface</div>
+        </div>
+
+        <hr class="hr" />
+
+        <h2>Prompt</h2>
+        <p class="muted">
+          Write a detailed game idea. The builder always generates a structured spec first, then full game files.
+        </p>
+
+        <textarea id="prompt" class="textarea" rows="11" placeholder="Describe your TikTok Live interactive game idea..."></textarea>
+
+        <div class="toggles">
+          <label class="toggle">
+            <input id="useCache" type="checkbox" checked />
+            <span>Allow server-side cache (cheaper)</span>
+          </label>
+          <label class="toggle">
+            <input id="forceFresh" type="checkbox" />
+            <span>Force fresh (ignore cache)</span>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="btnSpec" class="btn">Build Spec</button>
+          <button id="btnBuild" class="btn primary">Build Game Files</button>
+        </div>
+
+        <div class="statusBox">
+          <div class="statusLine"><span class="k">RequestId</span><span id="reqId" class="mono">—</span></div>
+          <div class="statusLine"><span class="k">API</span><span id="apiStatus">Not checked</span></div>
+          <div class="statusLine"><span class="k">Build</span><span id="buildStatus">Idle</span></div>
+        </div>
+
+        <hr class="hr" />
+
+        <h2>Edit (up to 3)</h2>
+        <p class="muted">
+          After a build, request targeted edits. Optional: attach a screenshot (UI issue, console error, etc).
+        </p>
+
+        <textarea id="editPrompt" class="textarea" rows="4" placeholder="Example: Make the HUD cleaner, add more juice to explosions, fix scoreboard spacing..."></textarea>
+
+        <div class="field">
+          <label class="label">Attach screenshot (optional)</label>
+          <input id="editImage" class="input" type="file" accept="image/*" />
+          <div class="hint">This sends a small base64 image to your API (limit ~900KB).</div>
+        </div>
+
+        <div class="actions">
+          <button id="btnEdit" class="btn ghost" disabled>Apply Edit</button>
+          <div class="pill">Edits used: <span id="editCount">0</span>/3</div>
         </div>
       </div>
 
-      <!-- RIGHT: Build + Outputs -->
+      <!-- RIGHT PANEL -->
       <div class="card">
-        <div class="cardHead">
-          <div class="cardTitle">
-            <p class="t">2) Build the files</p>
-            <p class="s">Order is enforced: HTML → CSS → game.js. Copy full files into your game folder.</p>
-          </div>
-          <span class="lockTag" id="filesLock">
-            <span class="miniDot"></span>
-            <span id="filesLockText">Waiting</span>
-          </span>
+        <h2>Outputs</h2>
+
+        <div class="block">
+          <div class="blockTitle">Prompt Echo (what the API actually used)</div>
+          <pre id="echoPrompt" class="pre"></pre>
         </div>
 
-        <div class="cardBody">
-          <div class="row">
-            <div>
-              <label>Primary</label>
-              <div class="row" style="grid-template-columns: 1fr 90px; gap:8px">
-                <input type="text" id="colorPrimary" value="#ff0050" />
-                <input type="color" id="colorPrimaryPicker" value="#ff0050" style="height:42px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:transparent;padding:0" />
-              </div>
-            </div>
-            <div>
-              <label>Secondary</label>
-              <div class="row" style="grid-template-columns: 1fr 90px; gap:8px">
-                <input type="text" id="colorSecondary" value="#00f2ea" />
-                <input type="color" id="colorSecondaryPicker" value="#00f2ea" style="height:42px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:transparent;padding:0" />
-              </div>
-            </div>
-          </div>
-
-          <div class="row" style="margin-top:10px">
-            <div>
-              <label>Background</label>
-              <div class="row" style="grid-template-columns: 1fr 90px; gap:8px">
-                <input type="text" id="colorBackground" value="#050b17" />
-                <input type="color" id="colorBackgroundPicker" value="#050b17" style="height:42px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:transparent;padding:0" />
-              </div>
-            </div>
-            <div>
-              <label>Theme presets</label>
-              <div class="swatches" id="presetRow" style="margin-top:0"></div>
-            </div>
-          </div>
-
-          <div class="btnRow" style="margin-top:12px">
-            <button class="primary" id="btnHtml" disabled>Build HTML</button>
-            <button class="primary" id="btnCss" disabled>Build CSS</button>
-            <button class="primary" id="btnJs" disabled>Build game.js</button>
-          </div>
-
-          <div class="btnRow">
-            <button class="ghost tiny" id="rebuildHtml" disabled>Unlock HTML</button>
-            <button class="ghost tiny" id="rebuildCss" disabled>Unlock CSS</button>
-            <button class="ghost tiny" id="rebuildJs" disabled>Unlock JS</button>
-          </div>
-
-          <div class="toast" id="buildToast"></div>
-
-          <div class="hr"></div>
-
-          <div class="split">
-            <div>
-              <div class="fileHeader">
-                <div class="name">index.html</div>
-                <div class="outActions">
-                  <span class="pill" id="htmlPill"><span class="dot"></span><span>Not built</span></span>
-                  <button class="tiny" id="copyHtml" disabled>Copy</button>
-                </div>
-              </div>
-              <textarea id="outHtml" class="mono" placeholder="index.html will appear here…" spellcheck="false"></textarea>
-            </div>
-
-            <div>
-              <div class="fileHeader">
-                <div class="name">style.css</div>
-                <div class="outActions">
-                  <span class="pill" id="cssPill"><span class="dot"></span><span>Not built</span></span>
-                  <button class="tiny" id="copyCss" disabled>Copy</button>
-                </div>
-              </div>
-              <textarea id="outCss" class="mono" placeholder="style.css will appear here…" spellcheck="false"></textarea>
-            </div>
-
-            <div>
-              <div class="fileHeader">
-                <div class="name">game.js</div>
-                <div class="outActions">
-                  <span class="pill" id="jsPill"><span class="dot"></span><span>Not built</span></span>
-                  <button class="tiny" id="copyJs" disabled>Copy</button>
-                </div>
-              </div>
-              <textarea id="outJs" class="mono" placeholder="game.js will appear here…" spellcheck="false"></textarea>
-            </div>
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="card" style="background: rgba(0,0,0,.16); border-color: rgba(255,255,255,.10); box-shadow:none">
-            <div class="cardHead" style="border-bottom-color: rgba(255,255,255,.08)">
-              <div class="cardTitle">
-                <p class="t">3) Optional edits (max 3)</p>
-                <p class="s">Unlocked only after <b>game.js</b> is built. Keeps TikTok connection contract intact.</p>
-              </div>
-              <span class="lockTag" id="editLock">
-                <span class="miniDot"></span>
-                <span><span id="editsLeft">3</span> edits left</span>
-              </span>
-            </div>
-            <div class="cardBody">
-              <div id="editLockedMsg" class="mutedSmall">
-                Build <b>game.js</b> to unlock edits.
-              </div>
-
-              <div id="editUnlocked" class="hidden">
-                <label for="editRequest">Edit request</label>
-                <textarea id="editRequest" placeholder="Example: Make hits flash bigger, add a stronger hit sound, and show a bigger profile pop for the shooter. Keep 9:16 layout and TikTok connection contract." style="min-height:90px"></textarea>
-                <div class="btnRow">
-                  <button class="primary" id="btnApplyEdit">Apply Edit</button>
-                </div>
-              </div>
-
-              <div class="toast" id="editToast"></div>
-            </div>
-          </div>
-
+        <div class="block">
+          <div class="blockTitle">Spec JSON</div>
+          <pre id="specOut" class="pre"></pre>
         </div>
+
+        <div class="block">
+          <div class="blockTitle">Built Files (JSON)</div>
+          <div class="dlRow">
+            <button id="dlHtml" class="btn ghost">Download index.html</button>
+            <button id="dlCss" class="btn ghost">Download style.css</button>
+            <button id="dlJs" class="btn ghost">Download game.js</button>
+            <button id="dlAll" class="btn ghost">Download All (3)</button>
+          </div>
+          <pre id="filesOut" class="pre"></pre>
+        </div>
+
+        <div class="block">
+          <div class="blockTitle">Notes</div>
+          <div class="note">
+            If you see 404/500 errors:
+            <ul>
+              <li>Hit <b>Ping API</b> to confirm connectivity.</li>
+              <li>Change the endpoint paths (spec/build/edit) to match your Render API routes.</li>
+              <li>Use <b>Prompt Echo</b> to prove the latest prompt is being used (no stale prompts).</li>
+            </ul>
+          </div>
+        </div>
+
       </div>
-
-    </div>
-  </div>
-
-  <script>
-    // =========================================================
-    // Internal API base (do not show in UI text)
-    // =========================================================
-    const API_BASE = "https://chattok-builder-api.onrender.com";
-
-    // =========================================================
-    // DOM
-    // =========================================================
-    const apiPill = document.getElementById("apiPill");
-    const apiText = document.getElementById("apiText");
-    const contractMode = document.getElementById("contractMode");
-
-    const templateId = document.getElementById("templateId");
-    const gameIdea = document.getElementById("gameIdea");
-
-    const btnPlan = document.getElementById("btnPlan");
-    const btnPlanEdit = document.getElementById("btnPlanEdit");
-    const btnContinue = document.getElementById("btnContinue");
-    const planEditor = document.getElementById("planEditor");
-    const planToast = document.getElementById("planToast");
-    const continueToast = document.getElementById("continueToast");
-    const planLock = document.getElementById("planLock");
-    const planLockText = document.getElementById("planLockText");
-
-    const colorPrimary = document.getElementById("colorPrimary");
-    const colorSecondary = document.getElementById("colorSecondary");
-    const colorBackground = document.getElementById("colorBackground");
-    const colorPrimaryPicker = document.getElementById("colorPrimaryPicker");
-    const colorSecondaryPicker = document.getElementById("colorSecondaryPicker");
-    const colorBackgroundPicker = document.getElementById("colorBackgroundPicker");
-
-    const presetRow = document.getElementById("presetRow");
-
-    const btnHtml = document.getElementById("btnHtml");
-    const btnCss = document.getElementById("btnCss");
-    const btnJs = document.getElementById("btnJs");
-
-    const rebuildHtml = document.getElementById("rebuildHtml");
-    const rebuildCss = document.getElementById("rebuildCss");
-    const rebuildJs = document.getElementById("rebuildJs");
-
-    const buildToast = document.getElementById("buildToast");
-    const filesLock = document.getElementById("filesLock");
-    const filesLockText = document.getElementById("filesLockText");
-
-    const outHtml = document.getElementById("outHtml");
-    const outCss = document.getElementById("outCss");
-    const outJs  = document.getElementById("outJs");
-
-    const copyHtml = document.getElementById("copyHtml");
-    const copyCss  = document.getElementById("copyCss");
-    const copyJs   = document.getElementById("copyJs");
-
-    const htmlPill = document.getElementById("htmlPill");
-    const cssPill  = document.getElementById("cssPill");
-    const jsPill   = document.getElementById("jsPill");
-
-    const editLock = document.getElementById("editLock");
-    const editsLeftEl = document.getElementById("editsLeft");
-    const editLockedMsg = document.getElementById("editLockedMsg");
-    const editUnlocked = document.getElementById("editUnlocked");
-    const editRequest = document.getElementById("editRequest");
-    const btnApplyEdit = document.getElementById("btnApplyEdit");
-    const editToast = document.getElementById("editToast");
-
-    // =========================================================
-    // State
-    // =========================================================
-    const state = {
-      apiOnline: false,
-      apiEndpoints: [],
-      hasPlanEndpoint: false,
-      hasGenerateEndpoint: true,
-      idea: "",
-      templateId: "arena",
-      theme: { primary:"#ff0050", secondary:"#00f2ea", background:"#050b17" },
-      spec: null,
-      planText: "",
-      planReady: false,
-      buildReady: false,
-      locks: { html:false, css:false, js:false },
-      files: { html:"", css:"", js:"" },
-      editsLeft: 3
-    };
-
-    // =========================================================
-    // UI helpers
-    // =========================================================
-    function toast(el, type, msg){
-      el.className = "toast " + (type || "");
-      el.textContent = String(msg || "");
-      el.style.display = "block";
-    }
-    function clearToast(el){
-      el.className = "toast";
-      el.textContent = "";
-      el.style.display = "none";
-    }
-    function setApiStatus(ok, text){
-      apiPill.className = "pill " + (ok ? "good" : "bad");
-      apiText.textContent = text;
-    }
-    function setLockTag(el, ok, text){
-      el.className = "lockTag " + (ok ? "ok" : "");
-      el.querySelector(".miniDot").style.opacity = ok ? "1" : ".55";
-      el.querySelector("span:last-child").textContent = text;
-    }
-    function normalizeHex(s){
-      const v = String(s||"").trim();
-      if (!v) return "";
-      let x = v.startsWith("#") ? v : "#" + v;
-      if (/^#[0-9a-fA-F]{3}$/.test(x)) {
-        x = "#" + x[1] + x[1] + x[2] + x[2] + x[3] + x[3];
-      }
-      if (!/^#[0-9a-fA-F]{6}$/.test(x)) return "";
-      return x.toLowerCase();
-    }
-
-    function applyThemeInputsToState(){
-      const p = normalizeHex(colorPrimary.value) || state.theme.primary;
-      const s = normalizeHex(colorSecondary.value) || state.theme.secondary;
-      const b = normalizeHex(colorBackground.value) || state.theme.background;
-
-      state.theme.primary = p;
-      state.theme.secondary = s;
-      state.theme.background = b;
-
-      colorPrimary.value = p; colorPrimaryPicker.value = p;
-      colorSecondary.value = s; colorSecondaryPicker.value = s;
-      colorBackground.value = b; colorBackgroundPicker.value = b;
-    }
-
-    function wireColorSync(textEl, pickerEl){
-      textEl.addEventListener("change", () => {
-        const v = normalizeHex(textEl.value);
-        if (v){
-          textEl.value = v;
-          pickerEl.value = v;
-          applyThemeInputsToState();
-        }
-      });
-      pickerEl.addEventListener("input", () => {
-        textEl.value = pickerEl.value;
-        applyThemeInputsToState();
-      });
-    }
-    wireColorSync(colorPrimary, colorPrimaryPicker);
-    wireColorSync(colorSecondary, colorSecondaryPicker);
-    wireColorSync(colorBackground, colorBackgroundPicker);
-
-    function updateBuildButtons(){
-      btnContinue.disabled = !state.planReady;
-
-      btnHtml.disabled = !state.buildReady || state.locks.html;
-      btnCss.disabled  = !state.buildReady || !state.locks.html || state.locks.css;
-      btnJs.disabled   = !state.buildReady || !state.locks.css || state.locks.js;
-
-      rebuildHtml.disabled = !state.locks.html;
-      rebuildCss.disabled  = !state.locks.css;
-      rebuildJs.disabled   = !state.locks.js;
-
-      copyHtml.disabled = !state.files.html;
-      copyCss.disabled  = !state.files.css;
-      copyJs.disabled   = !state.files.js;
-
-      htmlPill.className = "pill " + (state.locks.html ? "good" : "warn");
-      cssPill.className  = "pill " + (state.locks.css ? "good" : "warn");
-      jsPill.className   = "pill " + (state.locks.js  ? "good" : "warn");
-      htmlPill.querySelector("span:last-child").textContent = state.locks.html ? "Built" : "Not built";
-      cssPill.querySelector("span:last-child").textContent  = state.locks.css ? "Built" : "Not built";
-      jsPill.querySelector("span:last-child").textContent   = state.locks.js  ? "Built" : "Not built";
-
-      if (!state.buildReady){
-        setLockTag(filesLock, false, "Waiting");
-      } else if (state.locks.html && state.locks.css && state.locks.js){
-        setLockTag(filesLock, true, "Complete");
-      } else {
-        setLockTag(filesLock, false, "In progress");
-      }
-
-      editsLeftEl.textContent = String(state.editsLeft);
-      if (state.locks.js && state.editsLeft > 0){
-        editLockedMsg.classList.add("hidden");
-        editUnlocked.classList.remove("hidden");
-        btnApplyEdit.disabled = false;
-      } else {
-        editLockedMsg.classList.remove("hidden");
-        editUnlocked.classList.add("hidden");
-        btnApplyEdit.disabled = true;
-      }
-    }
-
-    function resetFilesAfter(stage){
-      if (stage === "html"){
-        state.files.html = ""; state.files.css = ""; state.files.js = "";
-        state.locks.html = false; state.locks.css = false; state.locks.js = false;
-        outHtml.value = ""; outCss.value = ""; outJs.value = "";
-      } else if (stage === "css"){
-        state.files.css = ""; state.files.js = "";
-        state.locks.css = false; state.locks.js = false;
-        outCss.value = ""; outJs.value = "";
-      } else if (stage === "js"){
-        state.files.js = "";
-        state.locks.js = false;
-        outJs.value = "";
-      }
-
-      if (stage === "html" || stage === "css"){
-        state.editsLeft = 3;
-        editRequest.value = "";
-        clearToast(editToast);
-      }
-
-      updateBuildButtons();
-    }
-
-    // =========================================================
-    // Presets
-    // =========================================================
-    const presets = [
-      { name:"ChatTok", primary:"#ff0050", secondary:"#00f2ea", background:"#050b17" },
-      { name:"Neon Night", primary:"#a855f7", secondary:"#22d3ee", background:"#030712" },
-      { name:"Arcade", primary:"#f97316", secondary:"#22c55e", background:"#0b1220" },
-      { name:"Ice Blue", primary:"#38bdf8", secondary:"#a7f3d0", background:"#071a35" },
-      { name:"Crimson", primary:"#fb7185", secondary:"#facc15", background:"#120510" }
-    ];
-
-    function renderPresets(){
-      presetRow.innerHTML = "";
-      presets.forEach((p, idx) => {
-        const d = document.createElement("div");
-        d.className = "swatch";
-        d.title = p.name;
-        d.style.background = `linear-gradient(135deg, ${p.primary}, ${p.secondary})`;
-        d.addEventListener("click", () => {
-          state.theme.primary = p.primary;
-          state.theme.secondary = p.secondary;
-          state.theme.background = p.background;
-          applyThemeInputsToState();
-          [...presetRow.children].forEach(x => x.classList.remove("sel"));
-          d.classList.add("sel");
-        });
-        if (idx === 0) d.classList.add("sel");
-        presetRow.appendChild(d);
-      });
-    }
-
-    // =========================================================
-    // API helpers (robust)
-    // =========================================================
-    async function apiGet(path){
-      const r = await fetch(API_BASE + path, {
-        method: "GET",
-        headers: { "Accept": "application/json" },
-        cache: "no-store",
-        credentials: "omit",
-        mode: "cors",
-      });
-      const text = await r.text();
-      let data = null;
-      try{ data = text ? JSON.parse(text) : null; } catch { data = { raw:text }; }
-      if (!r.ok) {
-        const err = new Error((data && data.error) ? data.error : ("HTTP " + r.status));
-        err.status = r.status;
-        err.data = data;
-        throw err;
-      }
-      return data;
-    }
-
-    async function apiPost(path, body){
-      const r = await fetch(API_BASE + path, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-        body: JSON.stringify(body || {}),
-        cache: "no-store",
-        credentials: "omit",
-        mode: "cors",
-      });
-
-      const text = await r.text();
-      let data = null;
-      try{ data = text ? JSON.parse(text) : null; } catch { data = { raw:text }; }
-
-      if (!r.ok) {
-        const err = new Error((data && data.error) ? data.error : ("HTTP " + r.status));
-        err.status = r.status;
-        err.data = data;
-        throw err;
-      }
-      return data;
-    }
-
-    function formatApiError(prefix, e){
-      const msg = (e && e.message) ? e.message : String(e || "Unknown error");
-      const details = e && e.data ? e.data : null;
-      let extra = "";
-      if (details && typeof details === "object") {
-        if (details.details) extra = " — " + String(details.details);
-      }
-      return `${prefix}: ${msg}${extra}`;
-    }
-
-    // =========================================================
-    // Contract detection
-    // =========================================================
-    async function checkApi(){
-      try{
-        const data = await apiGet("/health");
-        state.apiOnline = !!data.ok;
-        state.apiEndpoints = Array.isArray(data.endpoints) ? data.endpoints : [];
-        state.hasPlanEndpoint = state.apiEndpoints.some(x => String(x).toLowerCase().includes("post /api/plan"));
-        state.hasGenerateEndpoint = state.apiEndpoints.some(x => String(x).toLowerCase().includes("post /api/generate")) || true;
-
-        setApiStatus(true, "API: online");
-        contractMode.textContent = state.hasPlanEndpoint ? "Contract: plan+generate" : "Contract: generate-only";
-      } catch {
-        state.apiOnline = false;
-        setApiStatus(false, "API: offline");
-        contractMode.textContent = "Contract: unknown";
-      }
-    }
-
-    // =========================================================
-    // Spec / Plan helpers
-    // =========================================================
-    function pickSpecFromResponse(data){
-      if (!data || typeof data !== "object") return null;
-      if (data.spec && typeof data.spec === "object") return data.spec;
-      if (data.plan && typeof data.plan === "object") return data.plan;
-      if (data.context && typeof data.context === "object") {
-        if (data.context.spec && typeof data.context.spec === "object") return data.context.spec;
-        if (data.context.plan && typeof data.context.plan === "object") return data.context.plan;
-      }
-      if (data.contextSpec && typeof data.contextSpec === "object") return data.contextSpec;
-      return null;
-    }
-
-    function toPlanText(spec){
-      if (!spec || typeof spec !== "object") return "";
-      const lines = [];
-      lines.push(`TITLE: ${spec.title || ""}`.trim());
-      lines.push(`SUBTITLE: ${spec.subtitle || ""}`.trim());
-      if (spec.oneSentence) lines.push(`ONE-LINER: ${spec.oneSentence}`.trim());
-      if (Array.isArray(spec.howToPlay) && spec.howToPlay.length){
-        lines.push("");
-        lines.push("HOW TO PLAY:");
-        spec.howToPlay.slice(0,10).forEach((x, i) => lines.push(`- ${String(x||"").trim()}`));
-      }
-      if (spec.commands && typeof spec.commands === "object"){
-        lines.push("");
-        lines.push("COMMANDS:");
-        Object.keys(spec.commands).slice(0,12).forEach(k => {
-          lines.push(`- ${k}: ${String(spec.commands[k]||"").trim()}`);
-        });
-      }
-      if (spec.defaultSettings && typeof spec.defaultSettings === "object"){
-        lines.push("");
-        lines.push("DEFAULT SETTINGS:");
-        Object.keys(spec.defaultSettings).slice(0,12).forEach(k => {
-          lines.push(`- ${k}: ${String(spec.defaultSettings[k])}`);
-        });
-      }
-      if (spec.visuals && typeof spec.visuals === "object"){
-        lines.push("");
-        lines.push("VISUALS:");
-        Object.keys(spec.visuals).slice(0,12).forEach(k => {
-          const v = String(spec.visuals[k] ?? "").trim();
-          lines.push(`- ${k}: ${v}`);
-        });
-      }
-      return lines.join("\n").trim();
-    }
-
-    function extractFileContent(data, stage){
-      if (data && data.file && typeof data.file.content === "string") return data.file.content;
-
-      const s = String(stage||"").toLowerCase();
-      if (data && data.files && typeof data.files === "object") {
-        if (s === "html" && typeof data.files.indexHtml === "string") return data.files.indexHtml;
-        if (s === "css" && typeof data.files.styleCss === "string") return data.files.styleCss;
-        if (s === "js"  && typeof data.files.gameJs  === "string") return data.files.gameJs;
-      }
-      if (s === "html" && typeof data.index_html === "string") return data.index_html;
-      if (s === "css"  && typeof data.style_css === "string") return data.style_css;
-      if (s === "js"   && typeof data.game_js === "string") return data.game_js;
-
-      if (typeof data.content === "string") return data.content;
-      return "";
-    }
-
-    function choosePlanTextFromApi(data, spec){
-      // If API gives a real planText, use it.
-      // If it gives a tiny status message, ignore and derive from spec.
-      const pt = (data && typeof data.planText === "string") ? data.planText.trim() : "";
-      if (pt && pt.length >= 80) return pt;
-      return toPlanText(spec);
-    }
-
-    // =========================================================
-    // Step 1: Plan / Spec
-    // =========================================================
-    async function generatePlanOrSpec(){
-      clearToast(planToast);
-      clearToast(continueToast);
-      clearToast(buildToast);
-
-      applyThemeInputsToState();
-
-      const idea = String(gameIdea.value || "").trim();
-      if (!idea){
-        toast(planToast, "bad", "Please enter a game idea first.");
-        return;
-      }
-
-      state.idea = idea;
-      state.templateId = String(templateId.value || "arena").trim();
-      btnPlan.disabled = true;
-      btnPlanEdit.disabled = true;
-      btnContinue.disabled = true;
-
-      setLockTag(planLock, false, "Generating…");
-      toast(planToast, "warn", "Generating plan/spec…");
-
-      try{
-        let data = null;
-
-        if (state.hasPlanEndpoint) {
-          data = await apiPost("/api/plan", {
-            prompt: state.idea,
-            idea: state.idea,
-            templateId: state.templateId,
-            theme: state.theme
-          });
-        } else {
-          data = await apiPost("/api/generate", {
-            stage: "html",
-            prompt: state.idea,
-            idea: state.idea,
-            templateId: state.templateId,
-            theme: state.theme
-          });
-
-          const htmlMaybe = String(extractFileContent(data, "html") || "");
-          if (htmlMaybe.trim()){
-            state.files.html = htmlMaybe;
-            outHtml.value = htmlMaybe;
-            state.locks.html = true;
-          }
-        }
-
-        const spec = pickSpecFromResponse(data);
-        if (!spec) throw new Error("API returned no spec/context.spec.");
-
-        state.spec = spec;
-        state.planText = choosePlanTextFromApi(data, spec);
-
-        planEditor.value = state.planText;
-
-        state.planReady = true;
-        setLockTag(planLock, true, "Ready");
-        toast(planToast, "good", "Plan/spec generated. Review/edit it, then Continue to build.");
-
-        btnPlanEdit.disabled = false;
-        btnContinue.disabled = false;
-      } catch (e){
-        state.planReady = false;
-        setLockTag(planLock, false, "Failed");
-        toast(planToast, "bad", formatApiError("Plan error", e));
-      } finally {
-        btnPlan.disabled = false;
-        updateBuildButtons();
-      }
-    }
-
-    btnPlan.addEventListener("click", generatePlanOrSpec);
-
-    btnPlanEdit.addEventListener("click", async () => {
-      clearToast(planToast);
-      clearToast(continueToast);
-      clearToast(buildToast);
-
-      applyThemeInputsToState();
-
-      if (!state.planReady){
-        toast(planToast, "bad", "Generate a plan/spec first.");
-        return;
-      }
-
-      const edited = String(planEditor.value || "").trim();
-      if (!edited){
-        toast(planToast, "bad", "Plan text is empty.");
-        return;
-      }
-
-      btnPlanEdit.disabled = true;
-      btnContinue.disabled = true;
-      setLockTag(planLock, false, "Rebuilding…");
-      toast(planToast, "warn", "Rebuilding spec from your edited plan…");
-
-      try{
-        state.idea = edited;
-
-        let data = null;
-        if (state.hasPlanEndpoint) {
-          data = await apiPost("/api/plan", {
-            prompt: edited,
-            idea: edited,
-            templateId: state.templateId,
-            theme: state.theme
-          });
-        } else {
-          data = await apiPost("/api/generate", {
-            stage: "html",
-            prompt: edited,
-            idea: edited,
-            templateId: state.templateId,
-            theme: state.theme
-          });
-
-          const htmlMaybe = String(extractFileContent(data, "html") || "");
-          if (htmlMaybe.trim()){
-            state.files.html = htmlMaybe;
-            outHtml.value = htmlMaybe;
-            state.locks.html = true;
-          } else {
-            state.locks.html = false;
-          }
-        }
-
-        const spec = pickSpecFromResponse(data);
-        if (!spec) throw new Error("API returned no spec/context.spec.");
-
-        state.spec = spec;
-        state.planText = choosePlanTextFromApi(data, spec);
-
-        planEditor.value = state.planText;
-
-        setLockTag(planLock, true, "Ready");
-        toast(planToast, "good", "Plan/spec updated. Click Continue when ready.");
-      } catch (e){
-        setLockTag(planLock, false, "Failed");
-        toast(planToast, "bad", formatApiError("Plan edit error", e));
-      } finally {
-        btnPlanEdit.disabled = false;
-        btnContinue.disabled = false;
-        updateBuildButtons();
-      }
-    });
-
-    btnContinue.addEventListener("click", () => {
-      clearToast(continueToast);
-      clearToast(buildToast);
-
-      if (!state.planReady || !state.spec){
-        toast(continueToast, "bad", "Generate a plan/spec first.");
-        return;
-      }
-
-      state.buildReady = true;
-      toast(continueToast, "good", "Build unlocked. Build HTML → CSS → game.js.");
-      updateBuildButtons();
-    });
-
-    // =========================================================
-    // Step 2: Build stages (HTML → CSS → JS)
-    // =========================================================
-    async function buildStage(stage){
-      clearToast(buildToast);
-      applyThemeInputsToState();
-
-      if (!state.buildReady || !state.spec){
-        toast(buildToast, "bad", "Build is locked. Generate and confirm the plan/spec first.");
-        return;
-      }
-
-      if (stage === "css" && !state.locks.html){
-        toast(buildToast, "bad", "Build HTML first.");
-        return;
-      }
-      if (stage === "js" && (!state.locks.html || !state.locks.css)){
-        toast(buildToast, "bad", "Build HTML and CSS first.");
-        return;
-      }
-
-      const label = stage === "html" ? "HTML" : stage === "css" ? "CSS" : "game.js";
-      toast(buildToast, "warn", "Building " + label + "…");
-
-      if (stage === "html") btnHtml.disabled = true;
-      if (stage === "css")  btnCss.disabled = true;
-      if (stage === "js")   btnJs.disabled = true;
-
-      try{
-        const data = await apiPost("/api/generate", {
-          stage,
-          prompt: state.idea,
-          idea: state.idea,
-          templateId: state.templateId,
-          theme: state.theme,
-          context: { spec: state.spec }
-        });
-
-        const newSpec = pickSpecFromResponse(data);
-        if (newSpec) state.spec = newSpec;
-
-        const content = String(extractFileContent(data, stage) || "");
-        if (!content.trim()) throw new Error("API returned no file content.");
-
-        if (stage === "html"){
-          state.files.html = content;
-          state.locks.html = true;
-          outHtml.value = content;
-          toast(buildToast, "good", "HTML built. Next: Build CSS.");
-        } else if (stage === "css"){
-          state.files.css = content;
-          state.locks.css = true;
-          outCss.value = content;
-          toast(buildToast, "good", "CSS built. Next: Build game.js.");
-        } else if (stage === "js"){
-          state.files.js = content;
-          state.locks.js = true;
-          outJs.value = content;
-          toast(buildToast, "good", "game.js built. Optional edits unlocked below.");
-        }
-
-        updateBuildButtons();
-      } catch (e){
-        toast(buildToast, "bad", formatApiError("Build error", e));
-        updateBuildButtons();
-      } finally {
-        btnHtml.disabled = !state.buildReady || state.locks.html;
-        btnCss.disabled  = !state.buildReady || !state.locks.html || state.locks.css;
-        btnJs.disabled   = !state.buildReady || !state.locks.css  || state.locks.js;
-      }
-    }
-
-    btnHtml.addEventListener("click", () => buildStage("html"));
-    btnCss.addEventListener("click", () => buildStage("css"));
-    btnJs.addEventListener("click",  () => buildStage("js"));
-
-    rebuildHtml.addEventListener("click", () => {
-      resetFilesAfter("html");
-      toast(buildToast, "warn", "HTML unlocked. Build HTML → CSS → game.js again.");
-    });
-    rebuildCss.addEventListener("click", () => {
-      resetFilesAfter("css");
-      toast(buildToast, "warn", "CSS unlocked. Build CSS → game.js again.");
-    });
-    rebuildJs.addEventListener("click", () => {
-      resetFilesAfter("js");
-      toast(buildToast, "warn", "JS unlocked. Build game.js again.");
-    });
-
-    // =========================================================
-    // Copy
-    // =========================================================
-    async function copyToClipboard(text){
-      await navigator.clipboard.writeText(String(text || ""));
-    }
-    function flashButton(btn){
-      const old = btn.textContent;
-      btn.textContent = "Copied!";
-      setTimeout(() => (btn.textContent = old), 900);
-    }
-
-    copyHtml.addEventListener("click", async () => {
-      try{ await copyToClipboard(state.files.html); flashButton(copyHtml); } catch {}
-    });
-    copyCss.addEventListener("click", async () => {
-      try{ await copyToClipboard(state.files.css); flashButton(copyCss); } catch {}
-    });
-    copyJs.addEventListener("click", async () => {
-      try{ await copyToClipboard(state.files.js); flashButton(copyJs); } catch {}
-    });
-
-    // =========================================================
-    // Edits
-    // =========================================================
-    btnApplyEdit.addEventListener("click", async () => {
-      clearToast(editToast);
-
-      if (!state.locks.js || state.editsLeft <= 0){
-        toast(editToast, "bad", "Edits are locked.");
-        return;
-      }
-
-      const req = String(editRequest.value || "").trim();
-      if (!req){
-        toast(editToast, "bad", "Type an edit request first.");
-        return;
-      }
-
-      btnApplyEdit.disabled = true;
-      toast(editToast, "warn", "Applying edit…");
-
-      try{
-        const data = await apiPost("/api/edit", {
-          remainingEdits: state.editsLeft,
-          changeRequest: req,
-          templateId: state.templateId,
-          theme: state.theme,
-          currentFiles: {
-            "index.html": state.files.html,
-            "style.css": state.files.css,
-            "game.js": state.files.js
-          }
-        });
-
-        if (data && data.ok && Array.isArray(data.patches)){
-          for (const p of data.patches){
-            if (p.name === "style.css"){
-              state.files.css = String(p.content || "");
-              outCss.value = state.files.css;
-              state.locks.css = true;
-            }
-            if (p.name === "game.js"){
-              state.files.js = String(p.content || "");
-              outJs.value = state.files.js;
-              state.locks.js = true;
-            }
-            // optional: if you want HTML edits to apply visually in output, uncomment:
-            // if (p.name === "index.html"){
-            //   state.files.html = String(p.content || "");
-            //   outHtml.value = state.files.html;
-            //   state.locks.html = true;
-            // }
-          }
-          state.editsLeft = Number(data.remainingEdits ?? (state.editsLeft - 1));
-          toast(editToast, "good", "Edit applied.");
-          editRequest.value = "";
-        } else {
-          throw new Error("Edit failed: invalid response.");
-        }
-
-        updateBuildButtons();
-      } catch (e){
-        toast(editToast, "bad", formatApiError("Edit error", e));
-      } finally {
-        btnApplyEdit.disabled = false;
-        updateBuildButtons();
-      }
-    });
-
-    // =========================================================
-    // Init
-    // =========================================================
-    renderPresets();
-    applyThemeInputsToState();
-    updateBuildButtons();
-    setLockTag(planLock, false, "Waiting");
-    setLockTag(filesLock, false, "Waiting");
-    checkApi();
-  </script>
+    </section>
+
+    <footer class="footer">
+      <div class="muted">
+        Tool path: <span class="mono">/builder/</span> • API default: <span class="mono">https://chattok-builder-api.onrender.com</span>
+      </div>
+    </footer>
+  </main>
+
+  <script src="./app.js"></script>
 </body>
 </html>
