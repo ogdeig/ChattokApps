@@ -1,235 +1,313 @@
-/* AI Live Interactive Game Builder (local) */
-const els = {
-  gameIdea: document.getElementById("gameIdea"),
-  sessionId: document.getElementById("sessionId"),
-  resetSessionBtn: document.getElementById("resetSessionBtn"),
-  startBtn: document.getElementById("startBtn"),
-  apiStatus: document.getElementById("apiStatus"),
+// app.js — ChatTok Builder UI (Clean)
+// Default backend: Render API, unless overridden by user input or host injection
 
-  wizardCard: document.getElementById("wizardCard"),
-  questionText: document.getElementById("questionText"),
-  answerInput: document.getElementById("answerInput"),
-  nextBtn: document.getElementById("nextBtn"),
-  skipBtn: document.getElementById("skipBtn"),
-  wizardStatus: document.getElementById("wizardStatus"),
-  specPre: document.getElementById("specPre"),
-  generateBtn: document.getElementById("generateBtn"),
+const DEFAULT_API_BASE = "https://chattok-builder-api.onrender.com";
 
-  lastAnswerMsg: document.getElementById("lastAnswerMsg"),
-  lastAnswerText: document.getElementById("lastAnswerText"),
+const el = (id) => document.getElementById(id);
 
-  outputCard: document.getElementById("outputCard"),
-  outIndex: document.getElementById("outIndex"),
-  outCss: document.getElementById("outCss"),
-  outJs: document.getElementById("outJs"),
-  outReadme: document.getElementById("outReadme"),
-  genStatus: document.getElementById("genStatus"),
-  downloadZipBtn: document.getElementById("downloadZipBtn"),
-};
-
-let sessionId = newSessionId();
-let spec = {};
-let done = false;
-let generated = null;
-
-function newSessionId() {
-  const bytes = new Uint8Array(16);
-  crypto.getRandomValues(bytes);
-  return [...bytes].map(b => b.toString(16).padStart(2,"0")).join("");
+function normalizeHex(v, fallback) {
+  if (!v) return fallback;
+  const s = String(v).trim();
+  if (/^#[0-9a-fA-F]{6}$/.test(s)) return s;
+  return fallback;
 }
 
-function setSessionId(id){
-  sessionId = id;
-  els.sessionId.textContent = id;
+function getApiBase() {
+  // 1) Host site can inject a base, if desired:
+  // window.__CHATTOK_BUILDER_API__ = "https://..."
+  const injected = window.__CHATTOK_BUILDER_API__;
+  if (typeof injected === "string" && injected.trim()) return injected.trim().replace(/\/$/, "");
+
+  // 2) User input from UI
+  const ui = el("apiBase")?.value?.trim();
+  if (ui) return ui.replace(/\/$/, "");
+
+  // 3) Persisted value
+  const saved = localStorage.getItem("builder_api_base");
+  if (saved) return saved.replace(/\/$/, "");
+
+  // 4) Default to Render
+  return DEFAULT_API_BASE;
 }
 
-setSessionId(sessionId);
+function setApiBaseUI(value) {
+  if (!el("apiBase")) return;
+  el("apiBase").value = value;
+  localStorage.setItem("builder_api_base", value);
+}
 
-els.resetSessionBtn.addEventListener("click", () => {
-  setSessionId(newSessionId());
-  spec = {};
-  done = false;
-  generated = null;
-  els.wizardCard.style.display = "none";
-  els.outputCard.style.display = "none";
-  els.apiStatus.textContent = "API: reset session";
-});
+function newRequestId() {
+  // Always generate a fresh requestId to prevent accidental caching/stale prompts.
+  return "req_" + crypto.randomUUID();
+}
 
-async function postJSON(url, body){
+async function apiFetch(path, opts = {}) {
+  const base = getApiBase();
+  const url = base.replace(/\/$/, "") + path;
+
   const res = await fetch(url, {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify(body),
-  });
-  if(!res.ok){
-    const text = await res.text().catch(()=> "");
-    throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
-  }
-  return await res.json();
-}
-
-function renderSpec(){
-  els.specPre.textContent = JSON.stringify(spec, null, 2);
-}
-
-function setQuestion(q){
-  els.questionText.textContent = q || "Wizard complete — you can generate your files.";
-}
-
-function showLastAnswer(ans){
-  if(!ans) return;
-  els.lastAnswerText.textContent = ans;
-  els.lastAnswerMsg.style.display = "";
-}
-
-async function startWizard(){
-  const idea = (els.gameIdea.value || "").trim();
-  if(!idea){
-    alert("Paste a game idea first.");
-    return;
-  }
-
-  els.apiStatus.textContent = "API: starting wizard…";
-  els.wizardCard.style.display = "";
-  els.outputCard.style.display = "none";
-  els.generateBtn.disabled = true;
-  els.wizardStatus.textContent = "Thinking…";
-
-  const data = await postJSON("/api/next-question", {
-    sessionId,
-    gameIdea: idea,
-    answer: null,
-    skip: false,
+    ...opts,
+    headers: {
+      "Content-Type": "application/json",
+      ...(opts.headers || {}),
+    },
+    cache: "no-store", // important: avoid browser caching
   });
 
-  spec = data.spec || {};
-  done = !!data.done;
-  setQuestion(data.question);
-  renderSpec();
+  let data = null;
+  const text = await res.text();
+  try { data = text ? JSON.parse(text) : null; } catch { data = { raw: text }; }
 
-  els.wizardStatus.textContent = done ? "Done — ready to generate" : "Waiting for your answer";
-  els.generateBtn.disabled = !done;
-  els.apiStatus.textContent = "API: wizard running";
-  els.answerInput.value = "";
-  els.answerInput.focus();
+  if (!res.ok) {
+    const msg = data?.error || data?.message || `HTTP ${res.status}`;
+    throw new Error(msg);
+  }
+
+  return data;
 }
 
-els.startBtn.addEventListener("click", () => startWizard());
+// ----- UI wiring -----
 
-async function submitAnswer({skip=false} = {}){
-  if(!els.wizardCard.style.display === "none") return;
-
-  const ans = skip ? "" : (els.answerInput.value || "").trim();
-  if(!skip && !ans){
-    alert("Type an answer (or click Skip).");
-    return;
-  }
-
-  if(!skip) showLastAnswer(ans);
-
-  els.wizardStatus.textContent = "Thinking…";
-  els.generateBtn.disabled = true;
-
-  const data = await postJSON("/api/next-question", {
-    sessionId,
-    answer: ans,
-    skip,
-  });
-
-  spec = data.spec || spec;
-  done = !!data.done;
-  setQuestion(data.question);
-  renderSpec();
-
-  els.wizardStatus.textContent = done ? "Done — ready to generate" : "Waiting for your answer";
-  els.generateBtn.disabled = !done;
-  els.answerInput.value = "";
-  els.answerInput.focus();
+function syncColorPair(colorId, textId, fallback) {
+  const c = el(colorId);
+  const t = el(textId);
+  const apply = (hex) => {
+    const v = normalizeHex(hex, fallback);
+    c.value = v;
+    t.value = v;
+    renderPreview();
+  };
+  c.addEventListener("input", () => apply(c.value));
+  t.addEventListener("input", () => apply(t.value));
+  apply(c.value || t.value || fallback);
 }
 
-els.nextBtn.addEventListener("click", () => submitAnswer({skip:false}));
-els.skipBtn.addEventListener("click", () => submitAnswer({skip:true}));
-
-els.answerInput.addEventListener("keydown", (e) => {
-  if(e.key === "Enter"){
-    e.preventDefault();
-    submitAnswer({skip:false});
-  }
-});
-
-function setupTabs(){
-  const tabs = document.querySelectorAll(".tab");
-  const panes = document.querySelectorAll(".pane");
-  tabs.forEach(t => {
-    t.addEventListener("click", () => {
-      const key = t.getAttribute("data-tab");
-      tabs.forEach(x => x.classList.toggle("active", x === t));
-      panes.forEach(p => p.classList.toggle("active", p.getAttribute("data-pane") === key));
-    });
-  });
-
-  document.querySelectorAll("[data-copy]").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const key = btn.getAttribute("data-copy");
-      const text = key === "index" ? els.outIndex.textContent
-                : key === "css" ? els.outCss.textContent
-                : key === "js" ? els.outJs.textContent
-                : els.outReadme.textContent;
-      try{
-        await navigator.clipboard.writeText(text);
-        btn.textContent = "Copied!";
-        setTimeout(()=> btn.textContent = "Copy", 900);
-      }catch{
-        alert("Could not copy to clipboard.");
-      }
-    });
-  });
+function getTheme() {
+  return {
+    primary: normalizeHex(el("tPrimary").value, "#ff0050"),
+    secondary: normalizeHex(el("tSecondary").value, "#00f2ea"),
+    bg: normalizeHex(el("tBg").value, "#050b17"),
+    surface: normalizeHex(el("tSurface").value, "#0b1632"),
+    text: normalizeHex(el("tText").value, "#ffffff"),
+  };
 }
-setupTabs();
 
-els.generateBtn.addEventListener("click", async () => {
-  els.genStatus.textContent = "Generating…";
-  els.outputCard.style.display = "";
-  els.outIndex.textContent = "";
-  els.outCss.textContent = "";
-  els.outJs.textContent = "";
-  els.outReadme.textContent = "";
+function renderPreview() {
+  const theme = getTheme();
+  document.documentElement.style.setProperty("--p", theme.primary);
+  document.documentElement.style.setProperty("--s", theme.secondary);
+  document.documentElement.style.setProperty("--bg", theme.bg);
+  document.documentElement.style.setProperty("--surface", theme.surface);
+  document.documentElement.style.setProperty("--text", theme.text);
 
-  try{
-    const data = await postJSON("/api/generate", { sessionId });
-    generated = data;
+  el("chipPrimary").style.background = theme.primary;
+  el("chipSecondary").style.background = theme.secondary;
+  el("chipSurface").style.background = theme.surface;
+  el("chipSurface").style.borderColor = "rgba(255,255,255,.18)";
+}
 
-    els.outIndex.textContent = data.indexHtml || "";
-    els.outCss.textContent = data.styleCss || "";
-    els.outJs.textContent = data.gameJs || "";
-    els.outReadme.textContent = data.readme || "";
+function setStatus(server, build) {
+  if (server) el("serverStatus").textContent = server;
+  if (build) el("buildStatus").textContent = build;
+}
 
-    els.genStatus.textContent = "Done";
-  }catch(err){
-    console.error(err);
-    els.genStatus.textContent = "Error";
-    alert(err.message || String(err));
-  }
-});
+function setReqId(v) {
+  el("reqId").textContent = v;
+}
 
-els.downloadZipBtn.addEventListener("click", async () => {
-  if(!generated){
-    alert("Generate files first.");
-    return;
-  }
-  const zip = new JSZip();
-  zip.file("index.html", generated.indexHtml || "");
-  zip.file("style.css", generated.styleCss || "");
-  zip.file("game.js", generated.gameJs || "");
-  zip.file("README.md", generated.readme || "");
+function getPrompt() {
+  return (el("prompt").value || "").trim();
+}
 
-  const blob = await zip.generateAsync({type:"blob"});
+function getBuildFlags() {
+  const useCache = !!el("useCache").checked;
+  const forceFresh = !!el("forceFresh").checked;
+  return { useCache, forceFresh };
+}
+
+let lastSpec = null;
+let builtFiles = null;
+let editsUsed = 0;
+
+function setEditEnabled(enabled) {
+  el("btnEdit").disabled = !enabled;
+}
+
+function downloadText(filename, text) {
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
   const a = document.createElement("a");
-  const url = URL.createObjectURL(blob);
-  a.href = url;
-  a.download = "chattok-game-bundle.zip";
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   a.remove();
-  setTimeout(()=> URL.revokeObjectURL(url), 1000);
-});
+  setTimeout(() => URL.revokeObjectURL(a.href), 2500);
+}
+
+function showJson(preId, obj) {
+  el(preId).textContent = JSON.stringify(obj, null, 2);
+}
+
+async function pingServer() {
+  try {
+    const base = getApiBase();
+    setStatus(`Checking ${base}...`, null);
+    const data = await apiFetch("/api/ping", { method: "GET" });
+    setStatus(`OK: ${data?.name || "API"} (${data?.time || "no time"})`, null);
+  } catch (e) {
+    setStatus(`Error: ${e.message}`, null);
+  }
+}
+
+async function buildSpec() {
+  const prompt = getPrompt();
+  if (!prompt) return alert("Please enter a detailed prompt.");
+
+  const requestId = newRequestId();
+  setReqId(requestId);
+  setStatus(null, "Building spec...");
+
+  try {
+    const theme = getTheme();
+    const flags = getBuildFlags();
+
+    const data = await apiFetch("/api/spec", {
+      method: "POST",
+      body: JSON.stringify({
+        requestId,
+        prompt,
+        theme,
+        flags,
+      }),
+    });
+
+    // The server should echo prompt back so you can verify no stale prompt
+    lastSpec = data.spec;
+    el("echoPrompt").textContent = data.echoPrompt || "(no echo)";
+    showJson("specOut", data.spec);
+    setStatus(null, "Spec ready.");
+  } catch (e) {
+    setStatus(null, `Spec error: ${e.message}`);
+    alert(e.message);
+  }
+}
+
+async function buildGame() {
+  const prompt = getPrompt();
+  if (!prompt) return alert("Please enter a detailed prompt.");
+
+  const requestId = newRequestId();
+  setReqId(requestId);
+  setStatus(null, "Building game files...");
+
+  try {
+    const theme = getTheme();
+    const flags = getBuildFlags();
+
+    const data = await apiFetch("/api/build", {
+      method: "POST",
+      body: JSON.stringify({
+        requestId,
+        prompt,
+        theme,
+        flags,
+        spec: lastSpec || null,
+      }),
+    });
+
+    builtFiles = data.files;
+    el("echoPrompt").textContent = data.echoPrompt || "(no echo)";
+    showJson("filesOut", data.files);
+    setStatus(null, "Build complete.");
+
+    editsUsed = 0;
+    el("editCount").textContent = String(editsUsed);
+    setEditEnabled(true);
+
+  } catch (e) {
+    setStatus(null, `Build error: ${e.message}`);
+    alert(e.message);
+  }
+}
+
+async function applyEdit() {
+  if (!builtFiles) return alert("Build a game first.");
+  if (editsUsed >= 3) return alert("Edit limit reached (3).");
+
+  const editPrompt = (el("editPrompt").value || "").trim();
+  if (!editPrompt) return alert("Enter an edit request.");
+
+  const requestId = newRequestId();
+  setReqId(requestId);
+  setStatus(null, "Applying edit...");
+
+  try {
+    const theme = getTheme();
+    const flags = getBuildFlags();
+
+    const data = await apiFetch("/api/edit", {
+      method: "POST",
+      body: JSON.stringify({
+        requestId,
+        editPrompt,
+        theme,
+        flags,
+        files: builtFiles,
+      }),
+    });
+
+    builtFiles = data.files;
+    el("echoPrompt").textContent = data.echoPrompt || "(no echo)";
+    showJson("filesOut", data.files);
+
+    editsUsed++;
+    el("editCount").textContent = String(editsUsed);
+
+    setStatus(null, editsUsed >= 3 ? "Edit applied (limit reached)." : "Edit applied.");
+  } catch (e) {
+    setStatus(null, `Edit error: ${e.message}`);
+    alert(e.message);
+  }
+}
+
+function wireDownloads() {
+  el("dlHtml").addEventListener("click", () => {
+    if (!builtFiles) return alert("Build a game first.");
+    downloadText("index.html", builtFiles["index.html"] || "");
+  });
+  el("dlCss").addEventListener("click", () => {
+    if (!builtFiles) return alert("Build a game first.");
+    downloadText("style.css", builtFiles["style.css"] || "");
+  });
+  el("dlJs").addEventListener("click", () => {
+    if (!builtFiles) return alert("Build a game first.");
+    downloadText("game.js", builtFiles["game.js"] || "");
+  });
+}
+
+// init
+(function init() {
+  // default apiBase UI to Render for clarity
+  setApiBaseUI(DEFAULT_API_BASE);
+
+  el("btnPing").addEventListener("click", pingServer);
+  el("btnSpec").addEventListener("click", buildSpec);
+  el("btnBuild").addEventListener("click", buildGame);
+  el("btnEdit").addEventListener("click", applyEdit);
+
+  // Keep user edits if they change apiBase
+  el("apiBase").addEventListener("change", () => {
+    const v = el("apiBase").value.trim() || DEFAULT_API_BASE;
+    setApiBaseUI(v);
+  });
+
+  syncColorPair("cPrimary", "tPrimary", "#ff0050");
+  syncColorPair("cSecondary", "tSecondary", "#00f2ea");
+  syncColorPair("cBg", "tBg", "#050b17");
+  syncColorPair("cSurface", "tSurface", "#0b1632");
+  syncColorPair("cText", "tText", "#ffffff");
+
+  renderPreview();
+  setEditEnabled(false);
+  wireDownloads();
+})();
