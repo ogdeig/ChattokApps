@@ -398,7 +398,7 @@
         <div class="cardHead">
           <div class="cardTitle">
             <p class="t">1) Describe the game</p>
-            <p class="s">Be specific: gameplay loop, chat commands, gifts/likes, win condition, and visuals.</p>
+            <p class="s">Free-build: unique gameplay & visuals from your prompt (no template skins).</p>
           </div>
           <span class="lockTag" id="planLock">
             <span class="miniDot"></span>
@@ -407,15 +407,8 @@
         </div>
 
         <div class="cardBody">
-          <label for="templateId">Template flavor</label>
-          <select id="templateId">
-            <option value="arena">Arena (action)</option>
-            <option value="trivia">Trivia (rounds)</option>
-            <option value="wheel">Spin Wheel (random)</option>
-            <option value="boss">Boss Fight (team vs boss)</option>
-          </select>
-
-          <div class="hr"></div>
+          <!-- Compatibility: keep templateId in DOM, but lock to "blank" -->
+          <input type="hidden" id="templateId" value="blank" />
 
           <label for="gameIdea">Game idea prompt</label>
           <textarea id="gameIdea" placeholder="Example: Seek & Destroy — viewers type coordinates like A4 to fire at hidden targets on a grid. Hits show 💥 + the shooter's profile pop. Misses show 💦. Gifts can reveal a tile or add an extra shot. Likes charge a radar sweep. Must feel good with 3–4s chat delay."></textarea>
@@ -435,8 +428,9 @@
           <textarea id="planEditor" class="mono" placeholder="Your generated plan/spec will appear here. You can tweak it, then click 'Rebuild Spec from edited plan'."></textarea>
 
           <div class="hint">
-            <b>Notes:</b> Builder automatically adapts to the API’s contract. If the API provides <code>/api/plan</code>, we use it.
-            Otherwise we derive the plan from the spec returned by <code>/api/generate</code>.
+            <b>Hard rules injected every time:</b>
+            9:16 layout, exactly two screens (Setup → Live Game), <b>NO practice mode</b>, keep TikTok connection contract unchanged.
+            If <code>/api/plan</code> fails, builder auto-falls back to <code>/api/generate</code>.
           </div>
         </div>
       </div>
@@ -580,6 +574,18 @@
     const API_BASE = "https://chattok-builder-api.onrender.com";
 
     // =========================================================
+    // Hard constraints (sent to API every time)
+    // =========================================================
+    const CONSTRAINTS = {
+      layout: "9:16",
+      screens: ["setup", "game"],
+      practiceMode: false,
+      requireLiveConnect: true,
+      noDemoMode: true,
+      keepTikTokConnectionContract: true
+    };
+
+    // =========================================================
     // DOM
     // =========================================================
     const apiPill = document.getElementById("apiPill");
@@ -596,7 +602,6 @@
     const planToast = document.getElementById("planToast");
     const continueToast = document.getElementById("continueToast");
     const planLock = document.getElementById("planLock");
-    const planLockText = document.getElementById("planLockText");
 
     const colorPrimary = document.getElementById("colorPrimary");
     const colorSecondary = document.getElementById("colorSecondary");
@@ -617,7 +622,6 @@
 
     const buildToast = document.getElementById("buildToast");
     const filesLock = document.getElementById("filesLock");
-    const filesLockText = document.getElementById("filesLockText");
 
     const outHtml = document.getElementById("outHtml");
     const outCss = document.getElementById("outCss");
@@ -631,7 +635,6 @@
     const cssPill  = document.getElementById("cssPill");
     const jsPill   = document.getElementById("jsPill");
 
-    const editLock = document.getElementById("editLock");
     const editsLeftEl = document.getElementById("editsLeft");
     const editLockedMsg = document.getElementById("editLockedMsg");
     const editUnlocked = document.getElementById("editUnlocked");
@@ -643,21 +646,23 @@
     // State
     // =========================================================
     const state = {
-      apiOnline: false,
+      apiOnline: null,
       apiEndpoints: [],
-      // contract detection
-      hasPlanEndpoint: false,  // /api/plan
-      hasGenerateEndpoint: true, // /api/generate
-      // flow
+      hasPlanEndpoint: null,     // unknown until /health works
+      hasGenerateEndpoint: true, // assume true
+
       idea: "",
-      templateId: "arena",
+      templateId: "blank",
       theme: { primary:"#ff0050", secondary:"#00f2ea", background:"#050b17" },
+
       spec: null,
       planText: "",
       planReady: false,
       buildReady: false,
+
       locks: { html:false, css:false, js:false },
       files: { html:"", css:"", js:"" },
+
       editsLeft: 3
     };
 
@@ -674,15 +679,18 @@
       el.textContent = "";
       el.style.display = "none";
     }
-    function setApiStatus(ok, text){
-      apiPill.className = "pill " + (ok ? "good" : "bad");
+
+    function setApiStatus(kind, text){
+      apiPill.className = "pill " + (kind || "warn");
       apiText.textContent = text;
     }
+
     function setLockTag(el, ok, text){
       el.className = "lockTag " + (ok ? "ok" : "");
       el.querySelector(".miniDot").style.opacity = ok ? "1" : ".55";
       el.querySelector("span:last-child").textContent = text;
     }
+
     function normalizeHex(s){
       const v = String(s||"").trim();
       if (!v) return "";
@@ -824,7 +832,7 @@
     }
 
     // =========================================================
-    // API helpers (robust)
+    // API helpers
     // =========================================================
     async function apiGet(path){
       const r = await fetch(API_BASE + path, {
@@ -878,27 +886,31 @@
       let extra = "";
       if (details && typeof details === "object") {
         if (details.details) extra = " — " + String(details.details);
+        if (details.raw) extra = " — " + String(details.raw).slice(0, 240);
       }
       return `${prefix}: ${msg}${extra}`;
     }
 
     // =========================================================
-    // Contract detection
+    // Contract detection (non-blocking)
     // =========================================================
     async function checkApi(){
       try{
         const data = await apiGet("/health");
         state.apiOnline = !!data.ok;
         state.apiEndpoints = Array.isArray(data.endpoints) ? data.endpoints : [];
-        state.hasPlanEndpoint = state.apiEndpoints.some(x => String(x).toLowerCase().includes("post /api/plan"));
-        state.hasGenerateEndpoint = state.apiEndpoints.some(x => String(x).toLowerCase().includes("post /api/generate")) || true;
 
-        setApiStatus(true, "API: online");
+        const endpointsText = state.apiEndpoints.map(x => String(x).toLowerCase());
+        state.hasPlanEndpoint = endpointsText.some(x => x.includes("post /api/plan"));
+        state.hasGenerateEndpoint = endpointsText.some(x => x.includes("post /api/generate")) || true;
+
+        setApiStatus("good", "API: online");
         contractMode.textContent = state.hasPlanEndpoint ? "Contract: plan+generate" : "Contract: generate-only";
       } catch {
-        state.apiOnline = false;
-        setApiStatus(false, "API: offline");
-        contractMode.textContent = "Contract: unknown";
+        state.apiOnline = null;
+        state.hasPlanEndpoint = null;
+        setApiStatus("warn", "API: status unknown");
+        contractMode.textContent = "Contract: auto-fallback";
       }
     }
 
@@ -906,12 +918,6 @@
     // Spec / Plan helpers
     // =========================================================
     function pickSpecFromResponse(data){
-      // Supports many shapes:
-      // - {spec:{...}}
-      // - {plan:{...}}
-      // - {context:{spec:{...}}}
-      // - {context:{plan:{...}}}
-      // - {contextSpec:{...}}
       if (!data || typeof data !== "object") return null;
       if (data.spec && typeof data.spec === "object") return data.spec;
       if (data.plan && typeof data.plan === "object") return data.plan;
@@ -932,7 +938,7 @@
       if (Array.isArray(spec.howToPlay) && spec.howToPlay.length){
         lines.push("");
         lines.push("HOW TO PLAY:");
-        spec.howToPlay.slice(0,10).forEach((x, i) => lines.push(`- ${String(x||"").trim()}`));
+        spec.howToPlay.slice(0,10).forEach((x) => lines.push(`- ${String(x||"").trim()}`));
       }
       if (spec.commands && typeof spec.commands === "object"){
         lines.push("");
@@ -960,10 +966,8 @@
     }
 
     function extractFileContent(data, stage){
-      // Prefer server.js contract: {file:{name,content}}
       if (data && data.file && typeof data.file.content === "string") return data.file.content;
 
-      // Other possible shapes:
       const s = String(stage||"").toLowerCase();
       if (data && data.files && typeof data.files === "object") {
         if (s === "html" && typeof data.files.indexHtml === "string") return data.files.indexHtml;
@@ -974,14 +978,12 @@
       if (s === "css"  && typeof data.style_css === "string") return data.style_css;
       if (s === "js"   && typeof data.game_js === "string") return data.game_js;
 
-      // Older single file content
       if (typeof data.content === "string") return data.content;
-
       return "";
     }
 
     // =========================================================
-    // Step 1: Plan / Spec
+    // Step 1: Plan / Spec (with hard fallback if /api/plan fails)
     // =========================================================
     async function generatePlanOrSpec(){
       clearToast(planToast);
@@ -994,8 +996,10 @@
         return;
       }
 
+      applyThemeInputsToState();
       state.idea = idea;
-      state.templateId = String(templateId.value || "arena").trim();
+      state.templateId = String(templateId.value || "blank").trim() || "blank";
+
       btnPlan.disabled = true;
       btnPlanEdit.disabled = true;
       btnContinue.disabled = true;
@@ -1006,30 +1010,31 @@
       try{
         let data = null;
 
-        if (state.hasPlanEndpoint) {
-          // If the API supports /api/plan, use it
+        // Try /api/plan FIRST (even if health is unknown)
+        try{
           data = await apiPost("/api/plan", {
             prompt: state.idea,
             idea: state.idea,
-            templateId: state.templateId
+            templateId: state.templateId,
+            theme: state.theme,
+            constraints: CONSTRAINTS
           });
-        } else {
-          // Fallback: generate HTML stage and harvest context.spec
-          // (This keeps the system working even if /api/plan is not deployed yet.)
+        } catch (ePlan){
+          // Hard fallback: /api/generate
           data = await apiPost("/api/generate", {
             stage: "html",
             prompt: state.idea,
             idea: state.idea,
             templateId: state.templateId,
-            theme: state.theme
+            theme: state.theme,
+            constraints: CONSTRAINTS
           });
 
-          // If the API returned HTML already, store it as built-but-not-final until Continue.
           const htmlMaybe = String(extractFileContent(data, "html") || "");
           if (htmlMaybe.trim()){
             state.files.html = htmlMaybe;
             outHtml.value = htmlMaybe;
-            state.locks.html = true; // treat as built (saves a step)
+            state.locks.html = true;
           }
         }
 
@@ -1077,39 +1082,41 @@
         return;
       }
 
+      applyThemeInputsToState();
+
       btnPlanEdit.disabled = true;
       btnContinue.disabled = true;
       setLockTag(planLock, false, "Rebuilding…");
       toast(planToast, "warn", "Rebuilding spec from your edited plan…");
 
       try{
-        // Re-run plan/spec generation using the edited plan text as prompt
         state.idea = edited;
 
         let data = null;
-        if (state.hasPlanEndpoint) {
+        try{
           data = await apiPost("/api/plan", {
             prompt: edited,
             idea: edited,
-            templateId: state.templateId
+            templateId: state.templateId,
+            theme: state.theme,
+            constraints: CONSTRAINTS
           });
-        } else {
+        } catch {
           data = await apiPost("/api/generate", {
             stage: "html",
             prompt: edited,
             idea: edited,
             templateId: state.templateId,
-            theme: state.theme
+            theme: state.theme,
+            constraints: CONSTRAINTS
           });
 
-          // HTML fallback may change; keep it as draft built
           const htmlMaybe = String(extractFileContent(data, "html") || "");
           if (htmlMaybe.trim()){
             state.files.html = htmlMaybe;
             outHtml.value = htmlMaybe;
             state.locks.html = true;
           } else {
-            // if HTML not returned, do not force lock
             state.locks.html = false;
           }
         }
@@ -1185,11 +1192,10 @@
           idea: state.idea,
           templateId: state.templateId,
           theme: state.theme,
-          // Server.js expects context.spec (especially for JS stage)
+          constraints: CONSTRAINTS,
           context: { spec: state.spec }
         });
 
-        // keep spec synced
         const newSpec = pickSpecFromResponse(data);
         if (newSpec) state.spec = newSpec;
 
@@ -1289,6 +1295,7 @@
           changeRequest: req,
           templateId: state.templateId,
           theme: state.theme,
+          constraints: CONSTRAINTS,
           currentFiles: {
             "index.html": state.files.html,
             "style.css": state.files.css,
@@ -1334,7 +1341,6 @@
     setLockTag(planLock, false, "Waiting");
     setLockTag(filesLock, false, "Waiting");
     checkApi();
-
   </script>
 </body>
 </html>
