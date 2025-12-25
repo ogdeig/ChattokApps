@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>ChatTok AI Game Builder</title>
+  <title>ChatTok Gaming — AI Game Builder</title>
 
   <style>
     :root{
@@ -18,71 +18,94 @@
       --muted: rgba(255,255,255,.72);
 
       --good:#2ee59d;
-      --warn:#ffd66b;
       --bad:#ff4d4d;
-
-      --pink:#ff0050;
-      --aqua:#00f2ea;
+      --warn:#ffcc66;
 
       --shadowPanel: 0 14px 40px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.08);
       --r: 18px;
       --r2: 14px;
-
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
+      --pink:#ff0050;
+      --aqua:#00f2ea;
+
+      --btn: linear-gradient(135deg, rgba(0,242,234,.22), rgba(255,0,80,.22));
+      --btn2: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
     }
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
     body{
       margin:0;
       font-family: var(--sans);
       color: var(--text);
       background:
-        radial-gradient(1100px 700px at 10% 0%, rgba(0,242,234,.18), transparent 60%),
-        radial-gradient(1000px 600px at 90% 10%, rgba(255,0,80,.16), transparent 55%),
-        linear-gradient(180deg, var(--bg1), var(--bg0));
+        radial-gradient(1000px 600px at 12% -10%, rgba(0,242,234,.18), transparent 58%),
+        radial-gradient(900px 520px at 86% -12%, rgba(255,0,80,.16), transparent 56%),
+        radial-gradient(1200px 900px at 50% 120%, rgba(0,0,0,.72), transparent 55%),
+        linear-gradient(180deg, #020611 0%, var(--bg0) 48%, #01040c 100%);
+      overflow-x:hidden;
     }
 
     .wrap{
       max-width: 1220px;
       margin: 0 auto;
-      padding: 18px 14px 36px;
+      padding: 22px 16px 40px;
     }
 
-    .topbar{
+    .header{
       display:flex;
-      gap: 12px;
       align-items:center;
       justify-content:space-between;
-      margin-bottom: 14px;
+      gap:14px;
+      padding: 14px 16px;
+      border-radius: var(--r);
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadowPanel);
+      position: sticky;
+      top: 10px;
+      z-index: 10;
+      backdrop-filter: blur(10px);
     }
 
     .brand{
       display:flex;
       align-items:center;
-      gap: 10px;
+      gap:12px;
       min-width: 260px;
     }
-
     .logo{
-      width: 38px; height: 38px;
-      border-radius: 14px;
-      background:
-        radial-gradient(14px 14px at 30% 30%, rgba(255,255,255,.9), rgba(255,255,255,0) 60%),
-        linear-gradient(135deg, rgba(255,0,80,.95), rgba(0,242,234,.85));
-      box-shadow: 0 10px 24px rgba(0,0,0,.35);
+      width:40px;height:40px;border-radius:14px;
+      background: linear-gradient(135deg, rgba(255,0,80,.85), rgba(0,242,234,.85));
+      box-shadow: 0 14px 26px rgba(0,0,0,.35);
+      display:grid;
+      place-items:center;
+      font-weight: 900;
+      letter-spacing: .5px;
+      user-select:none;
     }
     .brand h1{
-      font-size: 16px;
       margin:0;
+      font-size: 16px;
+      line-height: 1.1;
+      font-weight: 900;
       letter-spacing:.2px;
-      line-height:1.1;
     }
     .brand p{
-      margin: 2px 0 0;
+      margin:3px 0 0;
       font-size: 12px;
       color: var(--muted);
+      line-height:1.2;
+    }
+
+    .statusbar{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap: wrap;
+      justify-content:flex-end;
     }
 
     .pill{
@@ -91,629 +114,732 @@
       gap:8px;
       padding: 8px 10px;
       border-radius: 999px;
-      background: rgba(0,0,0,.22);
       border: 1px solid rgba(255,255,255,.12);
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
-      white-space: nowrap;
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.86);
       font-size: 12px;
-      color: var(--muted);
+      user-select:none;
+      white-space:nowrap;
     }
     .dot{
-      width: 9px; height: 9px;
-      border-radius: 99px;
-      background: rgba(255,255,255,.2);
-      box-shadow: 0 0 0 2px rgba(255,255,255,.08) inset;
+      width:10px;height:10px;border-radius:999px;
+      background: rgba(255,255,255,.35);
+      box-shadow: 0 0 0 3px rgba(255,255,255,.10);
     }
-    .dot.good{ background: var(--good); box-shadow: 0 0 0 2px rgba(46,229,157,.20), 0 0 18px rgba(46,229,157,.25); }
-    .dot.bad{ background: var(--bad); box-shadow: 0 0 0 2px rgba(255,77,77,.20), 0 0 18px rgba(255,77,77,.25); }
-    .dot.warn{ background: var(--warn); box-shadow: 0 0 0 2px rgba(255,214,107,.20), 0 0 18px rgba(255,214,107,.18); }
+    .pill.good .dot{ background: var(--good); box-shadow:0 0 0 3px rgba(46,229,157,.18); }
+    .pill.bad .dot{ background: var(--bad); box-shadow:0 0 0 3px rgba(255,77,77,.18); }
+    .pill.warn .dot{ background: var(--warn); box-shadow:0 0 0 3px rgba(255,204,102,.18); }
+    .pill code{ font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.88); }
 
     .grid{
       display:grid;
-      grid-template-columns: 1.15fr .85fr;
-      gap: 12px;
-      align-items:start;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 14px;
     }
     @media (max-width: 980px){
       .grid{ grid-template-columns: 1fr; }
+      .brand{ min-width: unset; }
+      .header{ position: relative; top:auto; }
     }
 
     .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.035));
-      border: 1px solid rgba(255,255,255,.10);
       border-radius: var(--r);
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,.10);
       box-shadow: var(--shadowPanel);
       overflow:hidden;
     }
 
     .cardHead{
-      padding: 12px 14px;
-      border-bottom: 1px solid rgba(255,255,255,.10);
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       justify-content:space-between;
-      gap: 10px;
-      background: rgba(0,0,0,.14);
+      gap: 12px;
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
     }
 
     .cardTitle{
       display:flex;
-      align-items:center;
-      gap: 10px;
-      min-width: 0;
+      flex-direction:column;
+      gap: 4px;
     }
-
-    .stepNum{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      width: 26px; height: 26px;
-      border-radius: 10px;
-      background: rgba(0,0,0,.28);
-      border: 1px solid rgba(255,255,255,.10);
-      color: rgba(255,255,255,.9);
-      font-size: 12px;
-      flex: 0 0 auto;
-    }
-
-    .cardTitle h2{
+    .cardTitle .t{
+      font-weight: 900;
+      letter-spacing:.2px;
       font-size: 14px;
       margin:0;
-      letter-spacing:.2px;
     }
-    .cardTitle small{
-      display:block;
-      margin-top:2px;
+    .cardTitle .s{
+      margin:0;
       font-size: 12px;
       color: var(--muted);
-      line-height: 1.25;
+      line-height:1.3;
     }
 
-    .cardBody{ padding: 14px; }
-
-    .row{
-      display:flex;
-      gap: 10px;
-      flex-wrap: wrap;
+    .cardBody{
+      padding: 14px;
     }
-    .row > * { flex: 1; min-width: 220px; }
 
     label{
       display:block;
       font-size: 12px;
-      color: var(--muted);
+      color: rgba(255,255,255,.82);
       margin-bottom: 6px;
+      font-weight: 800;
+      letter-spacing:.2px;
     }
 
-    input[type="text"], input[type="number"], textarea, select{
+    input[type="text"], textarea, select{
       width:100%;
-      padding: 10px 10px;
-      border-radius: 12px;
-      background: rgba(0,0,0,.22);
+      border-radius: 14px;
       border: 1px solid rgba(255,255,255,.14);
-      color: var(--text);
-      outline: none;
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.92);
+      padding: 11px 12px;
+      outline:none;
+      font-size: 13px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
     }
     textarea{
-      min-height: 120px;
+      min-height: 110px;
       resize: vertical;
+      font-family: var(--sans);
+      line-height:1.35;
+    }
+    .mono{
       font-family: var(--mono);
       font-size: 12px;
-      line-height: 1.45;
+      min-height: 150px;
     }
-    input::placeholder, textarea::placeholder{ color: rgba(255,255,255,.45); }
+
+    .row{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 680px){
+      .row{ grid-template-columns: 1fr; }
+    }
 
     .btnRow{
       display:flex;
       gap: 10px;
       flex-wrap: wrap;
       align-items:center;
+      justify-content:flex-start;
       margin-top: 10px;
     }
 
     button{
-      appearance:none;
       border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.22);
-      color: var(--text);
+      background: var(--btn2);
+      color: rgba(255,255,255,.92);
       padding: 10px 12px;
       border-radius: 14px;
       cursor:pointer;
-      font-weight: 650;
-      letter-spacing:.15px;
-      box-shadow: 0 10px 26px rgba(0,0,0,.25);
-      transition: transform .08s ease, border-color .15s ease, background .15s ease;
+      font-weight: 900;
+      letter-spacing: .2px;
+      font-size: 13px;
+      box-shadow: 0 14px 28px rgba(0,0,0,.28);
+      transition: transform .08s ease, opacity .08s ease;
+      user-select:none;
     }
-    button:hover{ border-color: rgba(255,255,255,.24); }
-    button:active{ transform: translateY(1px); }
-    button[disabled]{ opacity:.5; cursor:not-allowed; transform:none; }
+    button:hover{ transform: translateY(-1px); }
+    button:active{ transform: translateY(0px); opacity:.92; }
+    button:disabled{ opacity:.45; cursor:not-allowed; transform:none; }
 
     .primary{
-      background: linear-gradient(135deg, rgba(255,0,80,.95), rgba(0,242,234,.75));
-      border-color: rgba(255,255,255,.18);
-      color: #061018;
+      background: var(--btn);
+      border: 1px solid rgba(255,255,255,.18);
     }
     .ghost{
-      background: rgba(255,255,255,.06);
+      background: rgba(0,0,0,.14);
+    }
+    .tiny{
+      padding: 8px 10px;
+      font-size: 12px;
+      border-radius: 12px;
+      box-shadow: none;
     }
 
     .hint{
-      margin-top: 8px;
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
+      color: rgba(255,255,255,.78);
       font-size: 12px;
-      color: var(--muted);
-      line-height: 1.35;
+      line-height:1.35;
     }
+    .hint b{ color: rgba(255,255,255,.92); }
 
     .toast{
       margin-top: 10px;
-      font-size: 12px;
       padding: 10px 12px;
       border-radius: 14px;
       border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.22);
-      color: var(--muted);
+      background: rgba(0,0,0,.20);
+      font-size: 12px;
+      line-height:1.35;
       display:none;
-      white-space: pre-wrap;
-      line-height: 1.35;
     }
-    .toast.show{ display:block; }
-    .toast.good{ border-color: rgba(46,229,157,.35); color: rgba(225,255,244,.92); }
-    .toast.bad{ border-color: rgba(255,77,77,.35); color: rgba(255,236,236,.92); }
-    .toast.warn{ border-color: rgba(255,214,107,.35); color: rgba(255,248,233,.92); }
+    .toast.good{ border-color: rgba(46,229,157,.28); background: rgba(46,229,157,.10); display:block; }
+    .toast.bad{ border-color: rgba(255,77,77,.28); background: rgba(255,77,77,.10); display:block; }
+    .toast.warn{ border-color: rgba(255,204,102,.28); background: rgba(255,204,102,.10); display:block; }
 
     .split{
       display:grid;
       grid-template-columns: 1fr;
-      gap: 12px;
-    }
-
-    .mini{
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .fileHead{
-      display:flex;
       gap: 10px;
-      align-items:center;
-      justify-content:space-between;
-      margin-bottom: 8px;
-    }
-    .fileHead .name{
-      font-family: var(--mono);
-      font-size: 12px;
-      color: rgba(255,255,255,.86);
-    }
-    .fileHead .actions{
-      display:flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content:flex-end;
-    }
-    .actions button{
-      padding: 8px 10px;
-      border-radius: 12px;
-      font-weight: 650;
     }
 
-    .themeRow{
-      display:flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .themeRow > *{ flex: 1; min-width: 180px; }
-
-    .colorField{
-      display:flex;
-      gap: 10px;
-      align-items:center;
-    }
-    .colorField input[type="color"]{
-      width: 44px;
-      height: 40px;
-      padding: 0;
-      border-radius: 12px;
-      background: rgba(0,0,0,.22);
-      border: 1px solid rgba(255,255,255,.14);
-    }
-    .colorField input[type="text"]{
-      font-family: var(--mono);
-      font-size: 12px;
-    }
-
-    .lockRow{
-      display:flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 10px;
-    }
-    .tag{
+    .lockTag{
       display:inline-flex;
       align-items:center;
-      gap: 8px;
+      gap:8px;
       padding: 6px 10px;
       border-radius: 999px;
-      background: rgba(0,0,0,.22);
       border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
       font-size: 12px;
-      color: var(--muted);
+      color: rgba(255,255,255,.82);
+      user-select:none;
+      white-space:nowrap;
     }
-    .tag b{ color: rgba(255,255,255,.92); }
+    .lockTag.ok{ border-color: rgba(46,229,157,.30); background: rgba(46,229,157,.10); }
+    .lockTag .miniDot{
+      width:8px;height:8px;border-radius:999px;background: rgba(255,255,255,.35);
+    }
+    .lockTag.ok .miniDot{ background: var(--good); }
 
-    .danger{
-      border-color: rgba(255,77,77,.32);
-      background: rgba(255,77,77,.07);
+    .outActions{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:flex-end;
+      flex-wrap:wrap;
     }
+
+    .hr{
+      height:1px;
+      background: rgba(255,255,255,.08);
+      margin: 12px 0;
+    }
+
+    .swatches{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-top: 10px;
+    }
+    .swatch{
+      width: 46px;
+      height: 30px;
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,.12);
+      cursor:pointer;
+      box-shadow: 0 10px 20px rgba(0,0,0,.22);
+      transition: transform .08s ease, border-color .08s ease;
+    }
+    .swatch:hover{ transform: translateY(-1px); }
+    .swatch.sel{ border-color: rgba(255,255,255,.55); }
+
+    .hidden{ display:none !important; }
+
+    .fileHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom: 8px;
+    }
+    .fileHeader .name{
+      font-weight: 900;
+      letter-spacing:.2px;
+      font-size: 13px;
+      color: rgba(255,255,255,.92);
+    }
+    .mutedSmall{ color: var(--muted); font-size: 12px; line-height:1.3; }
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <div class="topbar">
+    <div class="header">
       <div class="brand">
-        <div class="logo" aria-hidden="true"></div>
+        <div class="logo">CT</div>
         <div>
-          <h1>ChatTok AI Game Builder</h1>
-          <p>Plan → Build HTML → Build CSS → Build game.js (stable contract, no regressions)</p>
+          <h1>AI Game Builder</h1>
+          <p>Plan → Build (HTML → CSS → JS) → Optional edits (up to 3)</p>
         </div>
       </div>
 
-      <div class="pill" title="API status">
-        <span id="apiDot" class="dot warn"></span>
-        <span id="apiPillText">Checking API…</span>
+      <div class="statusbar">
+        <div class="pill warn" id="apiPill" title="API health">
+          <span class="dot"></span>
+          <span id="apiText">API: checking…</span>
+        </div>
+        <div class="pill" title="Contract mode">
+          <span class="dot" style="opacity:.6"></span>
+          <span id="contractMode">Contract: auto-detect</span>
+        </div>
       </div>
     </div>
 
     <div class="grid">
-      <!-- LEFT: Steps -->
-      <div class="split">
 
-        <!-- Step 1 -->
-        <div class="card">
-          <div class="cardHead">
-            <div class="cardTitle">
-              <div class="stepNum">1</div>
-              <div>
-                <h2>Describe your game</h2>
-                <small>Give the builder a clear idea. You can pick a template and theme colors.</small>
+      <!-- LEFT: Setup + Plan -->
+      <div class="card">
+        <div class="cardHead">
+          <div class="cardTitle">
+            <p class="t">1) Describe the game</p>
+            <p class="s">Be specific: gameplay loop, chat commands, gifts/likes, win condition, and visuals.</p>
+          </div>
+          <span class="lockTag" id="planLock">
+            <span class="miniDot"></span>
+            <span id="planLockText">Waiting</span>
+          </span>
+        </div>
+
+        <div class="cardBody">
+          <label for="templateId">Template flavor</label>
+          <select id="templateId">
+            <option value="arena">Arena (action)</option>
+            <option value="trivia">Trivia (rounds)</option>
+            <option value="wheel">Spin Wheel (random)</option>
+            <option value="boss">Boss Fight (team vs boss)</option>
+          </select>
+
+          <div class="hr"></div>
+
+          <label for="gameIdea">Game idea prompt</label>
+          <textarea id="gameIdea" placeholder="Example: Seek & Destroy — viewers type coordinates like A4 to fire at hidden targets on a grid. Hits show 💥 + the shooter's profile pop. Misses show 💦. Gifts can reveal a tile or add an extra shot. Likes charge a radar sweep. Must feel good with 3–4s chat delay."></textarea>
+
+          <div class="btnRow">
+            <button class="primary" id="btnPlan">Generate Plan / Spec</button>
+            <button class="ghost" id="btnPlanEdit" disabled>Rebuild Spec from edited plan</button>
+            <button class="primary" id="btnContinue" disabled>Continue → Build</button>
+          </div>
+
+          <div class="toast" id="planToast"></div>
+          <div class="toast" id="continueToast"></div>
+
+          <div class="hr"></div>
+
+          <label for="planEditor">Plan / Spec (editable)</label>
+          <textarea id="planEditor" class="mono" placeholder="Your generated plan/spec will appear here. You can tweak it, then click 'Rebuild Spec from edited plan'."></textarea>
+
+          <div class="hint">
+            <b>Notes:</b> Builder automatically adapts to the API’s contract. If the API provides <code>/api/plan</code>, we use it.
+            Otherwise we derive the plan from the spec returned by <code>/api/generate</code>.
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Build + Outputs -->
+      <div class="card">
+        <div class="cardHead">
+          <div class="cardTitle">
+            <p class="t">2) Build the files</p>
+            <p class="s">Order is enforced: HTML → CSS → game.js. Copy full files into your game folder.</p>
+          </div>
+          <span class="lockTag" id="filesLock">
+            <span class="miniDot"></span>
+            <span id="filesLockText">Waiting</span>
+          </span>
+        </div>
+
+        <div class="cardBody">
+          <div class="row">
+            <div>
+              <label>Primary</label>
+              <div class="row" style="grid-template-columns: 1fr 90px; gap:8px">
+                <input type="text" id="colorPrimary" value="#ff0050" />
+                <input type="color" id="colorPrimaryPicker" value="#ff0050" style="height:42px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:transparent;padding:0" />
+              </div>
+            </div>
+            <div>
+              <label>Secondary</label>
+              <div class="row" style="grid-template-columns: 1fr 90px; gap:8px">
+                <input type="text" id="colorSecondary" value="#00f2ea" />
+                <input type="color" id="colorSecondaryPicker" value="#00f2ea" style="height:42px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:transparent;padding:0" />
               </div>
             </div>
           </div>
-          <div class="cardBody">
-            <div class="row">
-              <div>
-                <label for="gameIdea">Game idea (required)</label>
-                <textarea id="gameIdea" placeholder="Example: Seek & Destroy — viewers fire coordinates like A4. Hits/misses show emoji and a flashy profile popup. Likes charge energy, gifts trigger power-ups."></textarea>
-                <div class="hint">Tip: include how chat controls the game, what viewers see when they act, and the win condition.</div>
+
+          <div class="row" style="margin-top:10px">
+            <div>
+              <label>Background</label>
+              <div class="row" style="grid-template-columns: 1fr 90px; gap:8px">
+                <input type="text" id="colorBackground" value="#050b17" />
+                <input type="color" id="colorBackgroundPicker" value="#050b17" style="height:42px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:transparent;padding:0" />
+              </div>
+            </div>
+            <div>
+              <label>Theme presets</label>
+              <div class="swatches" id="presetRow" style="margin-top:0"></div>
+            </div>
+          </div>
+
+          <div class="btnRow" style="margin-top:12px">
+            <button class="primary" id="btnHtml" disabled>Build HTML</button>
+            <button class="primary" id="btnCss" disabled>Build CSS</button>
+            <button class="primary" id="btnJs" disabled>Build game.js</button>
+          </div>
+
+          <div class="btnRow">
+            <button class="ghost tiny" id="rebuildHtml" disabled>Unlock HTML</button>
+            <button class="ghost tiny" id="rebuildCss" disabled>Unlock CSS</button>
+            <button class="ghost tiny" id="rebuildJs" disabled>Unlock JS</button>
+          </div>
+
+          <div class="toast" id="buildToast"></div>
+
+          <div class="hr"></div>
+
+          <div class="split">
+            <div>
+              <div class="fileHeader">
+                <div class="name">index.html</div>
+                <div class="outActions">
+                  <span class="pill" id="htmlPill"><span class="dot"></span><span>Not built</span></span>
+                  <button class="tiny" id="copyHtml" disabled>Copy</button>
+                </div>
+              </div>
+              <textarea id="outHtml" class="mono" placeholder="index.html will appear here…" spellcheck="false"></textarea>
+            </div>
+
+            <div>
+              <div class="fileHeader">
+                <div class="name">style.css</div>
+                <div class="outActions">
+                  <span class="pill" id="cssPill"><span class="dot"></span><span>Not built</span></span>
+                  <button class="tiny" id="copyCss" disabled>Copy</button>
+                </div>
+              </div>
+              <textarea id="outCss" class="mono" placeholder="style.css will appear here…" spellcheck="false"></textarea>
+            </div>
+
+            <div>
+              <div class="fileHeader">
+                <div class="name">game.js</div>
+                <div class="outActions">
+                  <span class="pill" id="jsPill"><span class="dot"></span><span>Not built</span></span>
+                  <button class="tiny" id="copyJs" disabled>Copy</button>
+                </div>
+              </div>
+              <textarea id="outJs" class="mono" placeholder="game.js will appear here…" spellcheck="false"></textarea>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="card" style="background: rgba(0,0,0,.16); border-color: rgba(255,255,255,.10); box-shadow:none">
+            <div class="cardHead" style="border-bottom-color: rgba(255,255,255,.08)">
+              <div class="cardTitle">
+                <p class="t">3) Optional edits (max 3)</p>
+                <p class="s">Unlocked only after <b>game.js</b> is built. Keeps TikTok connection contract intact.</p>
+              </div>
+              <span class="lockTag" id="editLock">
+                <span class="miniDot"></span>
+                <span><span id="editsLeft">3</span> edits left</span>
+              </span>
+            </div>
+            <div class="cardBody">
+              <div id="editLockedMsg" class="mutedSmall">
+                Build <b>game.js</b> to unlock edits.
               </div>
 
-              <div>
-                <label for="templateId">Template</label>
-                <select id="templateId">
-                  <option value="arena">Arena (default)</option>
-                  <option value="seek">Seek & Destroy</option>
-                  <option value="trivia">Trivia (basic)</option>
-                </select>
-
-                <div style="height:10px"></div>
-
-                <label>Theme colors</label>
-                <div class="themeRow">
-                  <div>
-                    <label class="mini">Primary</label>
-                    <div class="colorField">
-                      <input id="primaryPicker" type="color" value="#ff0050" />
-                      <input id="primaryHex" type="text" value="#ff0050" placeholder="#ff0050" />
-                    </div>
-                  </div>
-                  <div>
-                    <label class="mini">Secondary</label>
-                    <div class="colorField">
-                      <input id="secondaryPicker" type="color" value="#00f2ea" />
-                      <input id="secondaryHex" type="text" value="#00f2ea" placeholder="#00f2ea" />
-                    </div>
-                  </div>
-                  <div>
-                    <label class="mini">Background</label>
-                    <div class="colorField">
-                      <input id="backgroundPicker" type="color" value="#0b0f14" />
-                      <input id="backgroundHex" type="text" value="#0b0f14" placeholder="#0b0f14" />
-                    </div>
-                  </div>
-                </div>
-
+              <div id="editUnlocked" class="hidden">
+                <label for="editRequest">Edit request</label>
+                <textarea id="editRequest" placeholder="Example: Make hits flash bigger, add a stronger hit sound, and show a bigger profile pop for the shooter. Keep 9:16 layout and TikTok connection contract." style="min-height:90px"></textarea>
                 <div class="btnRow">
-                  <button id="btnPlan" class="primary">Generate Plan</button>
-                  <button id="btnReset" class="ghost">Reset</button>
+                  <button class="primary" id="btnApplyEdit">Apply Edit</button>
                 </div>
-
-                <div id="planToast" class="toast"></div>
               </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- Step 2 -->
-        <div class="card">
-          <div class="cardHead">
-            <div class="cardTitle">
-              <div class="stepNum">2</div>
-              <div>
-                <h2>Review the plan/spec</h2>
-                <small>Confirm the spec before building files. (You can edit JSON safely.)</small>
-              </div>
-            </div>
-          </div>
-          <div class="cardBody">
-            <label for="planEditor">Plan/spec (JSON)</label>
-            <textarea id="planEditor" placeholder="Generate a plan to populate this."></textarea>
-
-            <div class="btnRow">
-              <button id="btnUseEditedPlan" class="primary">Use Edited Plan</button>
-              <button id="btnContinue" class="ghost">Continue to Build</button>
-            </div>
-
-            <div class="lockRow">
-              <span class="tag"><b>Plan</b>: <span id="planState">locked</span></span>
-              <span class="tag"><b>Build</b>: <span id="buildState">locked</span></span>
-              <span class="tag"><b>Edits</b>: <span id="editsState">3</span> left</span>
-            </div>
-
-            <div id="continueToast" class="toast"></div>
-          </div>
-        </div>
-
-        <!-- Step 3 -->
-        <div class="card">
-          <div class="cardHead">
-            <div class="cardTitle">
-              <div class="stepNum">3</div>
-              <div>
-                <h2>Build files</h2>
-                <small>Build in order: <b>HTML → CSS → game.js</b>. The API returns full, production-ready files.</small>
-              </div>
-            </div>
-          </div>
-          <div class="cardBody">
-            <div class="btnRow">
-              <button id="btnHtml" class="primary" disabled>Build HTML</button>
-              <button id="btnCss" class="primary" disabled>Build CSS</button>
-              <button id="btnJs" class="primary" disabled>Build game.js</button>
-              <button id="btnBuildAll" class="ghost" disabled>Build All</button>
-            </div>
-            <div class="hint">CSS is template-based to prevent corruption. game.js uses template-first + AI region + fallback to avoid timeouts/regressions.</div>
-            <div id="buildToast" class="toast"></div>
-          </div>
-        </div>
-
-        <!-- Step 4 -->
-        <div class="card">
-          <div class="cardHead">
-            <div class="cardTitle">
-              <div class="stepNum">4</div>
-              <div>
-                <h2>Optional: apply up to 3 edits</h2>
-                <small>Edits never touch TikTok connection (tiktok-client.js is injected and read-only).</small>
-              </div>
-            </div>
-          </div>
-          <div class="cardBody">
-            <label for="editRequest">Edit request</label>
-            <textarea id="editRequest" placeholder="Example: Make hit animations bigger and add a quick winner banner when someone lands a hit."></textarea>
-
-            <div class="btnRow">
-              <button id="btnApplyEdit" class="primary" disabled>Apply Edit</button>
-              <button id="btnLockBuild" class="ghost danger" disabled>Stop / Lock Build</button>
-            </div>
-
-            <div class="hint">Edits patch existing files without breaking the contract. If the AI fails, the API falls back to safe baseline gameplay.</div>
-            <div id="editToast" class="toast"></div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- RIGHT: Outputs -->
-      <div class="split">
-        <div class="card">
-          <div class="cardHead">
-            <div class="cardTitle">
-              <div class="stepNum">↳</div>
-              <div>
-                <h2>Outputs</h2>
-                <small>Copy the files into your game folder: <span style="font-family:var(--mono)">index.html</span>, <span style="font-family:var(--mono)">style.css</span>, <span style="font-family:var(--mono)">game.js</span>.</small>
-              </div>
+              <div class="toast" id="editToast"></div>
             </div>
           </div>
 
-          <div class="cardBody">
-            <div class="fileHead">
-              <div class="name">index.html</div>
-              <div class="actions">
-                <button id="copyHtml" class="ghost">Copy</button>
-              </div>
-            </div>
-            <textarea id="outHtml" placeholder="Build HTML to see index.html here."></textarea>
-
-            <div style="height:10px"></div>
-
-            <div class="fileHead">
-              <div class="name">style.css</div>
-              <div class="actions">
-                <button id="copyCss" class="ghost">Copy</button>
-              </div>
-            </div>
-            <textarea id="outCss" placeholder="Build CSS to see style.css here."></textarea>
-
-            <div style="height:10px"></div>
-
-            <div class="fileHead">
-              <div class="name">game.js</div>
-              <div class="actions">
-                <button id="copyJs" class="ghost">Copy</button>
-              </div>
-            </div>
-            <textarea id="outJs" placeholder="Build game.js to see game.js here."></textarea>
-
-            <div class="hint">If you see an error, it should be shown in the step’s status box above (no dev console required).</div>
-          </div>
         </div>
       </div>
+
     </div>
   </div>
 
   <script>
-    // ===========================
-    // Config (internal only)
-    // ===========================
+    // =========================================================
+    // Internal API base (do not show in UI text)
+    // =========================================================
     const API_BASE = "https://chattok-builder-api.onrender.com";
 
-    // ===========================
-    // Elements
-    // ===========================
-    const apiDot = document.getElementById("apiDot");
-    const apiPillText = document.getElementById("apiPillText");
+    // =========================================================
+    // DOM
+    // =========================================================
+    const apiPill = document.getElementById("apiPill");
+    const apiText = document.getElementById("apiText");
+    const contractMode = document.getElementById("contractMode");
 
-    const gameIdea = document.getElementById("gameIdea");
     const templateId = document.getElementById("templateId");
+    const gameIdea = document.getElementById("gameIdea");
+
     const btnPlan = document.getElementById("btnPlan");
-    const btnReset = document.getElementById("btnReset");
-
-    const primaryPicker = document.getElementById("primaryPicker");
-    const secondaryPicker = document.getElementById("secondaryPicker");
-    const backgroundPicker = document.getElementById("backgroundPicker");
-    const primaryHex = document.getElementById("primaryHex");
-    const secondaryHex = document.getElementById("secondaryHex");
-    const backgroundHex = document.getElementById("backgroundHex");
-
-    const planEditor = document.getElementById("planEditor");
-    const btnUseEditedPlan = document.getElementById("btnUseEditedPlan");
+    const btnPlanEdit = document.getElementById("btnPlanEdit");
     const btnContinue = document.getElementById("btnContinue");
-
+    const planEditor = document.getElementById("planEditor");
     const planToast = document.getElementById("planToast");
     const continueToast = document.getElementById("continueToast");
-    const buildToast = document.getElementById("buildToast");
-    const editToast = document.getElementById("editToast");
+    const planLock = document.getElementById("planLock");
+    const planLockText = document.getElementById("planLockText");
 
-    const planState = document.getElementById("planState");
-    const buildState = document.getElementById("buildState");
-    const editsState = document.getElementById("editsState");
+    const colorPrimary = document.getElementById("colorPrimary");
+    const colorSecondary = document.getElementById("colorSecondary");
+    const colorBackground = document.getElementById("colorBackground");
+    const colorPrimaryPicker = document.getElementById("colorPrimaryPicker");
+    const colorSecondaryPicker = document.getElementById("colorSecondaryPicker");
+    const colorBackgroundPicker = document.getElementById("colorBackgroundPicker");
+
+    const presetRow = document.getElementById("presetRow");
 
     const btnHtml = document.getElementById("btnHtml");
     const btnCss = document.getElementById("btnCss");
     const btnJs = document.getElementById("btnJs");
-    const btnBuildAll = document.getElementById("btnBuildAll");
+
+    const rebuildHtml = document.getElementById("rebuildHtml");
+    const rebuildCss = document.getElementById("rebuildCss");
+    const rebuildJs = document.getElementById("rebuildJs");
+
+    const buildToast = document.getElementById("buildToast");
+    const filesLock = document.getElementById("filesLock");
+    const filesLockText = document.getElementById("filesLockText");
 
     const outHtml = document.getElementById("outHtml");
     const outCss = document.getElementById("outCss");
-    const outJs = document.getElementById("outJs");
+    const outJs  = document.getElementById("outJs");
 
     const copyHtml = document.getElementById("copyHtml");
-    const copyCss = document.getElementById("copyCss");
-    const copyJs = document.getElementById("copyJs");
+    const copyCss  = document.getElementById("copyCss");
+    const copyJs   = document.getElementById("copyJs");
 
+    const htmlPill = document.getElementById("htmlPill");
+    const cssPill  = document.getElementById("cssPill");
+    const jsPill   = document.getElementById("jsPill");
+
+    const editLock = document.getElementById("editLock");
+    const editsLeftEl = document.getElementById("editsLeft");
+    const editLockedMsg = document.getElementById("editLockedMsg");
+    const editUnlocked = document.getElementById("editUnlocked");
     const editRequest = document.getElementById("editRequest");
     const btnApplyEdit = document.getElementById("btnApplyEdit");
-    const btnLockBuild = document.getElementById("btnLockBuild");
+    const editToast = document.getElementById("editToast");
 
-    // ===========================
+    // =========================================================
     // State
-    // ===========================
+    // =========================================================
     const state = {
+      apiOnline: false,
+      apiEndpoints: [],
+      // contract detection
+      hasPlanEndpoint: false,  // /api/plan
+      hasGenerateEndpoint: true, // /api/generate
+      // flow
       idea: "",
       templateId: "arena",
-      theme: { primary: "#ff0050", secondary: "#00f2ea", background: "#0b0f14" },
-
+      theme: { primary:"#ff0050", secondary:"#00f2ea", background:"#050b17" },
       spec: null,
       planText: "",
       planReady: false,
       buildReady: false,
-
-      // file locks (order enforcement + safety)
-      locks: { html: false, css: false, js: false },
-
-      editsLeft: 3,
-
-      files: { html: "", css: "", js: "" },
-
-      // hard lock (user can stop)
-      stopped: false,
+      locks: { html:false, css:false, js:false },
+      files: { html:"", css:"", js:"" },
+      editsLeft: 3
     };
 
-    // ===========================
+    // =========================================================
     // UI helpers
-    // ===========================
-    function toast(el, kind, msg){
-      el.className = "toast show" + (kind ? (" " + kind) : "");
+    // =========================================================
+    function toast(el, type, msg){
+      el.className = "toast " + (type || "");
       el.textContent = String(msg || "");
+      el.style.display = "block";
     }
     function clearToast(el){
       el.className = "toast";
       el.textContent = "";
+      el.style.display = "none";
+    }
+    function setApiStatus(ok, text){
+      apiPill.className = "pill " + (ok ? "good" : "bad");
+      apiText.textContent = text;
+    }
+    function setLockTag(el, ok, text){
+      el.className = "lockTag " + (ok ? "ok" : "");
+      el.querySelector(".miniDot").style.opacity = ok ? "1" : ".55";
+      el.querySelector("span:last-child").textContent = text;
+    }
+    function normalizeHex(s){
+      const v = String(s||"").trim();
+      if (!v) return "";
+      let x = v.startsWith("#") ? v : "#" + v;
+      if (/^#[0-9a-fA-F]{3}$/.test(x)) {
+        x = "#" + x[1] + x[1] + x[2] + x[2] + x[3] + x[3];
+      }
+      if (!/^#[0-9a-fA-F]{6}$/.test(x)) return "";
+      return x.toLowerCase();
     }
 
-    function setApiStatus(kind, text){
-      apiDot.className = "dot " + kind;
-      apiPillText.textContent = text;
+    function applyThemeInputsToState(){
+      const p = normalizeHex(colorPrimary.value) || state.theme.primary;
+      const s = normalizeHex(colorSecondary.value) || state.theme.secondary;
+      const b = normalizeHex(colorBackground.value) || state.theme.background;
+
+      state.theme.primary = p;
+      state.theme.secondary = s;
+      state.theme.background = b;
+
+      colorPrimary.value = p; colorPrimaryPicker.value = p;
+      colorSecondary.value = s; colorSecondaryPicker.value = s;
+      colorBackground.value = b; colorBackgroundPicker.value = b;
     }
 
-    function setPlanReady(on){
-      state.planReady = !!on;
-      planState.textContent = state.planReady ? "ready" : "locked";
+    function wireColorSync(textEl, pickerEl){
+      textEl.addEventListener("change", () => {
+        const v = normalizeHex(textEl.value);
+        if (v){
+          textEl.value = v;
+          pickerEl.value = v;
+          applyThemeInputsToState();
+        }
+      });
+      pickerEl.addEventListener("input", () => {
+        textEl.value = pickerEl.value;
+        applyThemeInputsToState();
+      });
+    }
+    wireColorSync(colorPrimary, colorPrimaryPicker);
+    wireColorSync(colorSecondary, colorSecondaryPicker);
+    wireColorSync(colorBackground, colorBackgroundPicker);
+
+    function updateBuildButtons(){
       btnContinue.disabled = !state.planReady;
-      btnUseEditedPlan.disabled = !state.planReady;
-    }
 
-    function setBuildReady(on){
-      state.buildReady = !!on;
-      buildState.textContent = state.buildReady ? "ready" : "locked";
-      const enabled = state.buildReady && !state.stopped;
+      btnHtml.disabled = !state.buildReady || state.locks.html;
+      btnCss.disabled  = !state.buildReady || !state.locks.html || state.locks.css;
+      btnJs.disabled   = !state.buildReady || !state.locks.css || state.locks.js;
 
-      btnHtml.disabled = !enabled;
-      btnCss.disabled = !enabled;
-      btnJs.disabled = !enabled;
-      btnBuildAll.disabled = !enabled;
+      rebuildHtml.disabled = !state.locks.html;
+      rebuildCss.disabled  = !state.locks.css;
+      rebuildJs.disabled   = !state.locks.js;
 
-      // edits only allowed after at least game.js exists (or after build all)
-      btnApplyEdit.disabled = !(enabled && state.locks.js && state.editsLeft > 0);
-      btnLockBuild.disabled = !enabled;
-    }
+      copyHtml.disabled = !state.files.html;
+      copyCss.disabled  = !state.files.css;
+      copyJs.disabled   = !state.files.js;
 
-    function updateLocksUI(){
-      // enable build buttons with order enforcement
-      const enabled = state.buildReady && !state.stopped;
-      btnHtml.disabled = !enabled;
-      btnCss.disabled = !enabled || !state.locks.html;
-      btnJs.disabled = !enabled || !(state.locks.html && state.locks.css);
-      btnBuildAll.disabled = !enabled;
+      htmlPill.className = "pill " + (state.locks.html ? "good" : "warn");
+      cssPill.className  = "pill " + (state.locks.css ? "good" : "warn");
+      jsPill.className   = "pill " + (state.locks.js  ? "good" : "warn");
+      htmlPill.querySelector("span:last-child").textContent = state.locks.html ? "Built" : "Not built";
+      cssPill.querySelector("span:last-child").textContent  = state.locks.css ? "Built" : "Not built";
+      jsPill.querySelector("span:last-child").textContent   = state.locks.js  ? "Built" : "Not built";
 
-      // edits
-      btnApplyEdit.disabled = !(enabled && state.locks.js && state.editsLeft > 0);
-    }
-
-    function setStopped(on){
-      state.stopped = !!on;
-      btnLockBuild.textContent = state.stopped ? "Build Locked" : "Stop / Lock Build";
-      btnLockBuild.disabled = !state.buildReady;
-      updateLocksUI();
-      if (state.stopped) {
-        toast(editToast, "warn", "Build has been locked. Refresh to start over, or press Reset.");
+      if (!state.buildReady){
+        setLockTag(filesLock, false, "Waiting");
+      } else if (state.locks.html && state.locks.css && state.locks.js){
+        setLockTag(filesLock, true, "Complete");
       } else {
-        clearToast(editToast);
+        setLockTag(filesLock, false, "In progress");
+      }
+
+      editsLeftEl.textContent = String(state.editsLeft);
+      if (state.locks.js && state.editsLeft > 0){
+        editLockedMsg.classList.add("hidden");
+        editUnlocked.classList.remove("hidden");
+        btnApplyEdit.disabled = false;
+      } else {
+        editLockedMsg.classList.remove("hidden");
+        editUnlocked.classList.add("hidden");
+        btnApplyEdit.disabled = true;
       }
     }
 
-    // ===========================
-    // API helpers
-    // ===========================
+    function resetFilesAfter(stage){
+      if (stage === "html"){
+        state.files.html = ""; state.files.css = ""; state.files.js = "";
+        state.locks.html = false; state.locks.css = false; state.locks.js = false;
+        outHtml.value = ""; outCss.value = ""; outJs.value = "";
+      } else if (stage === "css"){
+        state.files.css = ""; state.files.js = "";
+        state.locks.css = false; state.locks.js = false;
+        outCss.value = ""; outJs.value = "";
+      } else if (stage === "js"){
+        state.files.js = "";
+        state.locks.js = false;
+        outJs.value = "";
+      }
+
+      if (stage === "html" || stage === "css"){
+        state.editsLeft = 3;
+        editRequest.value = "";
+        clearToast(editToast);
+      }
+
+      updateBuildButtons();
+    }
+
+    // =========================================================
+    // Presets
+    // =========================================================
+    const presets = [
+      { name:"ChatTok", primary:"#ff0050", secondary:"#00f2ea", background:"#050b17" },
+      { name:"Neon Night", primary:"#a855f7", secondary:"#22d3ee", background:"#030712" },
+      { name:"Arcade", primary:"#f97316", secondary:"#22c55e", background:"#0b1220" },
+      { name:"Ice Blue", primary:"#38bdf8", secondary:"#a7f3d0", background:"#071a35" },
+      { name:"Crimson", primary:"#fb7185", secondary:"#facc15", background:"#120510" }
+    ];
+
+    function renderPresets(){
+      presetRow.innerHTML = "";
+      presets.forEach((p, idx) => {
+        const d = document.createElement("div");
+        d.className = "swatch";
+        d.title = p.name;
+        d.style.background = `linear-gradient(135deg, ${p.primary}, ${p.secondary})`;
+        d.addEventListener("click", () => {
+          state.theme.primary = p.primary;
+          state.theme.secondary = p.secondary;
+          state.theme.background = p.background;
+          applyThemeInputsToState();
+          [...presetRow.children].forEach(x => x.classList.remove("sel"));
+          d.classList.add("sel");
+        });
+        if (idx === 0) d.classList.add("sel");
+        presetRow.appendChild(d);
+      });
+    }
+
+    // =========================================================
+    // API helpers (robust)
+    // =========================================================
     async function apiGet(path){
-      const res = await fetch(API_BASE + path, { method:"GET", cache:"no-store" });
+      const r = await fetch(API_BASE + path, {
+        method: "GET",
+        headers: { "Accept": "application/json" },
+        cache: "no-store",
+        credentials: "omit",
+        mode: "cors",
+      });
+      const text = await r.text();
       let data = null;
-      try { data = await res.json(); } catch {}
-      if (!res.ok) {
-        const msg = (data && (data.error || data.message)) ? (data.error || data.message) : ("HTTP " + res.status);
-        const err = new Error(msg);
-        err.status = res.status;
+      try{ data = text ? JSON.parse(text) : null; } catch { data = { raw:text }; }
+      if (!r.ok) {
+        const err = new Error((data && data.error) ? data.error : ("HTTP " + r.status));
+        err.status = r.status;
         err.data = data;
         throw err;
       }
@@ -721,152 +847,321 @@
     }
 
     async function apiPost(path, body){
-      const res = await fetch(API_BASE + path, {
+      const r = await fetch(API_BASE + path, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
         body: JSON.stringify(body || {}),
-        cache: "no-store"
+        cache: "no-store",
+        credentials: "omit",
+        mode: "cors",
       });
 
+      const text = await r.text();
       let data = null;
-      try { data = await res.json(); } catch {}
-      if (!res.ok) {
-        const msg = (data && (data.error || data.message)) ? (data.error || data.message) : ("HTTP " + res.status);
-        const err = new Error(msg);
-        err.status = res.status;
+      try{ data = text ? JSON.parse(text) : null; } catch { data = { raw:text }; }
+
+      if (!r.ok) {
+        const err = new Error((data && data.error) ? data.error : ("HTTP " + r.status));
+        err.status = r.status;
         err.data = data;
         throw err;
       }
       return data;
     }
 
-    function formatApiError(err){
-      const base = err && err.message ? err.message : "Unknown error";
-      if (err && err.status) return base + " (HTTP " + err.status + ")";
-      return base;
+    function formatApiError(prefix, e){
+      const msg = (e && e.message) ? e.message : String(e || "Unknown error");
+      const details = e && e.data ? e.data : null;
+      let extra = "";
+      if (details && typeof details === "object") {
+        if (details.details) extra = " — " + String(details.details);
+      }
+      return `${prefix}: ${msg}${extra}`;
     }
 
-    // ===========================
-    // Contract helpers (regression-proof)
-    // ===========================
-    function pickSpecFromPlanResponse(data){
-      const d = data && typeof data === "object" ? data : {};
-      return d.spec || d.plan || (d.context && (d.context.spec || d.context.plan)) || null;
+    // =========================================================
+    // Contract detection
+    // =========================================================
+    async function checkApi(){
+      try{
+        const data = await apiGet("/health");
+        state.apiOnline = !!data.ok;
+        state.apiEndpoints = Array.isArray(data.endpoints) ? data.endpoints : [];
+        state.hasPlanEndpoint = state.apiEndpoints.some(x => String(x).toLowerCase().includes("post /api/plan"));
+        state.hasGenerateEndpoint = state.apiEndpoints.some(x => String(x).toLowerCase().includes("post /api/generate")) || true;
+
+        setApiStatus(true, "API: online");
+        contractMode.textContent = state.hasPlanEndpoint ? "Contract: plan+generate" : "Contract: generate-only";
+      } catch {
+        state.apiOnline = false;
+        setApiStatus(false, "API: offline");
+        contractMode.textContent = "Contract: unknown";
+      }
+    }
+
+    // =========================================================
+    // Spec / Plan helpers
+    // =========================================================
+    function pickSpecFromResponse(data){
+      // Supports many shapes:
+      // - {spec:{...}}
+      // - {plan:{...}}
+      // - {context:{spec:{...}}}
+      // - {context:{plan:{...}}}
+      // - {contextSpec:{...}}
+      if (!data || typeof data !== "object") return null;
+      if (data.spec && typeof data.spec === "object") return data.spec;
+      if (data.plan && typeof data.plan === "object") return data.plan;
+      if (data.context && typeof data.context === "object") {
+        if (data.context.spec && typeof data.context.spec === "object") return data.context.spec;
+        if (data.context.plan && typeof data.context.plan === "object") return data.context.plan;
+      }
+      if (data.contextSpec && typeof data.contextSpec === "object") return data.contextSpec;
+      return null;
     }
 
     function toPlanText(spec){
-      try { return JSON.stringify(spec || {}, null, 2); } catch { return ""; }
+      if (!spec || typeof spec !== "object") return "";
+      const lines = [];
+      lines.push(`TITLE: ${spec.title || ""}`.trim());
+      lines.push(`SUBTITLE: ${spec.subtitle || ""}`.trim());
+      if (spec.oneSentence) lines.push(`ONE-LINER: ${spec.oneSentence}`.trim());
+      if (Array.isArray(spec.howToPlay) && spec.howToPlay.length){
+        lines.push("");
+        lines.push("HOW TO PLAY:");
+        spec.howToPlay.slice(0,10).forEach((x, i) => lines.push(`- ${String(x||"").trim()}`));
+      }
+      if (spec.commands && typeof spec.commands === "object"){
+        lines.push("");
+        lines.push("COMMANDS:");
+        Object.keys(spec.commands).slice(0,12).forEach(k => {
+          lines.push(`- ${k}: ${String(spec.commands[k]||"").trim()}`);
+        });
+      }
+      if (spec.defaultSettings && typeof spec.defaultSettings === "object"){
+        lines.push("");
+        lines.push("DEFAULT SETTINGS:");
+        Object.keys(spec.defaultSettings).slice(0,12).forEach(k => {
+          lines.push(`- ${k}: ${String(spec.defaultSettings[k])}`);
+        });
+      }
+      if (spec.visuals && typeof spec.visuals === "object"){
+        lines.push("");
+        lines.push("VISUALS:");
+        Object.keys(spec.visuals).slice(0,12).forEach(k => {
+          const v = String(spec.visuals[k] ?? "").trim();
+          lines.push(`- ${k}: ${v}`);
+        });
+      }
+      return lines.join("\n").trim();
     }
 
     function extractFileContent(data, stage){
-      const d = data && typeof data === "object" ? data : {};
-      const s = String(stage || "").toLowerCase();
+      // Prefer server.js contract: {file:{name,content}}
+      if (data && data.file && typeof data.file.content === "string") return data.file.content;
 
-      // Preferred: { file: { content } }
-      if (d.file && typeof d.file.content === "string") return d.file.content;
-
-      // Mirror: { content }
-      if (typeof d.content === "string") return d.content;
-
-      // Compatibility: { files: { indexHtml/styleCss/gameJs } }
-      if (d.files && typeof d.files === "object") {
-        if (s === "html" && typeof d.files.indexHtml === "string") return d.files.indexHtml;
-        if (s === "css" && typeof d.files.styleCss === "string") return d.files.styleCss;
-        if (s === "js" && typeof d.files.gameJs === "string") return d.files.gameJs;
+      // Other possible shapes:
+      const s = String(stage||"").toLowerCase();
+      if (data && data.files && typeof data.files === "object") {
+        if (s === "html" && typeof data.files.indexHtml === "string") return data.files.indexHtml;
+        if (s === "css" && typeof data.files.styleCss === "string") return data.files.styleCss;
+        if (s === "js"  && typeof data.files.gameJs  === "string") return data.files.gameJs;
       }
+      if (s === "html" && typeof data.index_html === "string") return data.index_html;
+      if (s === "css"  && typeof data.style_css === "string") return data.style_css;
+      if (s === "js"   && typeof data.game_js === "string") return data.game_js;
+
+      // Older single file content
+      if (typeof data.content === "string") return data.content;
 
       return "";
     }
 
-    // ===========================
-    // Theme sync
-    // ===========================
-    function normalizeHex(s){
-      s = String(s || "").trim();
-      if (!s) return "";
-      if (!s.startsWith("#")) s = "#" + s;
-      if (/^#[0-9a-fA-F]{3}$/.test(s)) {
-        return ("#" + s[1] + s[1] + s[2] + s[2] + s[3] + s[3]).toLowerCase();
+    // =========================================================
+    // Step 1: Plan / Spec
+    // =========================================================
+    async function generatePlanOrSpec(){
+      clearToast(planToast);
+      clearToast(continueToast);
+      clearToast(buildToast);
+
+      const idea = String(gameIdea.value || "").trim();
+      if (!idea){
+        toast(planToast, "bad", "Please enter a game idea first.");
+        return;
       }
-      if (!/^#[0-9a-fA-F]{6}$/.test(s)) return "";
-      return s.toLowerCase();
-    }
 
-    function applyThemeInputsToState(){
-      const p = normalizeHex(primaryHex.value) || normalizeHex(primaryPicker.value) || "#ff0050";
-      const s = normalizeHex(secondaryHex.value) || normalizeHex(secondaryPicker.value) || "#00f2ea";
-      const b = normalizeHex(backgroundHex.value) || normalizeHex(backgroundPicker.value) || "#0b0f14";
+      state.idea = idea;
+      state.templateId = String(templateId.value || "arena").trim();
+      btnPlan.disabled = true;
+      btnPlanEdit.disabled = true;
+      btnContinue.disabled = true;
 
-      state.theme.primary = p;
-      state.theme.secondary = s;
-      state.theme.background = b;
-
-      primaryPicker.value = p; primaryHex.value = p;
-      secondaryPicker.value = s; secondaryHex.value = s;
-      backgroundPicker.value = b; backgroundHex.value = b;
-    }
-
-    function wireColorSync(pickerEl, hexEl){
-      pickerEl.addEventListener("input", () => {
-        hexEl.value = pickerEl.value;
-        applyThemeInputsToState();
-      });
-      hexEl.addEventListener("input", () => {
-        const v = normalizeHex(hexEl.value);
-        if (v) pickerEl.value = v;
-        applyThemeInputsToState();
-      });
-      hexEl.addEventListener("blur", () => applyThemeInputsToState());
-    }
-
-    // ===========================
-    // Copy
-    // ===========================
-    async function copyToClipboard(text){
-      const t = String(text || "");
-      if (!t.trim()) return false;
+      setLockTag(planLock, false, "Generating…");
+      toast(planToast, "warn", "Generating plan/spec…");
 
       try{
-        await navigator.clipboard.writeText(t);
-        return true;
-      }catch{
-        // fallback
-        const ta = document.createElement("textarea");
-        ta.value = t;
-        ta.style.position = "fixed";
-        ta.style.left = "-9999px";
-        document.body.appendChild(ta);
-        ta.select();
-        try{
-          document.execCommand("copy");
-          document.body.removeChild(ta);
-          return true;
-        }catch{
-          document.body.removeChild(ta);
-          return false;
+        let data = null;
+
+        if (state.hasPlanEndpoint) {
+          // If the API supports /api/plan, use it
+          data = await apiPost("/api/plan", {
+            prompt: state.idea,
+            idea: state.idea,
+            templateId: state.templateId
+          });
+        } else {
+          // Fallback: generate HTML stage and harvest context.spec
+          // (This keeps the system working even if /api/plan is not deployed yet.)
+          data = await apiPost("/api/generate", {
+            stage: "html",
+            prompt: state.idea,
+            idea: state.idea,
+            templateId: state.templateId,
+            theme: state.theme
+          });
+
+          // If the API returned HTML already, store it as built-but-not-final until Continue.
+          const htmlMaybe = String(extractFileContent(data, "html") || "");
+          if (htmlMaybe.trim()){
+            state.files.html = htmlMaybe;
+            outHtml.value = htmlMaybe;
+            state.locks.html = true; // treat as built (saves a step)
+          }
         }
+
+        const spec = pickSpecFromResponse(data);
+        if (!spec) throw new Error("API returned no spec/context.spec.");
+
+        state.spec = spec;
+        state.planText = (data && typeof data.planText === "string" && data.planText.trim())
+          ? data.planText.trim()
+          : toPlanText(spec);
+
+        planEditor.value = state.planText;
+
+        state.planReady = true;
+        setLockTag(planLock, true, "Ready");
+        toast(planToast, "good", "Plan/spec generated. Review/edit it, then Continue to build.");
+
+        btnPlanEdit.disabled = false;
+        btnContinue.disabled = false;
+      } catch (e){
+        state.planReady = false;
+        setLockTag(planLock, false, "Failed");
+        toast(planToast, "bad", formatApiError("Plan error", e));
+      } finally {
+        btnPlan.disabled = false;
+        updateBuildButtons();
       }
     }
 
-    // ===========================
-    // Build logic
-    // ===========================
+    btnPlan.addEventListener("click", generatePlanOrSpec);
+
+    btnPlanEdit.addEventListener("click", async () => {
+      clearToast(planToast);
+      clearToast(continueToast);
+      clearToast(buildToast);
+
+      if (!state.planReady){
+        toast(planToast, "bad", "Generate a plan/spec first.");
+        return;
+      }
+
+      const edited = String(planEditor.value || "").trim();
+      if (!edited){
+        toast(planToast, "bad", "Plan text is empty.");
+        return;
+      }
+
+      btnPlanEdit.disabled = true;
+      btnContinue.disabled = true;
+      setLockTag(planLock, false, "Rebuilding…");
+      toast(planToast, "warn", "Rebuilding spec from your edited plan…");
+
+      try{
+        // Re-run plan/spec generation using the edited plan text as prompt
+        state.idea = edited;
+
+        let data = null;
+        if (state.hasPlanEndpoint) {
+          data = await apiPost("/api/plan", {
+            prompt: edited,
+            idea: edited,
+            templateId: state.templateId
+          });
+        } else {
+          data = await apiPost("/api/generate", {
+            stage: "html",
+            prompt: edited,
+            idea: edited,
+            templateId: state.templateId,
+            theme: state.theme
+          });
+
+          // HTML fallback may change; keep it as draft built
+          const htmlMaybe = String(extractFileContent(data, "html") || "");
+          if (htmlMaybe.trim()){
+            state.files.html = htmlMaybe;
+            outHtml.value = htmlMaybe;
+            state.locks.html = true;
+          } else {
+            // if HTML not returned, do not force lock
+            state.locks.html = false;
+          }
+        }
+
+        const spec = pickSpecFromResponse(data);
+        if (!spec) throw new Error("API returned no spec/context.spec.");
+
+        state.spec = spec;
+        state.planText = (data && typeof data.planText === "string" && data.planText.trim())
+          ? data.planText.trim()
+          : toPlanText(spec);
+
+        planEditor.value = state.planText;
+
+        setLockTag(planLock, true, "Ready");
+        toast(planToast, "good", "Plan/spec updated. Click Continue when ready.");
+      } catch (e){
+        setLockTag(planLock, false, "Failed");
+        toast(planToast, "bad", formatApiError("Plan edit error", e));
+      } finally {
+        btnPlanEdit.disabled = false;
+        btnContinue.disabled = false;
+        updateBuildButtons();
+      }
+    });
+
+    btnContinue.addEventListener("click", () => {
+      clearToast(continueToast);
+      clearToast(buildToast);
+
+      if (!state.planReady || !state.spec){
+        toast(continueToast, "bad", "Generate a plan/spec first.");
+        return;
+      }
+
+      state.buildReady = true;
+      toast(continueToast, "good", "Build unlocked. Build HTML → CSS → game.js.");
+      updateBuildButtons();
+    });
+
+    // =========================================================
+    // Step 2: Build stages (HTML → CSS → JS)
+    // =========================================================
     async function buildStage(stage){
       clearToast(buildToast);
-      clearToast(editToast);
       applyThemeInputsToState();
 
-      if (state.stopped){
-        toast(buildToast, "warn", "Build is locked. Press Reset to start over.");
-        return;
-      }
-
       if (!state.buildReady || !state.spec){
-        toast(buildToast, "bad", "Build is locked. Generate and confirm the plan first.");
+        toast(buildToast, "bad", "Build is locked. Generate and confirm the plan/spec first.");
         return;
       }
 
-      // enforce order
       if (stage === "css" && !state.locks.html){
         toast(buildToast, "bad", "Build HTML first.");
         return;
@@ -879,265 +1174,116 @@
       const label = stage === "html" ? "HTML" : stage === "css" ? "CSS" : "game.js";
       toast(buildToast, "warn", "Building " + label + "…");
 
-      btnHtml.disabled = true;
-      btnCss.disabled = true;
-      btnJs.disabled = true;
-      btnBuildAll.disabled = true;
+      if (stage === "html") btnHtml.disabled = true;
+      if (stage === "css")  btnCss.disabled = true;
+      if (stage === "js")   btnJs.disabled = true;
 
       try{
         const data = await apiPost("/api/generate", {
           stage,
+          prompt: state.idea,
           idea: state.idea,
-          prompt: state.idea, // backward compatible
           templateId: state.templateId,
           theme: state.theme,
-          spec: state.spec,
-          plan: state.spec,
-          context: { spec: state.spec, plan: state.spec }
+          // Server.js expects context.spec (especially for JS stage)
+          context: { spec: state.spec }
         });
 
-        // Keep local spec synced if API returns it
-        if (data && data.context && (data.context.spec || data.context.plan)){
-          state.spec = data.context.spec || data.context.plan;
-          state.planText = toPlanText(state.spec);
-          planEditor.value = state.planText;
-        }
+        // keep spec synced
+        const newSpec = pickSpecFromResponse(data);
+        if (newSpec) state.spec = newSpec;
 
         const content = String(extractFileContent(data, stage) || "");
-        if (!content.trim()){
-          const err = new Error("API returned no file content.");
-          err.data = data;
-          throw err;
-        }
+        if (!content.trim()) throw new Error("API returned no file content.");
 
         if (stage === "html"){
           state.files.html = content;
-          outHtml.value = content;
           state.locks.html = true;
-          toast(buildToast, "good", "HTML built successfully.");
+          outHtml.value = content;
+          toast(buildToast, "good", "HTML built. Next: Build CSS.");
         } else if (stage === "css"){
           state.files.css = content;
-          outCss.value = content;
           state.locks.css = true;
-          toast(buildToast, "good", "CSS built successfully.");
-        } else {
+          outCss.value = content;
+          toast(buildToast, "good", "CSS built. Next: Build game.js.");
+        } else if (stage === "js"){
           state.files.js = content;
-          outJs.value = content;
           state.locks.js = true;
-          toast(buildToast, "good", "game.js built successfully.");
+          outJs.value = content;
+          toast(buildToast, "good", "game.js built. Optional edits unlocked below.");
         }
 
-        updateLocksUI();
+        updateBuildButtons();
       } catch (e){
-        toast(buildToast, "bad", formatApiError(e));
+        toast(buildToast, "bad", formatApiError("Build error", e));
+        updateBuildButtons();
       } finally {
-        updateLocksUI();
+        btnHtml.disabled = !state.buildReady || state.locks.html;
+        btnCss.disabled  = !state.buildReady || !state.locks.html || state.locks.css;
+        btnJs.disabled   = !state.buildReady || !state.locks.css  || state.locks.js;
       }
     }
-
-    async function buildAll(){
-      clearToast(buildToast);
-      if (!state.buildReady || !state.spec){
-        toast(buildToast, "bad", "Generate and confirm the plan first.");
-        return;
-      }
-      if (state.stopped){
-        toast(buildToast, "warn", "Build is locked. Press Reset to start over.");
-        return;
-      }
-
-      btnBuildAll.disabled = true;
-      try{
-        await buildStage("html");
-        if (!state.locks.html) return;
-
-        await buildStage("css");
-        if (!state.locks.css) return;
-
-        await buildStage("js");
-      } finally {
-        updateLocksUI();
-      }
-    }
-
-    // ===========================
-    // Reset
-    // ===========================
-    function hardReset(){
-      clearToast(planToast);
-      clearToast(continueToast);
-      clearToast(buildToast);
-      clearToast(editToast);
-
-      state.idea = "";
-      state.templateId = "arena";
-      state.theme = { primary:"#ff0050", secondary:"#00f2ea", background:"#0b0f14" };
-
-      state.spec = null;
-      state.planText = "";
-      state.planReady = false;
-      state.buildReady = false;
-
-      state.locks = { html:false, css:false, js:false };
-      state.editsLeft = 3;
-      editsState.textContent = String(state.editsLeft);
-
-      state.files = { html:"", css:"", js:"" };
-      outHtml.value = "";
-      outCss.value = "";
-      outJs.value = "";
-
-      gameIdea.value = "";
-      templateId.value = "arena";
-      primaryPicker.value = "#ff0050"; primaryHex.value = "#ff0050";
-      secondaryPicker.value = "#00f2ea"; secondaryHex.value = "#00f2ea";
-      backgroundPicker.value = "#0b0f14"; backgroundHex.value = "#0b0f14";
-      planEditor.value = "";
-      editRequest.value = "";
-
-      setPlanReady(false);
-      setBuildReady(false);
-      setStopped(false);
-    }
-
-    // ===========================
-    // Init / health check
-    // ===========================
-    async function checkApi(){
-      try{
-        setApiStatus("warn", "Checking API…");
-        const data = await apiGet("/health");
-        const v = data && data.contractVersion ? ("v" + data.contractVersion) : "";
-        setApiStatus("good", "API Online " + v);
-      }catch{
-        setApiStatus("bad", "API Offline");
-      }
-    }
-
-    // ===========================
-    // Events
-    // ===========================
-    wireColorSync(primaryPicker, primaryHex);
-    wireColorSync(secondaryPicker, secondaryHex);
-    wireColorSync(backgroundPicker, backgroundHex);
-
-    btnReset.addEventListener("click", () => hardReset());
-
-    btnPlan.addEventListener("click", async () => {
-      clearToast(planToast);
-      clearToast(continueToast);
-      clearToast(buildToast);
-      clearToast(editToast);
-
-      const idea = String(gameIdea.value || "").trim();
-      if (!idea){
-        toast(planToast, "bad", "Please enter a game idea first.");
-        return;
-      }
-
-      btnPlan.disabled = true;
-      toast(planToast, "warn", "Generating plan…");
-
-      try{
-        applyThemeInputsToState();
-        state.idea = idea;
-        state.templateId = String(templateId.value || "arena").trim();
-
-        const data = await apiPost("/api/plan", {
-          idea: state.idea,
-          prompt: state.idea, // backward compatible
-          templateId: state.templateId
-        });
-
-        const spec = pickSpecFromPlanResponse(data);
-        if (!spec){
-          throw new Error("API returned no spec/plan.");
-        }
-
-        state.spec = spec;
-        state.planText = toPlanText(spec);
-        planEditor.value = state.planText;
-
-        setPlanReady(true);
-        toast(planToast, "good", "Plan generated. Review and click Continue.");
-      } catch (e){
-        setPlanReady(false);
-        toast(planToast, "bad", formatApiError(e));
-      } finally {
-        btnPlan.disabled = false;
-      }
-    });
-
-    btnUseEditedPlan.addEventListener("click", () => {
-      clearToast(continueToast);
-      if (!state.planReady){
-        toast(continueToast, "bad", "Generate a plan first.");
-        return;
-      }
-
-      const txt = String(planEditor.value || "").trim();
-      if (!txt){
-        toast(continueToast, "bad", "Plan JSON is empty.");
-        return;
-      }
-
-      try{
-        const obj = JSON.parse(txt);
-        if (!obj || typeof obj !== "object") throw new Error("Plan JSON must be an object.");
-        state.spec = obj;
-        state.planText = toPlanText(obj);
-        planEditor.value = state.planText;
-        toast(continueToast, "good", "Edited plan accepted.");
-      } catch (e){
-        toast(continueToast, "bad", "Invalid JSON: " + (e && e.message ? e.message : "parse failed"));
-      }
-    });
-
-    btnContinue.addEventListener("click", () => {
-      clearToast(continueToast);
-      if (!state.planReady || !state.spec){
-        toast(continueToast, "bad", "Generate a plan first.");
-        return;
-      }
-      state.buildReady = true;
-      setBuildReady(true);
-      toast(continueToast, "good", "Build unlocked. Build HTML → CSS → game.js (or Build All).");
-    });
 
     btnHtml.addEventListener("click", () => buildStage("html"));
     btnCss.addEventListener("click", () => buildStage("css"));
-    btnJs.addEventListener("click", () => buildStage("js"));
-    btnBuildAll.addEventListener("click", () => buildAll());
+    btnJs.addEventListener("click",  () => buildStage("js"));
 
+    rebuildHtml.addEventListener("click", () => {
+      resetFilesAfter("html");
+      toast(buildToast, "warn", "HTML unlocked. Build HTML → CSS → game.js again.");
+    });
+    rebuildCss.addEventListener("click", () => {
+      resetFilesAfter("css");
+      toast(buildToast, "warn", "CSS unlocked. Build CSS → game.js again.");
+    });
+    rebuildJs.addEventListener("click", () => {
+      resetFilesAfter("js");
+      toast(buildToast, "warn", "JS unlocked. Build game.js again.");
+    });
+
+    // =========================================================
+    // Copy
+    // =========================================================
+    async function copyToClipboard(text){
+      await navigator.clipboard.writeText(String(text || ""));
+    }
+    function flashButton(btn){
+      const old = btn.textContent;
+      btn.textContent = "Copied!";
+      setTimeout(() => (btn.textContent = old), 900);
+    }
+
+    copyHtml.addEventListener("click", async () => {
+      try{ await copyToClipboard(state.files.html); flashButton(copyHtml); } catch {}
+    });
+    copyCss.addEventListener("click", async () => {
+      try{ await copyToClipboard(state.files.css); flashButton(copyCss); } catch {}
+    });
+    copyJs.addEventListener("click", async () => {
+      try{ await copyToClipboard(state.files.js); flashButton(copyJs); } catch {}
+    });
+
+    // =========================================================
+    // Edits
+    // =========================================================
     btnApplyEdit.addEventListener("click", async () => {
       clearToast(editToast);
-      clearToast(buildToast);
 
-      if (!state.buildReady || !state.locks.js){
-        toast(editToast, "bad", "Build game.js first, then apply edits.");
-        return;
-      }
-      if (state.stopped){
-        toast(editToast, "warn", "Build is locked. Press Reset to start over.");
-        return;
-      }
-      if (state.editsLeft <= 0){
-        toast(editToast, "bad", "No edits remaining.");
+      if (!state.locks.js || state.editsLeft <= 0){
+        toast(editToast, "bad", "Edits are locked.");
         return;
       }
 
       const req = String(editRequest.value || "").trim();
       if (!req){
-        toast(editToast, "bad", "Please enter an edit request.");
+        toast(editToast, "bad", "Type an edit request first.");
         return;
       }
 
       btnApplyEdit.disabled = true;
-      toast(editToast, "warn", "Applying edit (" + state.editsLeft + " left)…");
+      toast(editToast, "warn", "Applying edit…");
 
       try{
-        applyThemeInputsToState();
-
         const data = await apiPost("/api/edit", {
           remainingEdits: state.editsLeft,
           changeRequest: req,
@@ -1150,63 +1296,45 @@
           }
         });
 
-        if (!data || !data.ok || !Array.isArray(data.patches)){
-          throw new Error("API returned no patches.");
+        if (data && data.ok && Array.isArray(data.patches)){
+          for (const p of data.patches){
+            if (p.name === "style.css"){
+              state.files.css = String(p.content || "");
+              outCss.value = state.files.css;
+              state.locks.css = true;
+            }
+            if (p.name === "game.js"){
+              state.files.js = String(p.content || "");
+              outJs.value = state.files.js;
+              state.locks.js = true;
+            }
+          }
+          state.editsLeft = Number(data.remainingEdits ?? (state.editsLeft - 1));
+          toast(editToast, "good", "Edit applied.");
+          editRequest.value = "";
+        } else {
+          throw new Error("Edit failed: invalid response.");
         }
 
-        for (const p of data.patches){
-          if (!p || typeof p.name !== "string") continue;
-          const name = p.name;
-          const content = String(p.content || "");
-
-          if (name === "index.html"){
-            state.files.html = content; outHtml.value = content;
-          }
-          if (name === "style.css"){
-            state.files.css = content; outCss.value = content;
-          }
-          if (name === "game.js"){
-            state.files.js = content; outJs.value = content;
-          }
-        }
-
-        state.editsLeft = Number(data.remainingEdits ?? (state.editsLeft - 1));
-        if (!Number.isFinite(state.editsLeft)) state.editsLeft = Math.max(0, state.editsLeft - 1);
-        editsState.textContent = String(state.editsLeft);
-
-        toast(editToast, "good", "Edit applied. (" + state.editsLeft + " edits remaining)");
+        updateBuildButtons();
       } catch (e){
-        toast(editToast, "bad", formatApiError(e));
+        toast(editToast, "bad", formatApiError("Edit error", e));
       } finally {
-        updateLocksUI();
+        btnApplyEdit.disabled = false;
+        updateBuildButtons();
       }
     });
 
-    btnLockBuild.addEventListener("click", () => {
-      if (!state.buildReady) return;
-      setStopped(true);
-    });
+    // =========================================================
+    // Init
+    // =========================================================
+    renderPresets();
+    applyThemeInputsToState();
+    updateBuildButtons();
+    setLockTag(planLock, false, "Waiting");
+    setLockTag(filesLock, false, "Waiting");
+    checkApi();
 
-    copyHtml.addEventListener("click", async () => {
-      const ok = await copyToClipboard(outHtml.value);
-      toast(buildToast, ok ? "good" : "bad", ok ? "Copied index.html" : "Copy failed");
-    });
-    copyCss.addEventListener("click", async () => {
-      const ok = await copyToClipboard(outCss.value);
-      toast(buildToast, ok ? "good" : "bad", ok ? "Copied style.css" : "Copy failed");
-    });
-    copyJs.addEventListener("click", async () => {
-      const ok = await copyToClipboard(outJs.value);
-      toast(buildToast, ok ? "good" : "bad", ok ? "Copied game.js" : "Copy failed");
-    });
-
-    // ===========================
-    // Boot
-    // ===========================
-    (function boot(){
-      hardReset();
-      checkApi();
-    })();
   </script>
 </body>
 </html>
