@@ -12,12 +12,12 @@
       <div class="logoDot" aria-hidden="true"></div>
       <div class="brandText">
         <div class="brandTitle">ChatTokApps • Game Builder</div>
-        <div class="brandSub">Spec → HTML → CSS → game.js → Edit (3x) • Live preview included</div>
+        <div class="brandSub">Spec → HTML → CSS → game.js → Edit (3×) • Live preview included</div>
       </div>
     </div>
 
     <div class="topActions">
-      <button id="btnRoutes" class="btn ghost">Load Routes</button>
+      <button id="btnLoadRoutes" class="btn ghost">Load Routes</button>
       <button id="btnPing" class="btn ghost">Ping API</button>
       <button id="btnReset" class="btn ghost">Reset</button>
     </div>
@@ -25,6 +25,7 @@
 
   <main class="wrap">
     <section class="grid">
+
       <!-- LEFT -->
       <div class="card">
         <div class="stepHeader">
@@ -37,50 +38,70 @@
           </div>
         </div>
 
-        <div class="fieldRow">
-          <div class="field">
-            <label class="label">Render API Base URL</label>
-            <input id="apiBase" class="input mono" spellcheck="false" />
-            <div class="hint">Default: https://chattok-builder-api.onrender.com</div>
-          </div>
-
-          <div class="field">
-            <label class="label">Ping Endpoint</label>
-            <input id="pingPath" class="input mono" spellcheck="false" />
-            <div class="hint">Usually <span class="mono">/api/ping</span></div>
-          </div>
+        <div class="statusBox">
+          <div class="statusLine"><span class="k">API</span><span id="apiStatus">Not checked</span></div>
+          <div class="statusLine"><span class="k">Status</span><span id="buildStatus">Idle</span></div>
+          <div class="statusLine"><span class="k">RequestId</span><span id="reqId" class="mono">—</span></div>
         </div>
 
-        <div class="fieldRow">
-          <div class="field">
-            <label class="label">Routes Endpoint</label>
-            <input id="routesPath" class="input mono" spellcheck="false" />
-            <div class="hint">Usually <span class="mono">/api/routes</span></div>
-          </div>
-          <div class="field">
-            <label class="label">Spec Endpoint</label>
-            <input id="specPath" class="input mono" spellcheck="false" />
-            <div class="hint">Recommended <span class="mono">/api/plan</span></div>
-          </div>
-        </div>
+        <!-- ADVANCED API SETTINGS (hidden by default) -->
+        <details class="details" id="advancedApi">
+          <summary>Advanced API Settings (optional)</summary>
 
-        <div class="fieldRow">
-          <div class="field">
-            <label class="label">Build Endpoint</label>
-            <input id="buildPath" class="input mono" spellcheck="false" />
-            <div class="hint">Recommended <span class="mono">/api/build</span></div>
+          <div class="detailsInner">
+            <div class="muted small">
+              Default API is already wired internally. Only change this if you’re troubleshooting routes/CORS.
+            </div>
+
+            <label class="toggle">
+              <input id="unlockApi" type="checkbox" />
+              <span>Unlock editing of API fields</span>
+            </label>
+
+            <div class="field">
+              <label class="label">Render API Base URL</label>
+              <input id="apiBase" class="input mono" spellcheck="false" readonly />
+            </div>
+
+            <div class="fieldRow">
+              <div class="field">
+                <label class="label">Ping Endpoint</label>
+                <input id="pingPath" class="input mono" spellcheck="false" readonly />
+              </div>
+              <div class="field">
+                <label class="label">Routes Endpoint</label>
+                <input id="routesPath" class="input mono" spellcheck="false" readonly />
+              </div>
+            </div>
+
+            <div class="fieldRow">
+              <div class="field">
+                <label class="label">Spec Endpoint</label>
+                <input id="specPath" class="input mono" spellcheck="false" readonly />
+              </div>
+              <div class="field">
+                <label class="label">Edit Endpoint</label>
+                <input id="editPath" class="input mono" spellcheck="false" readonly />
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label">Build Endpoint</label>
+              <input id="buildPath" class="input mono" spellcheck="false" readonly />
+              <div class="hint">This builder builds one file at a time using <span class="mono">target</span>.</div>
+            </div>
+
+            <div class="block">
+              <div class="blockTitle">Routes Output</div>
+              <pre id="routesOut" class="pre"></pre>
+            </div>
           </div>
-          <div class="field">
-            <label class="label">Edit Endpoint</label>
-            <input id="editPath" class="input mono" spellcheck="false" />
-            <div class="hint">Recommended <span class="mono">/api/edit</span></div>
-          </div>
-        </div>
+        </details>
 
         <hr class="hr" />
 
         <h3 class="h3">Theme Colors</h3>
-        <p class="muted">Injected into Spec/Build prompts so generated games match your brand.</p>
+        <p class="muted">These are injected into the spec/build prompts so the generated game matches your brand.</p>
 
         <div class="colors">
           <div class="colorRow">
@@ -118,17 +139,11 @@
 
         <div class="field">
           <label class="label">Game Prompt</label>
-          <textarea id="prompt" class="textarea" rows="10" placeholder="Describe your TikTok LIVE interactive game in detail..."></textarea>
+          <textarea id="prompt" class="textarea" rows="10" placeholder="Describe your TikTok LIVE interactive game in detail (host controls, chat commands, scoring, SFX, rounds, etc.)..."></textarea>
         </div>
 
         <div class="actions">
           <button id="btnSpec" class="btn primary">Build Spec</button>
-        </div>
-
-        <div class="statusBox">
-          <div class="statusLine"><span class="k">RequestId</span><span id="reqId" class="mono">—</span></div>
-          <div class="statusLine"><span class="k">API</span><span id="apiStatus">Not checked</span></div>
-          <div class="statusLine"><span class="k">Status</span><span id="buildStatus">Idle</span></div>
         </div>
 
         <hr class="hr" />
@@ -137,9 +152,11 @@
           <div class="stepTitle">Step 2 • Spec Output</div>
           <div class="stepRight">
             <button id="btnCopySpec" class="btn ghost" disabled>Copy Spec</button>
+            <button id="btnDownloadSpec" class="btn ghost" disabled>Download</button>
             <button id="btnContinue" class="btn" disabled>Continue → Build Files</button>
           </div>
         </div>
+
         <pre id="specOut" class="pre"></pre>
 
         <div class="warn" id="warnBox" style="display:none;"></div>
@@ -210,24 +227,19 @@
         <hr class="hr" />
 
         <div class="stepHeader">
-          <div class="stepTitle">Step 4 • Edit (optional, 3 max)</div>
+          <div class="stepTitle">Step 4 • Edits (optional, 3 max)</div>
           <div class="stepRight">
             <span class="pill off" id="pillEditReady">Locked</span>
             <span class="pill">Edits: <span id="editCount">0</span>/3</span>
           </div>
         </div>
 
-        <textarea id="editPrompt" class="textarea" rows="4" placeholder="Describe the edit you want (UI fixes, more style, fix TikTok logic, etc)..."></textarea>
+        <textarea id="editPrompt" class="textarea" rows="4" placeholder="Describe the edit (UI fixes, more style, fix TikTok logic, improve SFX, etc.)..."></textarea>
 
-        <div class="field" style="margin-top:10px;">
-          <label class="label">Optional Screenshot Upload (helps the AI fix UI/bugs)</label>
-          <input id="editShot" class="input" type="file" accept="image/*" />
-          <div class="hint">Keep it small if possible. This is sent to the API (base64).</div>
-        </div>
-
-        <div class="shotPreviewWrap" id="shotPreviewWrap" style="display:none;">
-          <div class="shotPreviewTitle">Screenshot Preview</div>
-          <img id="shotPreview" alt="Screenshot preview" />
+        <div class="field">
+          <label class="label">Optional Screenshot (to show what’s wrong)</label>
+          <input id="editScreenshot" class="input" type="file" accept="image/*" />
+          <div class="hint">Optional. If provided, it’s sent to the API as a base64 data URL.</div>
         </div>
 
         <div class="actions">
@@ -238,13 +250,12 @@
           <div class="blockTitle">Prompt Echo (what the API actually used)</div>
           <pre id="echoPrompt" class="pre"></pre>
         </div>
-
       </div>
     </section>
 
     <footer class="footer">
       <div class="muted">
-        Hosting: <span class="mono">GitHub Pages</span> • Tool: <span class="mono">/builder/</span> • API: <span class="mono">chattok-builder-api.onrender.com</span>
+        Hosting: <span class="mono">GitHub Pages</span> • API: <span class="mono">https://chattok-builder-api.onrender.com</span>
       </div>
     </footer>
   </main>
