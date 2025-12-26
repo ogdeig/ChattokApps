@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>ChatTokApps • Game Builder</title>
-  <link rel="stylesheet" href="./app.css" />
+  <link rel="stylesheet" href="app.css" />
 </head>
+
 <body>
   <header class="topbar">
     <div class="brand">
@@ -17,249 +18,270 @@
     </div>
 
     <div class="topActions">
-      <button id="btnLoadRoutes" class="btn ghost">Load Routes</button>
-      <button id="btnPing" class="btn ghost">Ping API</button>
-      <button id="btnReset" class="btn ghost">Reset</button>
+      <button id="btnLoadRoutes" class="btn ghost" type="button">Load Routes</button>
+      <button id="btnPing" class="btn ghost" type="button">Ping API</button>
+      <button id="btnReset" class="btn ghost" type="button">Reset</button>
     </div>
   </header>
 
   <main class="wrap">
-    <section class="grid">
-
-      <!-- LEFT -->
-      <div class="card">
-        <div class="stepHeader">
-          <div class="stepTitle">Step 1 • Prompt + Theme</div>
-          <div class="stepPills">
-            <span class="pill" id="pillStep1">Active</span>
-            <span class="pill off" id="pillStep2">Locked</span>
-            <span class="pill off" id="pillStep3">Locked</span>
-            <span class="pill off" id="pillStep4">Locked</span>
+    <div class="grid">
+      <!-- LEFT: Builder steps -->
+      <section class="card">
+        <div class="headRow">
+          <div>
+            <div class="h2">Build a TikTok LIVE Interactive Game</div>
+            <div class="muted small">API: <span id="apiLabel" class="mono"></span></div>
+          </div>
+          <div class="stepPills" aria-label="Steps">
+            <div class="pillStep" id="pillS1">Active</div>
+            <div class="pillStep off" id="pillS2">Locked</div>
+            <div class="pillStep off" id="pillS3">Locked</div>
+            <div class="pillStep off" id="pillS4">Locked</div>
           </div>
         </div>
 
         <div class="statusBox">
-          <div class="statusLine"><span class="k">API</span><span id="apiStatus">Not checked</span></div>
-          <div class="statusLine"><span class="k">Status</span><span id="buildStatus">Idle</span></div>
-          <div class="statusLine"><span class="k">RequestId</span><span id="reqId" class="mono">—</span></div>
+          <div class="statusLine">
+            <span class="muted">Status:</span>
+            <strong id="statusText">Not checked</strong>
+          </div>
+          <div class="statusLine">
+            <span class="muted">Activity:</span>
+            <span id="buildStatus" class="mono">Idle</span>
+          </div>
+          <div class="statusLine">
+            <span class="muted">requestId:</span>
+            <span id="reqId" class="mono">—</span>
+          </div>
         </div>
 
-        <!-- ADVANCED API SETTINGS (hidden by default) -->
-        <details class="details" id="advancedApi">
-          <summary>Advanced API Settings (optional)</summary>
-
-          <div class="detailsInner">
-            <div class="muted small">
-              Default API is already wired internally. Only change this if you’re troubleshooting routes/CORS.
-            </div>
-
-            <label class="toggle">
-              <input id="unlockApi" type="checkbox" />
-              <span>Unlock editing of API fields</span>
-            </label>
-
-            <div class="field">
-              <label class="label">Render API Base URL</label>
-              <input id="apiBase" class="input mono" spellcheck="false" readonly />
-            </div>
-
+        <details class="advanced" id="advApi">
+          <summary>Advanced API settings (rarely needed)</summary>
+          <div class="advInner">
             <div class="fieldRow">
               <div class="field">
-                <label class="label">Ping Endpoint</label>
-                <input id="pingPath" class="input mono" spellcheck="false" readonly />
+                <label class="label" for="apiBase">Render API Base URL</label>
+                <input id="apiBase" class="input mono" type="text" value="" spellcheck="false" />
+                <div class="hint">Default: https://chattok-builder-api.onrender.com</div>
               </div>
               <div class="field">
-                <label class="label">Routes Endpoint</label>
-                <input id="routesPath" class="input mono" spellcheck="false" readonly />
+                <label class="label" for="pingPath">Ping Endpoint</label>
+                <input id="pingPath" class="input mono" type="text" value="/api/ping" spellcheck="false" />
+                <div class="hint">Usually <span class="mono">/api/ping</span></div>
               </div>
             </div>
 
             <div class="fieldRow">
               <div class="field">
-                <label class="label">Spec Endpoint</label>
-                <input id="specPath" class="input mono" spellcheck="false" readonly />
+                <label class="label" for="routesPath">Routes Endpoint</label>
+                <input id="routesPath" class="input mono" type="text" value="/api/routes" spellcheck="false" />
               </div>
               <div class="field">
-                <label class="label">Edit Endpoint</label>
-                <input id="editPath" class="input mono" spellcheck="false" readonly />
+                <label class="label" for="specPath">Spec Endpoint</label>
+                <input id="specPath" class="input mono" type="text" value="/api/plan" spellcheck="false" />
               </div>
             </div>
 
-            <div class="field">
-              <label class="label">Build Endpoint</label>
-              <input id="buildPath" class="input mono" spellcheck="false" readonly />
-              <div class="hint">This builder builds one file at a time using <span class="mono">target</span>.</div>
+            <div class="fieldRow">
+              <div class="field">
+                <label class="label" for="buildPath">Build Endpoint</label>
+                <input id="buildPath" class="input mono" type="text" value="/api/build" spellcheck="false" />
+              </div>
+              <div class="field">
+                <label class="label" for="editPath">Edit Endpoint</label>
+                <input id="editPath" class="input mono" type="text" value="/api/edit" spellcheck="false" />
+              </div>
             </div>
 
-            <div class="block">
-              <div class="blockTitle">Routes Output</div>
-              <pre id="routesOut" class="pre"></pre>
+            <div class="actions">
+              <button id="btnSaveApi" class="btn" type="button">Save API Settings</button>
+            </div>
+
+            <div class="hr"></div>
+            <div class="field">
+              <label class="label">Detected routes</label>
+              <pre id="routesOut" class="code" style="min-height: 92px">(Click “Load Routes” in the top-right)</pre>
             </div>
           </div>
         </details>
 
-        <hr class="hr" />
+        <div id="warn" class="warn hidden"></div>
 
-        <h3 class="h3">Theme Colors</h3>
-        <p class="muted">These are injected into the spec/build prompts so the generated game matches your brand.</p>
+        <!-- STEP 1 -->
+        <section class="step">
+          <div class="stepTitle">Step 1 • Prompt + Theme</div>
 
-        <div class="colors">
-          <div class="colorRow">
-            <label>Primary</label>
-            <input id="cPrimary" type="color" value="#ff0050" />
-            <input id="tPrimary" class="input mono" value="#ff0050" spellcheck="false" />
+          <div class="field">
+            <label class="label" for="prompt">Detailed prompt</label>
+            <textarea id="prompt" class="textarea" rows="7" placeholder="Describe the game, chat controls, host controls, scoring, rounds, sounds, visuals...
+
+Example: A space runner where chat spawns obstacles with their profile picture, gifts create boss obstacles, likes give shields, and follows grant bonus points."></textarea>
+            <div class="hint">Tip: mention the exact chat keywords you want, plus what gifts/likes/follows/shares do.</div>
           </div>
-          <div class="colorRow">
-            <label>Secondary</label>
-            <input id="cSecondary" type="color" value="#00f2ea" />
-            <input id="tSecondary" class="input mono" value="#00f2ea" spellcheck="false" />
+
+          <div class="hr"></div>
+          <div class="h3">Theme Colors</div>
+
+          <div class="colors">
+            <div class="colorRow">
+              <label for="cPrimary">Primary</label>
+              <input id="cPrimary" type="color" value="#ff0050" />
+              <input id="tPrimary" class="input mono" type="text" value="#ff0050" maxlength="7" />
+            </div>
+
+            <div class="colorRow">
+              <label for="cSecondary">Secondary</label>
+              <input id="cSecondary" type="color" value="#00f2ea" />
+              <input id="tSecondary" class="input mono" type="text" value="#00f2ea" maxlength="7" />
+            </div>
+
+            <div class="colorRow">
+              <label for="cBg">Background</label>
+              <input id="cBg" type="color" value="#050b17" />
+              <input id="tBg" class="input mono" type="text" value="#050b17" maxlength="7" />
+            </div>
+
+            <div class="colorRow">
+              <label for="cSurface">Surface</label>
+              <input id="cSurface" type="color" value="#0b1632" />
+              <input id="tSurface" class="input mono" type="text" value="#0b1632" maxlength="7" />
+            </div>
+
+            <div class="colorRow">
+              <label for="cText">Text</label>
+              <input id="cText" type="color" value="#ffffff" />
+              <input id="tText" class="input mono" type="text" value="#ffffff" maxlength="7" />
+            </div>
+
+            <div class="previewChips" id="themePreview"></div>
           </div>
-          <div class="colorRow">
-            <label>Background</label>
-            <input id="cBg" type="color" value="#050b17" />
-            <input id="tBg" class="input mono" value="#050b17" spellcheck="false" />
+
+          <div class="actions">
+            <button id="btnSpec" class="btn primary" type="button">Build Spec</button>
           </div>
-          <div class="colorRow">
-            <label>Surface</label>
-            <input id="cSurface" type="color" value="#0b1632" />
-            <input id="tSurface" class="input mono" value="#0b1632" spellcheck="false" />
-          </div>
-          <div class="colorRow">
-            <label>Text</label>
-            <input id="cText" type="color" value="#ffffff" />
-            <input id="tText" class="input mono" value="#ffffff" spellcheck="false" />
-          </div>
-        </div>
+        </section>
 
-        <div class="previewChips">
-          <div class="chip" id="chipPrimary">Primary</div>
-          <div class="chip" id="chipSecondary">Secondary</div>
-          <div class="chip chipSurface" id="chipSurface">Surface</div>
-        </div>
+        <div class="hr"></div>
 
-        <div class="field">
-          <label class="label">Game Prompt</label>
-          <textarea id="prompt" class="textarea" rows="10" placeholder="Describe your TikTok LIVE interactive game in detail (host controls, chat commands, scoring, SFX, rounds, etc.)..."></textarea>
-        </div>
-
-        <div class="actions">
-          <button id="btnSpec" class="btn primary">Build Spec</button>
-        </div>
-
-        <hr class="hr" />
-
-        <div class="stepHeader">
+        <!-- STEP 2 -->
+        <section class="step" id="step2">
           <div class="stepTitle">Step 2 • Spec Output</div>
-          <div class="stepRight">
-            <button id="btnCopySpec" class="btn ghost" disabled>Copy Spec</button>
-            <button id="btnDownloadSpec" class="btn ghost" disabled>Download</button>
-            <button id="btnContinue" class="btn" disabled>Continue → Build Files</button>
+
+          <div class="actions">
+            <button id="btnCopySpec" class="btn" type="button" disabled>Copy Spec</button>
+            <button id="btnDlSpec" class="btn" type="button" disabled>Download Spec</button>
+            <button id="btnContinue" class="btn primary" type="button" disabled>Continue → Build Files</button>
           </div>
-        </div>
 
-        <pre id="specOut" class="pre"></pre>
+          <pre id="specOut" class="code" style="min-height: 240px">(Spec will appear here)</pre>
+        </section>
 
-        <div class="warn" id="warnBox" style="display:none;"></div>
-      </div>
+        <div class="hr"></div>
 
-      <!-- RIGHT -->
-      <div class="card">
-        <div class="stepHeader">
-          <div class="stepTitle">Step 3 • Build Files (one at a time)</div>
-          <div class="stepRight">
-            <span class="pill off" id="pillBuildReady">Waiting</span>
+        <!-- STEP 3 -->
+        <section class="step" id="step3">
+          <div class="stepTitle">Step 3 • Build Files (One at a Time)</div>
+
+          <div class="actions">
+            <button id="btnBuildHtml" class="btn primary" type="button" disabled>Build HTML</button>
+            <button id="btnBuildCss" class="btn primary" type="button" disabled>Build CSS</button>
+            <button id="btnBuildJs" class="btn primary" type="button" disabled>Build game.js</button>
           </div>
-        </div>
 
-        <div class="buildRow">
-          <button id="btnBuildHtml" class="btn" disabled>Build HTML</button>
-          <button id="btnBuildCss" class="btn" disabled>Build CSS</button>
-          <button id="btnBuildJs" class="btn" disabled>Build game.js</button>
-        </div>
+          <div class="fileBlock">
+            <div class="fileHead">
+              <div class="fileTitle">index.html</div>
+              <div class="fileBtns">
+                <button id="btnCopyHtml" class="btn" type="button" disabled>Copy</button>
+                <button id="btnDlHtml" class="btn" type="button" disabled>Download</button>
+              </div>
+            </div>
+            <pre id="htmlOut" class="code" style="min-height: 180px">(HTML will appear here)</pre>
+          </div>
 
-        <div class="fileCard">
-          <div class="fileHead">
-            <div class="fileTitle">index.html</div>
-            <div class="fileBtns">
-              <button id="btnCopyHtml" class="btn ghost" disabled>Copy</button>
-              <button id="btnDownloadHtml" class="btn ghost" disabled>Download</button>
+          <div class="fileBlock">
+            <div class="fileHead">
+              <div class="fileTitle">style.css</div>
+              <div class="fileBtns">
+                <button id="btnCopyCss" class="btn" type="button" disabled>Copy</button>
+                <button id="btnDlCss" class="btn" type="button" disabled>Download</button>
+              </div>
+            </div>
+            <pre id="cssOut" class="code" style="min-height: 160px">(CSS will appear here)</pre>
+          </div>
+
+          <div class="fileBlock">
+            <div class="fileHead">
+              <div class="fileTitle">game.js</div>
+              <div class="fileBtns">
+                <button id="btnCopyJs" class="btn" type="button" disabled>Copy</button>
+                <button id="btnDlJs" class="btn" type="button" disabled>Download</button>
+              </div>
+            </div>
+            <pre id="jsOut" class="code" style="min-height: 160px">(game.js will appear here)</pre>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="actions">
+            <button id="btnRefreshPreview" class="btn" type="button" disabled>Refresh Preview</button>
+            <button id="btnOpenPreview" class="btn" type="button" disabled>Open Preview Tab</button>
+          </div>
+
+          <div class="field">
+            <label class="label">Server echoPrompt (proves latest prompt)</label>
+            <div id="echoPrompt" class="echo mono">—</div>
+          </div>
+        </section>
+
+        <div class="hr"></div>
+
+        <!-- STEP 4 -->
+        <section class="step" id="step4">
+          <div class="stepTitle">Step 4 • Edits (Optional)</div>
+
+          <div class="muted small">Edits used: <strong id="editCount">0</strong> / 3</div>
+
+          <div class="field">
+            <label class="label" for="editPrompt">Edit request</label>
+            <textarea id="editPrompt" class="textarea" rows="4" placeholder="Describe EXACT changes. Example: Make the HUD larger, add a flash animation when someone triggers an action, and make chat directions a glass panel on the right."></textarea>
+          </div>
+
+          <div class="field">
+            <label class="label" for="editShot">Optional screenshot upload</label>
+            <input id="editShot" class="input" type="file" accept="image/*" />
+            <div class="hint">Helpful if something is misaligned on ChatTokGaming.com. (Optional)</div>
+            <div id="shotPreviewWrap" class="shotWrap hidden">
+              <img id="shotPreview" alt="Screenshot preview" />
             </div>
           </div>
-          <pre id="htmlOut" class="pre"></pre>
-        </div>
 
-        <div class="fileCard">
-          <div class="fileHead">
-            <div class="fileTitle">style.css</div>
-            <div class="fileBtns">
-              <button id="btnCopyCss" class="btn ghost" disabled>Copy</button>
-              <button id="btnDownloadCss" class="btn ghost" disabled>Download</button>
-            </div>
+          <div class="actions">
+            <button id="btnEdit" class="btn primary" type="button" disabled>Apply Edit</button>
           </div>
-          <pre id="cssOut" class="pre"></pre>
+        </section>
+      </section>
+
+      <!-- RIGHT: Preview -->
+      <section class="card">
+        <div class="h3">Live Preview</div>
+        <div class="muted small">Preview stubs TikTokClient (no real LIVE connection). Final games connect on ChatTokGaming.com.</div>
+        <div class="hr"></div>
+
+        <div class="previewFrameWrap">
+          <iframe id="previewFrame" title="Preview" class="previewFrame" src="about:blank"></iframe>
         </div>
 
-        <div class="fileCard">
-          <div class="fileHead">
-            <div class="fileTitle">game.js</div>
-            <div class="fileBtns">
-              <button id="btnCopyJs" class="btn ghost" disabled>Copy</button>
-              <button id="btnDownloadJs" class="btn ghost" disabled>Download</button>
-            </div>
-          </div>
-          <pre id="jsOut" class="pre"></pre>
+        <div class="hr"></div>
+
+        <div class="muted small">
+          <strong>Export to ChatTokGaming:</strong> Copy the three files into the game editor (index.html, style.css, game.js).
         </div>
-
-        <hr class="hr" />
-
-        <div class="stepHeader">
-          <div class="stepTitle">Live Preview</div>
-          <div class="stepRight">
-            <button id="btnRefreshPreview" class="btn ghost" disabled>Refresh Preview</button>
-            <button id="btnOpenPreview" class="btn ghost" disabled>Open in New Tab</button>
-          </div>
-        </div>
-
-        <div class="previewWrap">
-          <iframe id="previewFrame" title="Game Preview"></iframe>
-        </div>
-
-        <hr class="hr" />
-
-        <div class="stepHeader">
-          <div class="stepTitle">Step 4 • Edits (optional, 3 max)</div>
-          <div class="stepRight">
-            <span class="pill off" id="pillEditReady">Locked</span>
-            <span class="pill">Edits: <span id="editCount">0</span>/3</span>
-          </div>
-        </div>
-
-        <textarea id="editPrompt" class="textarea" rows="4" placeholder="Describe the edit (UI fixes, more style, fix TikTok logic, improve SFX, etc.)..."></textarea>
-
-        <div class="field">
-          <label class="label">Optional Screenshot (to show what’s wrong)</label>
-          <input id="editScreenshot" class="input" type="file" accept="image/*" />
-          <div class="hint">Optional. If provided, it’s sent to the API as a base64 data URL.</div>
-        </div>
-
-        <div class="actions">
-          <button id="btnEdit" class="btn ghost" disabled>Apply Edit</button>
-        </div>
-
-        <div class="block">
-          <div class="blockTitle">Prompt Echo (what the API actually used)</div>
-          <pre id="echoPrompt" class="pre"></pre>
-        </div>
-      </div>
-    </section>
-
-    <footer class="footer">
-      <div class="muted">
-        Hosting: <span class="mono">GitHub Pages</span> • API: <span class="mono">https://chattok-builder-api.onrender.com</span>
-      </div>
-    </footer>
+      </section>
+    </div>
   </main>
 
-  <script src="./app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
