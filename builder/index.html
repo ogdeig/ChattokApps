@@ -12,11 +12,12 @@
       <div class="logoDot" aria-hidden="true"></div>
       <div class="brandText">
         <div class="brandTitle">ChatTokApps • Game Builder</div>
-        <div class="brandSub">Spec → HTML → CSS → game.js → Edit • Live preview included</div>
+        <div class="brandSub">Spec → HTML → CSS → game.js → Edit (3x) • Live preview included</div>
       </div>
     </div>
 
     <div class="topActions">
+      <button id="btnRoutes" class="btn ghost">Load Routes</button>
       <button id="btnPing" class="btn ghost">Ping API</button>
       <button id="btnReset" class="btn ghost">Reset</button>
     </div>
@@ -27,7 +28,7 @@
       <!-- LEFT -->
       <div class="card">
         <div class="stepHeader">
-          <div class="stepTitle">Step 1 • Theme + Prompt</div>
+          <div class="stepTitle">Step 1 • Prompt + Theme</div>
           <div class="stepPills">
             <span class="pill" id="pillStep1">Active</span>
             <span class="pill off" id="pillStep2">Locked</span>
@@ -44,9 +45,22 @@
           </div>
 
           <div class="field">
+            <label class="label">Ping Endpoint</label>
+            <input id="pingPath" class="input mono" spellcheck="false" />
+            <div class="hint">Usually <span class="mono">/api/ping</span></div>
+          </div>
+        </div>
+
+        <div class="fieldRow">
+          <div class="field">
+            <label class="label">Routes Endpoint</label>
+            <input id="routesPath" class="input mono" spellcheck="false" />
+            <div class="hint">Usually <span class="mono">/api/routes</span></div>
+          </div>
+          <div class="field">
             <label class="label">Spec Endpoint</label>
             <input id="specPath" class="input mono" spellcheck="false" />
-            <div class="hint">Use <span class="mono">/api/plan</span> (recommended) or <span class="mono">/api/spec</span></div>
+            <div class="hint">Recommended <span class="mono">/api/plan</span></div>
           </div>
         </div>
 
@@ -54,25 +68,19 @@
           <div class="field">
             <label class="label">Build Endpoint</label>
             <input id="buildPath" class="input mono" spellcheck="false" />
-            <div class="hint">Usually <span class="mono">/api/build</span></div>
+            <div class="hint">Recommended <span class="mono">/api/build</span></div>
           </div>
           <div class="field">
             <label class="label">Edit Endpoint</label>
             <input id="editPath" class="input mono" spellcheck="false" />
-            <div class="hint">Usually <span class="mono">/api/edit</span></div>
+            <div class="hint">Recommended <span class="mono">/api/edit</span></div>
           </div>
-        </div>
-
-        <div class="field">
-          <label class="label">Ping Endpoint</label>
-          <input id="pingPath" class="input mono" spellcheck="false" />
-          <div class="hint">Usually <span class="mono">/api/ping</span></div>
         </div>
 
         <hr class="hr" />
 
         <h3 class="h3">Theme Colors</h3>
-        <p class="muted">These are injected into the spec/build prompts so the generated game matches your brand.</p>
+        <p class="muted">Injected into Spec/Build prompts so generated games match your brand.</p>
 
         <div class="colors">
           <div class="colorRow">
@@ -110,18 +118,7 @@
 
         <div class="field">
           <label class="label">Game Prompt</label>
-          <textarea id="prompt" class="textarea" rows="10" placeholder="Describe your TikTok Live interactive game in detail..."></textarea>
-        </div>
-
-        <div class="toggles">
-          <label class="toggle">
-            <input id="useCache" type="checkbox" checked />
-            <span>Allow cache (cheaper)</span>
-          </label>
-          <label class="toggle">
-            <input id="forceFresh" type="checkbox" />
-            <span>Force fresh (ignore cache)</span>
-          </label>
+          <textarea id="prompt" class="textarea" rows="10" placeholder="Describe your TikTok LIVE interactive game in detail..."></textarea>
         </div>
 
         <div class="actions">
@@ -137,10 +134,10 @@
         <hr class="hr" />
 
         <div class="stepHeader">
-          <div class="stepTitle">Step 2 • Confirm Spec</div>
+          <div class="stepTitle">Step 2 • Spec Output</div>
           <div class="stepRight">
             <button id="btnCopySpec" class="btn ghost" disabled>Copy Spec</button>
-            <button id="btnContinue" class="btn" disabled>Continue →</button>
+            <button id="btnContinue" class="btn" disabled>Continue → Build Files</button>
           </div>
         </div>
         <pre id="specOut" class="pre"></pre>
@@ -168,6 +165,7 @@
             <div class="fileTitle">index.html</div>
             <div class="fileBtns">
               <button id="btnCopyHtml" class="btn ghost" disabled>Copy</button>
+              <button id="btnDownloadHtml" class="btn ghost" disabled>Download</button>
             </div>
           </div>
           <pre id="htmlOut" class="pre"></pre>
@@ -178,6 +176,7 @@
             <div class="fileTitle">style.css</div>
             <div class="fileBtns">
               <button id="btnCopyCss" class="btn ghost" disabled>Copy</button>
+              <button id="btnDownloadCss" class="btn ghost" disabled>Download</button>
             </div>
           </div>
           <pre id="cssOut" class="pre"></pre>
@@ -188,6 +187,7 @@
             <div class="fileTitle">game.js</div>
             <div class="fileBtns">
               <button id="btnCopyJs" class="btn ghost" disabled>Copy</button>
+              <button id="btnDownloadJs" class="btn ghost" disabled>Download</button>
             </div>
           </div>
           <pre id="jsOut" class="pre"></pre>
@@ -218,6 +218,17 @@
         </div>
 
         <textarea id="editPrompt" class="textarea" rows="4" placeholder="Describe the edit you want (UI fixes, more style, fix TikTok logic, etc)..."></textarea>
+
+        <div class="field" style="margin-top:10px;">
+          <label class="label">Optional Screenshot Upload (helps the AI fix UI/bugs)</label>
+          <input id="editShot" class="input" type="file" accept="image/*" />
+          <div class="hint">Keep it small if possible. This is sent to the API (base64).</div>
+        </div>
+
+        <div class="shotPreviewWrap" id="shotPreviewWrap" style="display:none;">
+          <div class="shotPreviewTitle">Screenshot Preview</div>
+          <img id="shotPreview" alt="Screenshot preview" />
+        </div>
 
         <div class="actions">
           <button id="btnEdit" class="btn ghost" disabled>Apply Edit</button>
