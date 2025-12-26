@@ -1,18 +1,16 @@
 /* ChatTokApps Builder (Spec → HTML → CSS → game.js → Edit)
-   Host: GitHub Pages
+   Host: GitHub Pages (static)
    API: Render (OpenAI key stays on Render)
 
-   Key behavior:
-   - Defaults are internal & auto-set (no user typing needed)
-   - Advanced API settings are optional for debugging
-   - Anti-caching enforced on every request:
-     - requestId in body
-     - fetch cache: "no-store"
-     - ?ts=Date.now() query param
-   - Step 3 builds ONE file at a time:
-     - /api/build target=index.html
-     - /api/build target=style.css (with contextFiles)
-     - /api/build target=game.js (with contextFiles)
+   Key behavior (non-negotiable):
+   - Step 2 builds Spec once (/api/plan)
+   - Step 3 builds ONE file at a time (/api/build with target)
+   - Step 4 supports up to 3 edits (/api/edit) with optional screenshot upload
+   - Anti-caching on EVERY request:
+       - requestId in body
+       - fetch cache: "no-store"
+       - ?ts=${Date.now()} query param
+   - Always show server echoPrompt so we can verify latest prompt was used
 */
 
 const DEFAULTS = {
@@ -36,46 +34,31 @@ function normalizeHex(v, fallback) {
   return /^#[0-9a-fA-F]{6}$/.test(s) ? s : fallback;
 }
 
-function getTheme() {
-  return {
-    primary: normalizeHex(el("tPrimary").value, "#ff0050"),
-    secondary: normalizeHex(el("tSecondary").value, "#00f2ea"),
-    bg: normalizeHex(el("tBg").value, "#050b17"),
-    surface: normalizeHex(el("tSurface").value, "#0b1632"),
-    text: normalizeHex(el("tText").value, "#ffffff"),
-  };
+function newRequestId() {
+  return "req_" + (crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()) + "_" + Math.random().toString(16).slice(2));
 }
 
-function renderThemePreview() {
-  const t = getTheme();
-  document.documentElement.style.setProperty("--p", t.primary);
-  document.documentElement.style.setProperty("--s", t.secondary);
-  document.documentElement.style.setProperty("--bg", t.bg);
-  document.documentElement.style.setProperty("--surface", t.surface);
-  document.documentElement.style.setProperty("--text", t.text);
-
-  el("chipPrimary").style.background = t.primary;
-  el("chipSecondary").style.background = t.secondary;
-  el("chipSurface").style.background = t.surface;
+function showWarn(msg) {
+  const box = el("warn");
+  if (!msg) {
+    box.classList.add("hidden");
+    box.textContent = "";
+    return;
+  }
+  box.classList.remove("hidden");
+  box.textContent = String(msg);
 }
 
-function syncColorPair(colorId, textId, fallback) {
-  const c = el(colorId);
-  const t = el(textId);
-  const apply = (hex) => {
-    const v = normalizeHex(hex, fallback);
-    c.value = v;
-    t.value = v;
-    renderThemePreview();
-  };
-  c.addEventListener("input", () => apply(c.value));
-  t.addEventListener("input", () => apply(t.value));
-  apply(c.value || t.value || fallback);
+function setReqId(v) { el("reqId").textContent = v || "—"; }
+function setStatus(apiStatus, buildStatus) {
+  if (apiStatus !== undefined) el("statusText").textContent = apiStatus;
+  if (buildStatus !== undefined) el("buildStatus").textContent = buildStatus;
 }
 
 function configFromUI() {
+  const base = (el("apiBase").value || DEFAULTS.apiBase).trim().replace(/\/$/, "");
   return {
-    apiBase: (el("apiBase").value || DEFAULTS.apiBase).trim().replace(/\/$/, ""),
+    apiBase: base,
     pingPath: (el("pingPath").value || DEFAULTS.pingPath).trim(),
     routesPath: (el("routesPath").value || DEFAULTS.routesPath).trim(),
     specPath: (el("specPath").value || DEFAULTS.specPath).trim(),
@@ -91,13 +74,14 @@ function pushConfigToUI(cfg) {
   el("specPath").value = cfg.specPath;
   el("buildPath").value = cfg.buildPath;
   el("editPath").value = cfg.editPath;
+  el("apiLabel").textContent = cfg.apiBase;
 }
 
 function loadConfig() {
   const saved = safeJsonParse(localStorage.getItem(STORAGE_KEY) || "", null);
   const cfg = { ...DEFAULTS, ...(saved || {}) };
 
-  // Optional URL overrides (debug only)
+  // Optional URL overrides for debugging
   const qp = new URLSearchParams(location.search);
   if (qp.get("api")) cfg.apiBase = qp.get("api");
   if (qp.get("ping")) cfg.pingPath = qp.get("ping");
@@ -106,74 +90,105 @@ function loadConfig() {
   if (qp.get("build")) cfg.buildPath = qp.get("build");
   if (qp.get("edit")) cfg.editPath = qp.get("edit");
 
-  cfg.apiBase = (cfg.apiBase || "").trim().replace(/\/$/, "");
+  cfg.apiBase = (cfg.apiBase || DEFAULTS.apiBase).trim().replace(/\/$/, "");
   return cfg;
 }
 
 function saveConfig(cfg) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
+  el("apiLabel").textContent = cfg.apiBase;
 }
 
-function setReqId(v) {
-  el("reqId").textContent = v;
+/* =========================================================
+   Theme
+   ========================================================= */
+
+function getTheme() {
+  return {
+    primary: normalizeHex(el("tPrimary").value, "#ff0050"),
+    secondary: normalizeHex(el("tSecondary").value, "#00f2ea"),
+    bg: normalizeHex(el("tBg").value, "#050b17"),
+    surface: normalizeHex(el("tSurface").value, "#0b1632"),
+    text: normalizeHex(el("tText").value, "#ffffff"),
+  };
 }
 
-function setStatus(api, build) {
-  if (api !== undefined) el("apiStatus").textContent = api;
-  if (build !== undefined) el("buildStatus").textContent = build;
+function applyThemeToCssVars() {
+  const t = getTheme();
+  document.documentElement.style.setProperty("--p", t.primary);
+  document.documentElement.style.setProperty("--s", t.secondary);
+  document.documentElement.style.setProperty("--bg", t.bg);
+  document.documentElement.style.setProperty("--surface", t.surface);
+  document.documentElement.style.setProperty("--text", t.text);
+  renderThemeChips(t);
 }
 
-function showWarn(msg) {
-  const box = el("warnBox");
-  if (!msg) {
-    box.style.display = "none";
-    box.textContent = "";
-    return;
+function renderThemeChips(t) {
+  const root = el("themePreview");
+  if (!root) return;
+  root.innerHTML = "";
+
+  const items = [
+    ["Primary", t.primary],
+    ["Secondary", t.secondary],
+    ["Background", t.bg],
+    ["Surface", t.surface],
+    ["Text", t.text],
+  ];
+
+  for (const [label, value] of items) {
+    const chip = document.createElement("div");
+    chip.className = "chip";
+    const dot = document.createElement("div");
+    dot.className = "chipDot";
+    dot.style.background = value;
+    const txt = document.createElement("div");
+    txt.textContent = `${label}: ${value}`;
+    chip.appendChild(dot);
+    chip.appendChild(txt);
+    root.appendChild(chip);
   }
-  box.style.display = "block";
-  box.textContent = msg;
 }
 
-function newRequestId() {
-  return "req_" + crypto.randomUUID();
+function syncColorPair(colorId, textId, fallback) {
+  const c = el(colorId);
+  const t = el(textId);
+
+  const apply = (hex) => {
+    const v = normalizeHex(hex, fallback);
+    c.value = v;
+    t.value = v;
+    applyThemeToCssVars();
+  };
+
+  c.addEventListener("input", () => apply(c.value));
+  t.addEventListener("input", () => apply(t.value));
+  apply(c.value || t.value || fallback);
 }
 
-function getPrompt() {
-  return (el("prompt").value || "").trim();
-}
-
-function getEditPrompt() {
-  return (el("editPrompt").value || "").trim();
-}
-
-async function fileToDataUrl(file) {
-  if (!file) return "";
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(String(r.result || ""));
-    r.onerror = reject;
-    r.readAsDataURL(file);
-  });
-}
+/* =========================================================
+   Anti-cached fetch helper
+   ========================================================= */
 
 async function apiFetch(path, bodyObj, method = "POST") {
   const cfg = configFromUI();
   const base = cfg.apiBase.replace(/\/$/, "");
 
-  // Anti-cache query param
   const url = `${base}${path}${path.includes("?") ? "&" : "?"}ts=${Date.now()}`;
 
-  const res = await fetch(url, {
+  const init = {
     method,
     headers: { "Content-Type": "application/json" },
-    body: bodyObj ? JSON.stringify(bodyObj) : undefined,
     cache: "no-store",
-  });
+  };
 
+  if (bodyObj && method !== "GET") init.body = JSON.stringify(bodyObj);
+
+  const res = await fetch(url, init);
   const text = await res.text();
+
   let data = null;
-  try { data = text ? JSON.parse(text) : null; }
-  catch { data = { raw: text }; }
+  try { data = text ? JSON.parse(text) : null; } catch { data = { raw: text }; }
 
   if (!res.ok) {
     const msg = data?.error || data?.message || `HTTP ${res.status}`;
@@ -183,7 +198,7 @@ async function apiFetch(path, bodyObj, method = "POST") {
 }
 
 /* =========================================================
-   BUILDER RULES (enforces your non-negotiables)
+   Builder Rules (sent to server for enforcement)
    ========================================================= */
 
 const BUILDER_RULES = `
@@ -198,6 +213,7 @@ GLOBAL GAME REQUIREMENTS (NON-NEGOTIABLE):
      - settings controls relevant to the game
      - Start Game button (GATED; only enabled after Connected OR explicit Offline/Test mode)
   2) GAME SCREEN replaces the settings screen after Start.
+- ALWAYS include a <canvas id="gameCanvas"> in the GAME SCREEN (prevents getContext null errors).
 - Always include clear on-screen directions for chat commands in a transparent overlay that does NOT block gameplay view.
 - DO NOT use external CSS frameworks/CDNs (no Tailwind CDN). Write real CSS.
 - DO NOT reference external sound files. Use simple WebAudio synth beeps or embedded base64 sounds.
@@ -280,15 +296,14 @@ function setupTikTokClient(liveId) {
    Step state
    ========================================================= */
 
-let step = 1;
+let currentStep = 1; // 1 prompt, 2 spec, 3 build, 4 edit
 let lastSpec = null;
 
 let files = { html: "", css: "", js: "" };
 let built = { html: false, css: false, js: false };
-
 let editsUsed = 0;
 
-// animated status text
+// activity spinner
 let spinnerTimer = null;
 function startSpinner(label) {
   stopSpinner();
@@ -296,89 +311,86 @@ function startSpinner(label) {
   spinnerTimer = setInterval(() => {
     dots = (dots + 1) % 4;
     setStatus(undefined, `${label}${".".repeat(dots)}${" ".repeat(3 - dots)}`);
-  }, 350);
+  }, 300);
 }
 function stopSpinner() {
   if (spinnerTimer) clearInterval(spinnerTimer);
   spinnerTimer = null;
+  setStatus(undefined, "Idle");
 }
 
-function setPill(id, on) {
-  const p = el(id);
-  if (!p) return;
-  if (on) p.classList.remove("off");
-  else p.classList.add("off");
-}
+function setStep(n) {
+  currentStep = n;
 
-function setStep(newStep) {
-  step = newStep;
+  const setPill = (id, on, text) => {
+    const p = el(id);
+    if (!p) return;
+    if (on) p.classList.remove("off");
+    else p.classList.add("off");
+    if (text) p.textContent = text;
+  };
 
-  el("pillStep1").textContent = newStep === 1 ? "Active" : "Done";
-  el("pillStep2").textContent = newStep === 2 ? "Active" : (newStep > 2 ? "Done" : "Locked");
-  el("pillStep3").textContent = newStep === 3 ? "Active" : (newStep > 3 ? "Done" : "Locked");
-  el("pillStep4").textContent = newStep === 4 ? "Active" : (newStep > 4 ? "Ready" : "Locked");
+  setPill("pillS1", true, n === 1 ? "Active" : "Done");
+  setPill("pillS2", n >= 2, n === 2 ? "Active" : (n > 2 ? "Done" : "Locked"));
+  setPill("pillS3", n >= 3, n === 3 ? "Active" : (n > 3 ? "Done" : "Locked"));
+  setPill("pillS4", n >= 4, n === 4 ? "Active" : (n > 4 ? "Ready" : "Locked"));
 
-  setPill("pillStep2", newStep >= 2);
-  setPill("pillStep3", newStep >= 3);
-  setPill("pillStep4", newStep >= 4);
-
+  // Step 2 buttons
   el("btnCopySpec").disabled = !lastSpec;
-  el("btnDownloadSpec").disabled = !lastSpec;
+  el("btnDlSpec").disabled = !lastSpec;
   el("btnContinue").disabled = !lastSpec;
 
-  // Step 3 enablement
-  el("btnBuildHtml").disabled = !(newStep >= 3 && !!lastSpec);
-  el("btnBuildCss").disabled = !(newStep >= 3 && built.html);
-  el("btnBuildJs").disabled = !(newStep >= 3 && built.html && built.css);
+  // Step 3 build buttons
+  el("btnBuildHtml").disabled = !(n >= 3 && !!lastSpec);
+  el("btnBuildCss").disabled = !(n >= 3 && built.html);
+  el("btnBuildJs").disabled = !(n >= 3 && built.html && built.css);
 
-  // Copy/download enablement
+  // file copy/download buttons
   el("btnCopyHtml").disabled = !files.html;
+  el("btnDlHtml").disabled = !files.html;
   el("btnCopyCss").disabled = !files.css;
+  el("btnDlCss").disabled = !files.css;
   el("btnCopyJs").disabled = !files.js;
+  el("btnDlJs").disabled = !files.js;
 
-  el("btnDownloadHtml").disabled = !files.html;
-  el("btnDownloadCss").disabled = !files.css;
-  el("btnDownloadJs").disabled = !files.js;
+  // preview
+  const ready = built.html && built.css && built.js;
+  el("btnRefreshPreview").disabled = !ready;
+  el("btnOpenPreview").disabled = !ready;
 
-  const previewReady = built.html && built.css && built.js;
-  el("btnRefreshPreview").disabled = !previewReady;
-  el("btnOpenPreview").disabled = !previewReady;
+  // edit
+  el("btnEdit").disabled = !(ready && editsUsed < 3);
+  el("editCount").textContent = String(editsUsed);
+}
 
-  const editUnlocked = newStep >= 4 && previewReady;
-  setPill("pillEditReady", editUnlocked);
-  el("btnEdit").disabled = !(editUnlocked && editsUsed < 3);
-
-  // Build ready pill
-  if (newStep >= 3) {
-    el("pillBuildReady").classList.remove("off");
-    el("pillBuildReady").textContent = "Ready";
-  } else {
-    el("pillBuildReady").classList.add("off");
-    el("pillBuildReady").textContent = "Waiting";
-  }
+function showEcho(text) {
+  el("echoPrompt").textContent = text ? String(text) : "—";
 }
 
 function showSpec(specObj) {
   el("specOut").textContent = specObj ? JSON.stringify(specObj, null, 2) : "";
 }
 
-function showFileOutputs() {
+function showFiles() {
   el("htmlOut").textContent = files.html || "";
   el("cssOut").textContent = files.css || "";
   el("jsOut").textContent = files.js || "";
 }
 
-function showEcho(text) {
-  el("echoPrompt").textContent = text || "";
-}
+/* =========================================================
+   Clipboard + download
+   ========================================================= */
 
 async function copyText(text) {
+  const t = String(text || "");
+  if (!t) return false;
+
   try {
-    await navigator.clipboard.writeText(text);
+    await navigator.clipboard.writeText(t);
     return true;
   } catch {
     const ta = document.createElement("textarea");
-    ta.value = text;
+    ta.value = t;
     ta.style.position = "fixed";
     ta.style.left = "-9999px";
     document.body.appendChild(ta);
@@ -407,13 +419,23 @@ function downloadText(filename, content) {
 }
 
 /* =========================================================
-   Live Preview (inline CSS/JS + TikTok stub)
+   Live Preview (inline CSS/JS + stubs)
    ========================================================= */
 
 let previewUrl = null;
 
 function escapeScript(s) {
   return String(s || "").replace(/<\/script>/gi, "<\\/script>");
+}
+
+function stripExternalDeps(html) {
+  // Remove known dependency tags in preview (they won't exist locally)
+  return String(html || "")
+    .replace(/<script[^>]+src=["'][^"']*google-protobuf[^"']*["'][^>]*>\s*<\/script>/gi, "")
+    .replace(/<script[^>]+src=["'][^"']*generic\.js["'][^>]*>\s*<\/script>/gi, "")
+    .replace(/<script[^>]+src=["'][^"']*unknownobjects\.js["'][^>]*>\s*<\/script>/gi, "")
+    .replace(/<script[^>]+src=["'][^"']*data_linkmic_messages\.js["'][^>]*>\s*<\/script>/gi, "")
+    .replace(/<script[^>]+src=["'][^"']*tiktok-client\.js["'][^>]*>\s*<\/script>/gi, "");
 }
 
 function buildPreviewHtml(html, css, js) {
@@ -432,13 +454,16 @@ function buildPreviewHtml(html, css, js) {
 })();
 </script>`.trim();
 
-  let out = String(html || "");
+  let out = stripExternalDeps(html);
 
+  // inline css
   out = out.replace(/<link[^>]+href=["']style\.css["'][^>]*>/i, `<style>\n${css || ""}\n</style>`);
+
+  // inline game.js
   out = out.replace(/<script[^>]+src=["']game\.js["'][^>]*>\s*<\/script>/i, `<script>\n${escapeScript(js || "")}\n</script>`);
 
+  // inject tiktok stub
   if (out.includes("</head>")) out = out.replace("</head>", `${tiktokStub}\n</head>`);
-  else if (out.includes("<body")) out = out.replace(/<body[^>]*>/i, (m) => `${m}\n${tiktokStub}\n`);
   else out = `${tiktokStub}\n${out}`;
 
   return out;
@@ -461,24 +486,24 @@ function openPreviewTab() {
 }
 
 /* =========================================================
-   Response parsing helpers (robust to old/new API formats)
+   Response parsing (supports new/old formats)
    ========================================================= */
 
 function parseSpecResponse(data, fallbackPrompt) {
-  const spec = data?.spec || data?.plan || data?.result?.spec;
+  const spec = data?.spec || data?.plan || data?.result?.spec || null;
   return {
-    spec: spec || null,
+    spec,
     echo: data?.echoPrompt || data?.prompt || fallbackPrompt || "",
   };
 }
 
 function parseBuildFileResponse(data) {
-  // New format: { fileName, content }
-  if (typeof data?.content === "string" && typeof data?.fileName === "string") {
+  // Preferred: { fileName, content }
+  if (typeof data?.fileName === "string" && typeof data?.content === "string") {
     return { fileName: data.fileName, content: data.content, echo: data?.echoPrompt || "" };
   }
 
-  // Older format: { files: { "index.html": "...", "style.css": "...", "game.js": "..." } }
+  // Older: { files: { "index.html": "...", ... } }
   const f = data?.files || data;
   if (f && typeof f === "object") {
     if (typeof f["index.html"] === "string") return { fileName: "index.html", content: f["index.html"], echo: data?.echoPrompt || "" };
@@ -493,6 +518,19 @@ function parseBuildFileResponse(data) {
    Actions
    ========================================================= */
 
+function getPrompt() { return String(el("prompt").value || "").trim(); }
+function getEditPrompt() { return String(el("editPrompt").value || "").trim(); }
+
+async function fileToDataUrl(file) {
+  if (!file) return "";
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result || ""));
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
 async function ping() {
   showWarn("");
   const cfg = configFromUI();
@@ -501,18 +539,15 @@ async function ping() {
   startSpinner("Pinging API");
   try {
     const data = await apiFetch(cfg.pingPath, null, "GET");
-    stopSpinner();
-    setStatus(`OK • ${data?.name || "API"} • ${data?.time || "no time"}`, "Idle");
+    setStatus(`OK • ${data?.name || "API"} • ${data?.time || "no time"}`, undefined);
   } catch (e) {
-    stopSpinner();
-    setStatus(`Ping failed: ${e.message}`, "Idle");
+    setStatus(`Ping failed: ${e.message}`, undefined);
     showWarn(
       `Ping failed: ${e.message}\n\n` +
-      `Check:\n` +
-      `- Render is deployed\n` +
-      `- CORS allowlist includes your GitHub Pages domain\n` +
-      `- /api/ping exists`
+      `Check: Render deployment, CORS allowlist, endpoint path.`
     );
+  } finally {
+    stopSpinner();
   }
 }
 
@@ -524,21 +559,25 @@ async function loadRoutes() {
   startSpinner("Loading routes");
   try {
     const data = await apiFetch(cfg.routesPath, null, "GET");
-    stopSpinner();
     el("routesOut").textContent = JSON.stringify(data?.routes || data, null, 2);
-    setStatus(el("apiStatus").textContent, "Routes loaded.");
-    setTimeout(() => setStatus(undefined, "Idle"), 900);
+    setStatus(el("statusText").textContent, "Routes loaded.");
   } catch (e) {
+    setStatus(el("statusText").textContent, `Routes error: ${e.message}`);
+    el("routesOut").textContent = "(Routes not available)";
+    showWarn(`Routes error: ${e.message}\n\nIf /api/routes is not available, ignore this (optional).`);
+  } finally {
     stopSpinner();
-    setStatus(undefined, `Routes error: ${e.message}`);
-    showWarn(`Routes error: ${e.message}\n\nIf /api/routes is not available, ignore this (it’s optional).`);
   }
 }
 
 async function buildSpec() {
   showWarn("");
+
   const prompt = getPrompt();
-  if (!prompt) return alert("Enter a detailed prompt first.");
+  if (!prompt) {
+    showWarn("Enter a detailed prompt first.");
+    return;
+  }
 
   const requestId = newRequestId();
   setReqId(requestId);
@@ -556,9 +595,8 @@ async function buildSpec() {
     };
 
     const data = await apiFetch(cfg.specPath, payload, "POST");
-    stopSpinner();
-
     const parsed = parseSpecResponse(data, prompt);
+
     if (!parsed.spec) throw new Error("Spec response missing spec.");
 
     lastSpec = parsed.spec;
@@ -566,18 +604,19 @@ async function buildSpec() {
     showSpec(lastSpec);
 
     setStep(2);
-    setStatus(el("apiStatus").textContent || "OK", "Spec ready. Review and Continue.");
+    setStatus(el("statusText").textContent || "OK", "Spec ready. Review and Continue.");
   } catch (e) {
+    setStatus(el("statusText").textContent, `Spec error: ${e.message}`);
+    showWarn(`Spec error: ${e.message}\n\nExpected endpoint: ${cfg.specPath}`);
+  } finally {
     stopSpinner();
-    setStatus(undefined, `Spec error: ${e.message}`);
-    showWarn(`Spec error: ${e.message}\n\nExpected endpoint: /api/plan`);
   }
 }
 
 function continueToBuild() {
   if (!lastSpec) return;
   setStep(3);
-  setStatus(undefined, "Ready. Build HTML first.");
+  setStatus(el("statusText").textContent, "Ready. Build HTML first.");
 }
 
 async function buildOne(target) {
@@ -594,7 +633,9 @@ async function buildOne(target) {
   const contextFiles = {};
   if (files.html) contextFiles["index.html"] = files.html;
   if (files.css) contextFiles["style.css"] = files.css;
+  if (files.js) contextFiles["game.js"] = files.js;
 
+  startSpinner(`Building ${target}`);
   const payload = {
     requestId,
     target,
@@ -615,92 +656,73 @@ async function buildOne(target) {
 async function buildHtml() {
   showWarn("");
   try {
-    startSpinner("Building HTML");
     const r = await buildOne("index.html");
-    stopSpinner();
-
     files.html = r.content;
     built.html = true;
 
-    showFileOutputs();
-    setStatus(undefined, "HTML ready. Build CSS next.");
+    showFiles();
     setStep(3);
-
-    el("btnBuildCss").disabled = false;
-    el("btnCopyHtml").disabled = !files.html;
-    el("btnDownloadHtml").disabled = !files.html;
-
+    setStatus(el("statusText").textContent, "HTML ready. Build CSS next.");
     el("htmlOut").scrollIntoView({ behavior: "smooth", block: "start" });
   } catch (e) {
-    stopSpinner();
-    setStatus(undefined, `Build HTML error: ${e.message}`);
+    setStatus(el("statusText").textContent, `Build HTML error: ${e.message}`);
     showWarn(`Build HTML error: ${e.message}`);
+  } finally {
+    stopSpinner();
   }
 }
 
 async function buildCss() {
   showWarn("");
+  if (!built.html) return showWarn("Build HTML first.");
+
   try {
-    if (!built.html) return alert("Build HTML first.");
-
-    startSpinner("Building CSS");
     const r = await buildOne("style.css");
-    stopSpinner();
-
     files.css = r.content;
     built.css = true;
 
-    showFileOutputs();
-    setStatus(undefined, "CSS ready. Build game.js next.");
-
-    el("btnBuildJs").disabled = false;
-    el("btnCopyCss").disabled = !files.css;
-    el("btnDownloadCss").disabled = !files.css;
-
+    showFiles();
+    setStep(3);
+    setStatus(el("statusText").textContent, "CSS ready. Build game.js next.");
     el("cssOut").scrollIntoView({ behavior: "smooth", block: "start" });
   } catch (e) {
-    stopSpinner();
-    setStatus(undefined, `Build CSS error: ${e.message}`);
+    setStatus(el("statusText").textContent, `Build CSS error: ${e.message}`);
     showWarn(`Build CSS error: ${e.message}`);
+  } finally {
+    stopSpinner();
   }
 }
 
 async function buildJs() {
   showWarn("");
+  if (!built.html || !built.css) return showWarn("Build HTML and CSS first.");
+
   try {
-    if (!built.html || !built.css) return alert("Build HTML and CSS first.");
-
-    startSpinner("Building game.js");
     const r = await buildOne("game.js");
-    stopSpinner();
-
     files.js = r.content;
     built.js = true;
 
-    showFileOutputs();
+    showFiles();
     setPreview(files.html, files.css, files.js);
 
-    setStatus(undefined, "game.js ready. Editing unlocked.");
     setStep(4);
-
-    el("btnCopyJs").disabled = !files.js;
-    el("btnDownloadJs").disabled = !files.js;
-
+    setStatus(el("statusText").textContent, "game.js ready. Editing unlocked.");
     el("jsOut").scrollIntoView({ behavior: "smooth", block: "start" });
   } catch (e) {
-    stopSpinner();
-    setStatus(undefined, `Build game.js error: ${e.message}`);
+    setStatus(el("statusText").textContent, `Build game.js error: ${e.message}`);
     showWarn(`Build game.js error: ${e.message}`);
+  } finally {
+    stopSpinner();
   }
 }
 
 async function applyEdit() {
   showWarn("");
-  if (!(built.html && built.css && built.js)) return alert("Build HTML/CSS/game.js first.");
-  if (editsUsed >= 3) return alert("Edit limit reached (3).");
+  if (!(built.html && built.css && built.js)) return showWarn("Build HTML/CSS/game.js first.");
+  if (editsUsed >= 3) return showWarn("Edit limit reached (3).");
 
   const editPrompt = getEditPrompt();
-  if (!editPrompt) return alert("Enter an edit request.");
+  if (!editPrompt) return showWarn("Enter an edit request.");
 
   const requestId = newRequestId();
   setReqId(requestId);
@@ -710,15 +732,16 @@ async function applyEdit() {
 
   startSpinner("Applying edit");
   try {
-    const file = el("editScreenshot").files && el("editScreenshot").files[0];
+    const file = el("editShot").files && el("editShot").files[0];
     const screenshotDataUrl = file ? await fileToDataUrl(file) : "";
 
     const payload = {
       requestId,
+      prompt: getPrompt(),
       editPrompt,
       theme: getTheme(),
       builderRules: BUILDER_RULES,
-      screenshotDataUrl,
+      screenshotDataUrl, // optional (server may ignore for now)
       files: {
         "index.html": files.html,
         "style.css": files.css,
@@ -727,9 +750,8 @@ async function applyEdit() {
     };
 
     const data = await apiFetch(cfg.editPath, payload, "POST");
-    stopSpinner();
-
     const out = data?.files || data;
+
     if (typeof out?.["index.html"] !== "string" || typeof out?.["style.css"] !== "string" || typeof out?.["game.js"] !== "string") {
       throw new Error("Edit response missing files.");
     }
@@ -742,16 +764,39 @@ async function applyEdit() {
     el("editCount").textContent = String(editsUsed);
 
     showEcho(data?.echoPrompt || data?.editPrompt || editPrompt);
-    showFileOutputs();
+    showFiles();
     setPreview(files.html, files.css, files.js);
 
-    setStatus(undefined, editsUsed >= 3 ? "Edit applied (limit reached)." : "Edit applied.");
-    el("btnEdit").disabled = editsUsed >= 3;
+    setStatus(el("statusText").textContent, editsUsed >= 3 ? "Edit applied (limit reached)." : "Edit applied.");
+    setStep(4);
   } catch (e) {
-    stopSpinner();
-    setStatus(undefined, `Edit error: ${e.message}`);
+    setStatus(el("statusText").textContent, `Edit error: ${e.message}`);
     showWarn(`Edit error: ${e.message}`);
+  } finally {
+    stopSpinner();
   }
+}
+
+/* =========================================================
+   Screenshot preview (client-side only)
+   ========================================================= */
+
+function hookScreenshotPreview() {
+  const input = el("editShot");
+  const wrap = el("shotPreviewWrap");
+  const img = el("shotPreview");
+
+  input.addEventListener("change", async () => {
+    const file = input.files && input.files[0];
+    if (!file) {
+      wrap.classList.add("hidden");
+      img.removeAttribute("src");
+      return;
+    }
+    const url = await fileToDataUrl(file);
+    img.src = url;
+    wrap.classList.remove("hidden");
+  });
 }
 
 /* =========================================================
@@ -763,7 +808,7 @@ function hookCopy(btnId, getTextFn) {
     const t = getTextFn();
     if (!t) return;
     const ok = await copyText(t);
-    setStatus(undefined, ok ? "Copied to clipboard." : "Copy failed (browser blocked).");
+    setStatus(el("statusText").textContent, ok ? "Copied to clipboard." : "Copy failed (browser blocked).");
     setTimeout(() => setStatus(undefined, "Idle"), 900);
   });
 }
@@ -789,10 +834,11 @@ function resetAll() {
 
   el("prompt").value = "";
   el("editPrompt").value = "";
-  el("echoPrompt").textContent = "";
-  el("routesOut").textContent = "";
-  el("editScreenshot").value = "";
-  showWarn("");
+  el("echoPrompt").textContent = "—";
+  el("routesOut").textContent = "(Click “Load Routes”)";
+  el("editShot").value = "";
+  el("shotPreviewWrap").classList.add("hidden");
+  el("shotPreview").removeAttribute("src");
 
   lastSpec = null;
   files = { html: "", css: "", js: "" };
@@ -801,10 +847,10 @@ function resetAll() {
   editsUsed = 0;
   el("editCount").textContent = "0";
 
-  el("specOut").textContent = "";
-  el("htmlOut").textContent = "";
-  el("cssOut").textContent = "";
-  el("jsOut").textContent = "";
+  el("specOut").textContent = "(Spec will appear here)";
+  el("htmlOut").textContent = "(HTML will appear here)";
+  el("cssOut").textContent = "(CSS will appear here)";
+  el("jsOut").textContent = "(game.js will appear here)";
 
   if (previewUrl) URL.revokeObjectURL(previewUrl);
   previewUrl = null;
@@ -812,9 +858,12 @@ function resetAll() {
 
   setReqId("—");
   setStatus("Not checked", "Idle");
-
+  showWarn("");
+  applyThemeToCssVars();
   setStep(1);
-  renderThemePreview();
+
+  // collapse advanced section to avoid UI blocks
+  el("advApi").open = false;
 }
 
 /* =========================================================
@@ -826,39 +875,26 @@ function resetAll() {
   pushConfigToUI(cfg);
   saveConfig(cfg);
 
-  // lock/unlock advanced fields
-  const setApiReadonly = (readonly) => {
-    ["apiBase","pingPath","routesPath","specPath","buildPath","editPath"].forEach((id) => {
-      el(id).readOnly = readonly;
-    });
-  };
-  setApiReadonly(true);
-
-  el("unlockApi").addEventListener("change", () => {
-    setApiReadonly(!el("unlockApi").checked);
-  });
-
-  ["apiBase","pingPath","routesPath","specPath","buildPath","editPath"].forEach((id) => {
-    el(id).addEventListener("change", () => {
-      const c = configFromUI();
-      saveConfig(c);
-      setStatus("Config saved.", undefined);
-      setTimeout(() => setStatus("Not checked", undefined), 900);
-    });
-  });
-
-  // colors
+  // Colors
   syncColorPair("cPrimary", "tPrimary", "#ff0050");
   syncColorPair("cSecondary", "tSecondary", "#00f2ea");
   syncColorPair("cBg", "tBg", "#050b17");
   syncColorPair("cSurface", "tSurface", "#0b1632");
   syncColorPair("cText", "tText", "#ffffff");
-  renderThemePreview();
+  applyThemeToCssVars();
 
-  // buttons
-  el("btnLoadRoutes").addEventListener("click", loadRoutes);
+  // Buttons
   el("btnPing").addEventListener("click", ping);
+  el("btnLoadRoutes").addEventListener("click", loadRoutes);
   el("btnReset").addEventListener("click", resetAll);
+
+  el("btnSaveApi").addEventListener("click", () => {
+    const cfg2 = configFromUI();
+    saveConfig(cfg2);
+    pushConfigToUI(cfg2);
+    setStatus(el("statusText").textContent, "API settings saved.");
+    setTimeout(() => setStatus(undefined, "Idle"), 800);
+  });
 
   el("btnSpec").addEventListener("click", buildSpec);
   el("btnContinue").addEventListener("click", continueToBuild);
@@ -867,31 +903,35 @@ function resetAll() {
   el("btnBuildCss").addEventListener("click", buildCss);
   el("btnBuildJs").addEventListener("click", buildJs);
 
-  el("btnEdit").addEventListener("click", applyEdit);
-
   el("btnRefreshPreview").addEventListener("click", () => {
     if (!(built.html && built.css && built.js)) return;
     setPreview(files.html, files.css, files.js);
   });
   el("btnOpenPreview").addEventListener("click", openPreviewTab);
 
-  // copy hooks
+  el("btnEdit").addEventListener("click", applyEdit);
+
+  // Screenshot preview
+  hookScreenshotPreview();
+
+  // Copy buttons
   hookCopy("btnCopySpec", () => el("specOut").textContent);
   hookCopy("btnCopyHtml", () => files.html);
   hookCopy("btnCopyCss", () => files.css);
   hookCopy("btnCopyJs", () => files.js);
 
-  // download hooks
-  hookDownload("btnDownloadSpec", "spec.json", () => el("specOut").textContent);
-  hookDownload("btnDownloadHtml", "index.html", () => files.html);
-  hookDownload("btnDownloadCss", "style.css", () => files.css);
-  hookDownload("btnDownloadJs", "game.js", () => files.js);
+  // Download buttons
+  hookDownload("btnDlSpec", "spec.json", () => el("specOut").textContent);
+  hookDownload("btnDlHtml", "index.html", () => files.html);
+  hookDownload("btnDlCss", "style.css", () => files.css);
+  hookDownload("btnDlJs", "game.js", () => files.js);
 
-  // initial state
+  // Initial state
   setReqId("—");
   setStatus("Not checked", "Idle");
+  showEcho("—");
   setStep(1);
 
-  // Auto-ping once on load (silent-ish)
+  // Auto-ping on load
   ping().catch(() => {});
 })();
