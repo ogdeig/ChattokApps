@@ -511,9 +511,6 @@
   </main>
 
   <script>
-    // =========================================================
-    // INTERNAL DEFAULTS (no user typing needed)
-    // =========================================================
     const DEFAULTS = {
       apiBase: "https://chattok-builder-api.onrender.com",
       pingPath: "/api/ping",
@@ -587,9 +584,7 @@
       el("apiLabel").textContent = cfg.apiBase;
     }
 
-    // =========================================================
     // Theme
-    // =========================================================
     function getTheme() {
       return {
         primary: normalizeHex(el("tPrimary").value, "#ff0050"),
@@ -645,9 +640,7 @@
       apply(c.value || t.value || fallback);
     }
 
-    // =========================================================
-    // Anti-cached fetch helper
-    // =========================================================
+    // Anti-cache fetch helper
     async function apiFetch(path, bodyObj, method = "POST") {
       const cfg = configFromUI();
       const base = cfg.apiBase.replace(/\/$/, "");
@@ -672,9 +665,7 @@
       return data;
     }
 
-    // =========================================================
-    // Builder rules (sends your non-negotiables to the API)
-    // =========================================================
+    // Builder rules
     const BUILDER_RULES = `
 GLOBAL GAME REQUIREMENTS (NON-NEGOTIABLE):
 - Output MUST be professional and must support ANY type of game (shooters, runners, racing, arena, overlays, etc).
@@ -716,9 +707,7 @@ IMPORTANT: CONNECTION PATTERN (DO NOT REPLACE):
 - Wire events: chat, gift, like, join, social, roomUserSeq, control
 `.trim();
 
-    // =========================================================
     // Step state
-    // =========================================================
     let currentStep = 1;
     let lastSpec = null;
     let files = { html: "", css: "", js: "" };
@@ -785,9 +774,7 @@ IMPORTANT: CONNECTION PATTERN (DO NOT REPLACE):
       el("jsOut").textContent = files.js || "";
     }
 
-    // =========================================================
     // Clipboard + download
-    // =========================================================
     async function copyText(text) {
       const t = String(text || "");
       if (!t) return false;
@@ -809,9 +796,7 @@ IMPORTANT: CONNECTION PATTERN (DO NOT REPLACE):
       setTimeout(() => URL.revokeObjectURL(url), 400);
     }
 
-    // =========================================================
     // Live Preview (stub TikTokClient only inside preview)
-    // =========================================================
     let previewUrl = null;
 
     function escapeScript(s) { return String(s || "").replace(/<\/script>/gi, "<\\/script>"); }
@@ -826,22 +811,20 @@ IMPORTANT: CONNECTION PATTERN (DO NOT REPLACE):
     }
 
     function buildPreviewHtml(html, css, js) {
-      const tiktokStub = `
-<script>
-(function(){
-  if (typeof window.TikTokClient !== "undefined") return;
-  class TikTokClient {
-    constructor(liveId){ this.liveId = liveId; this.handlers = {}; this.socket = { close(){ } }; }
-    setAccessToken(){ }
-    on(evt, fn){ (this.handlers[evt] ||= []).push(fn); }
-    emit(evt, data){ (this.handlers[evt]||[]).forEach(fn => { try{ fn(data); } catch(e){} }); }
-    connect(){ setTimeout(() => this.emit("connected"), 250); }
-  }
-  window.TikTokClient = TikTokClient;
-})();
-</script>`.trim();
+      // IMPORTANT: Never include a raw </script> inside inline JS on this page.
+      const tiktokStub =
+        "<script>(function(){" +
+        "if(typeof window.TikTokClient!=='undefined')return;" +
+        "class TikTokClient{constructor(liveId){this.liveId=liveId;this.handlers={};this.socket={close(){}}}" +
+        "setAccessToken(){} on(evt,fn){(this.handlers[evt]||(this.handlers[evt]=[])).push(fn)}" +
+        "emit(evt,data){(this.handlers[evt]||[]).forEach(f=>{try{f(data)}catch(e){}})}" +
+        "connect(){setTimeout(()=>this.emit('connected'),250)}" +
+        "}" +
+        "window.TikTokClient=TikTokClient;" +
+        "})();<\\/script>";
 
       let out = stripDeps(html);
+
       out = out.replace(/<link[^>]+href=["']style\.css["'][^>]*>/i, `<style>\n${css || ""}\n</style>`);
       out = out.replace(/<script[^>]+src=["']game\.js["'][^>]*>\s*<\/script>/i, `<script>\n${escapeScript(js || "")}\n</script>`);
 
@@ -866,9 +849,7 @@ IMPORTANT: CONNECTION PATTERN (DO NOT REPLACE):
       window.open(previewUrl, "_blank", "noopener,noreferrer");
     }
 
-    // =========================================================
     // Parsing API responses
-    // =========================================================
     function parseSpecResponse(data, fallbackPrompt) {
       const spec = data?.spec || data?.plan || data?.result?.spec || null;
       return { spec, echo: data?.echoPrompt || data?.prompt || fallbackPrompt || "" };
@@ -886,9 +867,7 @@ IMPORTANT: CONNECTION PATTERN (DO NOT REPLACE):
       throw new Error("Build response missing file content.");
     }
 
-    // =========================================================
     // Actions
-    // =========================================================
     function getPrompt() { return String(el("prompt").value || "").trim(); }
     function getEditPrompt() { return String(el("editPrompt").value || "").trim(); }
 
@@ -1092,9 +1071,7 @@ IMPORTANT: CONNECTION PATTERN (DO NOT REPLACE):
       }
     }
 
-    // =========================================================
     // Hooks
-    // =========================================================
     function hookScreenshotPreview() {
       const input = el("editShot");
       const wrap = el("shotPreviewWrap");
@@ -1163,9 +1140,7 @@ IMPORTANT: CONNECTION PATTERN (DO NOT REPLACE):
       el("advApi").open = false;
     }
 
-    // =========================================================
     // Init
-    // =========================================================
     (function init() {
       const cfg = loadConfig();
       pushConfigToUI(cfg);
@@ -1222,7 +1197,6 @@ IMPORTANT: CONNECTION PATTERN (DO NOT REPLACE):
       showEcho("—");
       setStep(1);
 
-      // auto ping
       ping().catch(() => {});
     })();
   </script>
