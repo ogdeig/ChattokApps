@@ -2,11 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>ChatTokApps • Game Builder</title>
-  <link rel="stylesheet" href="app.css" />
+  <link rel="stylesheet" href="./app.css" />
 </head>
-
 <body>
   <header class="topbar">
     <div class="brand">
@@ -26,13 +25,14 @@
 
   <main class="wrap">
     <div class="grid">
-      <!-- LEFT: Builder steps -->
+      <!-- LEFT: Builder -->
       <section class="card">
         <div class="headRow">
           <div>
             <div class="h2">Build a TikTok LIVE Interactive Game</div>
             <div class="muted small">API: <span id="apiLabel" class="mono"></span></div>
           </div>
+
           <div class="stepPills" aria-label="Steps">
             <div class="pillStep" id="pillS1">Active</div>
             <div class="pillStep off" id="pillS2">Locked</div>
@@ -42,54 +42,46 @@
         </div>
 
         <div class="statusBox">
-          <div class="statusLine">
-            <span class="muted">Status:</span>
-            <strong id="statusText">Not checked</strong>
-          </div>
-          <div class="statusLine">
-            <span class="muted">Activity:</span>
-            <span id="buildStatus" class="mono">Idle</span>
-          </div>
-          <div class="statusLine">
-            <span class="muted">requestId:</span>
-            <span id="reqId" class="mono">—</span>
-          </div>
+          <div class="statusLine"><span class="muted">Status:</span> <strong id="statusText">Not checked</strong></div>
+          <div class="statusLine"><span class="muted">Activity:</span> <span id="buildStatus" class="mono">Idle</span></div>
+          <div class="statusLine"><span class="muted">requestId:</span> <span id="reqId" class="mono">—</span></div>
         </div>
 
+        <div id="warn" class="warn hidden"></div>
+
         <details class="advanced" id="advApi">
-          <summary>Advanced API settings (rarely needed)</summary>
+          <summary>Advanced API settings (optional)</summary>
           <div class="advInner">
             <div class="fieldRow">
               <div class="field">
-                <label class="label" for="apiBase">Render API Base URL</label>
-                <input id="apiBase" class="input mono" type="text" value="" spellcheck="false" />
+                <label class="label" for="apiBase">API Base URL</label>
+                <input id="apiBase" class="input mono" type="text" spellcheck="false" />
                 <div class="hint">Default: https://chattok-builder-api.onrender.com</div>
               </div>
               <div class="field">
-                <label class="label" for="pingPath">Ping Endpoint</label>
+                <label class="label" for="pingPath">Ping</label>
                 <input id="pingPath" class="input mono" type="text" value="/api/ping" spellcheck="false" />
-                <div class="hint">Usually <span class="mono">/api/ping</span></div>
               </div>
             </div>
 
             <div class="fieldRow">
               <div class="field">
-                <label class="label" for="routesPath">Routes Endpoint</label>
+                <label class="label" for="routesPath">Routes</label>
                 <input id="routesPath" class="input mono" type="text" value="/api/routes" spellcheck="false" />
               </div>
               <div class="field">
-                <label class="label" for="specPath">Spec Endpoint</label>
+                <label class="label" for="specPath">Spec</label>
                 <input id="specPath" class="input mono" type="text" value="/api/plan" spellcheck="false" />
               </div>
             </div>
 
             <div class="fieldRow">
               <div class="field">
-                <label class="label" for="buildPath">Build Endpoint</label>
+                <label class="label" for="buildPath">Build</label>
                 <input id="buildPath" class="input mono" type="text" value="/api/build" spellcheck="false" />
               </div>
               <div class="field">
-                <label class="label" for="editPath">Edit Endpoint</label>
+                <label class="label" for="editPath">Edit</label>
                 <input id="editPath" class="input mono" type="text" value="/api/edit" spellcheck="false" />
               </div>
             </div>
@@ -99,14 +91,13 @@
             </div>
 
             <div class="hr"></div>
+
             <div class="field">
               <label class="label">Detected routes</label>
-              <pre id="routesOut" class="code" style="min-height: 92px">(Click “Load Routes” in the top-right)</pre>
+              <pre id="routesOut" class="code" style="min-height:92px">(Click “Load Routes”)</pre>
             </div>
           </div>
         </details>
-
-        <div id="warn" class="warn hidden"></div>
 
         <!-- STEP 1 -->
         <section class="step">
@@ -114,10 +105,8 @@
 
           <div class="field">
             <label class="label" for="prompt">Detailed prompt</label>
-            <textarea id="prompt" class="textarea" rows="7" placeholder="Describe the game, chat controls, host controls, scoring, rounds, sounds, visuals...
-
-Example: A space runner where chat spawns obstacles with their profile picture, gifts create boss obstacles, likes give shields, and follows grant bonus points."></textarea>
-            <div class="hint">Tip: mention the exact chat keywords you want, plus what gifts/likes/follows/shares do.</div>
+            <textarea id="prompt" class="textarea" rows="7" placeholder="Describe the game, chat controls, host controls, scoring, rounds, sounds, visuals..."></textarea>
+            <div class="hint">Keep it specific: chat keywords, what gifts/likes/follows/shares do, and what the host controls.</div>
           </div>
 
           <div class="hr"></div>
@@ -154,7 +143,7 @@ Example: A space runner where chat spawns obstacles with their profile picture, 
               <input id="tText" class="input mono" type="text" value="#ffffff" maxlength="7" />
             </div>
 
-            <div class="previewChips" id="themePreview"></div>
+            <div id="themePreview" class="previewChips"></div>
           </div>
 
           <div class="actions">
@@ -174,7 +163,7 @@ Example: A space runner where chat spawns obstacles with their profile picture, 
             <button id="btnContinue" class="btn primary" type="button" disabled>Continue → Build Files</button>
           </div>
 
-          <pre id="specOut" class="code" style="min-height: 240px">(Spec will appear here)</pre>
+          <pre id="specOut" class="code" style="min-height:240px">(Spec will appear here)</pre>
         </section>
 
         <div class="hr"></div>
@@ -197,7 +186,7 @@ Example: A space runner where chat spawns obstacles with their profile picture, 
                 <button id="btnDlHtml" class="btn" type="button" disabled>Download</button>
               </div>
             </div>
-            <pre id="htmlOut" class="code" style="min-height: 180px">(HTML will appear here)</pre>
+            <pre id="htmlOut" class="code" style="min-height:180px">(HTML will appear here)</pre>
           </div>
 
           <div class="fileBlock">
@@ -208,7 +197,7 @@ Example: A space runner where chat spawns obstacles with their profile picture, 
                 <button id="btnDlCss" class="btn" type="button" disabled>Download</button>
               </div>
             </div>
-            <pre id="cssOut" class="code" style="min-height: 160px">(CSS will appear here)</pre>
+            <pre id="cssOut" class="code" style="min-height:160px">(CSS will appear here)</pre>
           </div>
 
           <div class="fileBlock">
@@ -219,7 +208,7 @@ Example: A space runner where chat spawns obstacles with their profile picture, 
                 <button id="btnDlJs" class="btn" type="button" disabled>Download</button>
               </div>
             </div>
-            <pre id="jsOut" class="code" style="min-height: 160px">(game.js will appear here)</pre>
+            <pre id="jsOut" class="code" style="min-height:160px">(game.js will appear here)</pre>
           </div>
 
           <div class="hr"></div>
@@ -245,13 +234,13 @@ Example: A space runner where chat spawns obstacles with their profile picture, 
 
           <div class="field">
             <label class="label" for="editPrompt">Edit request</label>
-            <textarea id="editPrompt" class="textarea" rows="4" placeholder="Describe EXACT changes. Example: Make the HUD larger, add a flash animation when someone triggers an action, and make chat directions a glass panel on the right."></textarea>
+            <textarea id="editPrompt" class="textarea" rows="4" placeholder="Describe EXACT changes you want."></textarea>
           </div>
 
           <div class="field">
             <label class="label" for="editShot">Optional screenshot upload</label>
             <input id="editShot" class="input" type="file" accept="image/*" />
-            <div class="hint">Helpful if something is misaligned on ChatTokGaming.com. (Optional)</div>
+            <div class="hint">Optional — helps document what you’re seeing on ChatTokGaming.com.</div>
             <div id="shotPreviewWrap" class="shotWrap hidden">
               <img id="shotPreview" alt="Screenshot preview" />
             </div>
@@ -276,12 +265,12 @@ Example: A space runner where chat spawns obstacles with their profile picture, 
         <div class="hr"></div>
 
         <div class="muted small">
-          <strong>Export to ChatTokGaming:</strong> Copy the three files into the game editor (index.html, style.css, game.js).
+          Export: Copy the three files into ChatTokGaming’s game editor: <span class="mono">index.html</span>, <span class="mono">style.css</span>, <span class="mono">game.js</span>.
         </div>
       </section>
     </div>
   </main>
 
-  <script src="app.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
