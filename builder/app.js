@@ -1,22 +1,28 @@
-/* ChatTokApps Builder (Step Workflow + 3 file containers + copy + live preview)
-   Host: GitHub Pages
-   API: Render (OpenAI key stays on Render)
+/* ChatTokApps Builder (Static GitHub Pages)
+   Workflow:
+   Step 2: Build Spec
+   Step 3: Build files one-at-a-time (HTML -> CSS -> game.js) using Spec
+   Step 4: Up to 3 edits + optional screenshot upload
+
+   Hard rules enforced:
+   - Every request includes requestId + ?ts + cache:no-store
+   - Show echoPrompt from server
 */
 
 const DEFAULTS = {
   apiBase: "https://chattok-builder-api.onrender.com",
   pingPath: "/api/ping",
-  specPath: "/api/plan",   // IMPORTANT: your backend showed /api/plan exists
+  routesPath: "/api/routes",
+  specPath: "/api/plan",
   buildPath: "/api/build",
   editPath: "/api/edit",
 };
 
-const STORAGE_KEY = "chattokapps_builder_stepper_v1";
+const STORAGE_KEY = "chattokapps_builder_v2";
+
 const el = (id) => document.getElementById(id);
 
-function safeJsonParse(s, fallback) {
-  try { return JSON.parse(s); } catch { return fallback; }
-}
+function safeJsonParse(s, fallback) { try { return JSON.parse(s); } catch { return fallback; } }
 
 function normalizeHex(v, fallback) {
   const s = String(v || "").trim();
@@ -37,9 +43,7 @@ function renderThemePreview() {
   const t = getTheme();
   document.documentElement.style.setProperty("--p", t.primary);
   document.documentElement.style.setProperty("--s", t.secondary);
-  document.documentElement.style.setProperty("--bg", t.bg);
   document.documentElement.style.setProperty("--surface", t.surface);
-  document.documentElement.style.setProperty("--text", t.text);
 
   el("chipPrimary").style.background = t.primary;
   el("chipSecondary").style.background = t.secondary;
@@ -49,62 +53,70 @@ function renderThemePreview() {
 function syncColorPair(colorId, textId, fallback) {
   const c = el(colorId);
   const t = el(textId);
-  const apply = (hex) => {
-    const v = normalizeHex(hex, fallback);
-    c.value = v;
+
+  const applyFromText = () => {
+    const v = normalizeHex(t.value, fallback);
     t.value = v;
+    c.value = v;
     renderThemePreview();
   };
-  c.addEventListener("input", () => apply(c.value));
-  t.addEventListener("input", () => apply(t.value));
-  apply(c.value || t.value || fallback);
+
+  const applyFromColor = () => {
+    t.value = c.value;
+    renderThemePreview();
+  };
+
+  c.addEventListener("input", applyFromColor);
+  t.addEventListener("change", applyFromText);
+  t.addEventListener("input", () => {
+    if (/^#[0-9a-fA-F]{0,6}$/.test(t.value.trim())) return;
+    applyFromText();
+  });
 }
 
-function configFromUI() {
+function loadConfig() {
+  const saved = safeJsonParse(localStorage.getItem(STORAGE_KEY), {});
   return {
-    apiBase: (el("apiBase").value || DEFAULTS.apiBase).trim().replace(/\/$/, ""),
-    pingPath: (el("pingPath").value || DEFAULTS.pingPath).trim(),
-    specPath: (el("specPath").value || DEFAULTS.specPath).trim(),
-    buildPath: (el("buildPath").value || DEFAULTS.buildPath).trim(),
-    editPath: (el("editPath").value || DEFAULTS.editPath).trim(),
+    apiBase: saved.apiBase || DEFAULTS.apiBase,
+    pingPath: saved.pingPath || DEFAULTS.pingPath,
+    routesPath: saved.routesPath || DEFAULTS.routesPath,
+    specPath: saved.specPath || DEFAULTS.specPath,
+    buildPath: saved.buildPath || DEFAULTS.buildPath,
+    editPath: saved.editPath || DEFAULTS.editPath,
   };
 }
+
+function saveConfig(cfg) { localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg)); }
 
 function pushConfigToUI(cfg) {
   el("apiBase").value = cfg.apiBase;
   el("pingPath").value = cfg.pingPath;
+  el("routesPath").value = cfg.routesPath;
   el("specPath").value = cfg.specPath;
   el("buildPath").value = cfg.buildPath;
   el("editPath").value = cfg.editPath;
 }
 
-function loadConfig() {
-  const saved = safeJsonParse(localStorage.getItem(STORAGE_KEY) || "", null);
-  const cfg = { ...DEFAULTS, ...(saved || {}) };
-
-  // optional URL overrides
-  const qp = new URLSearchParams(location.search);
-  if (qp.get("api")) cfg.apiBase = qp.get("api");
-  if (qp.get("ping")) cfg.pingPath = qp.get("ping");
-  if (qp.get("spec")) cfg.specPath = qp.get("spec");
-  if (qp.get("build")) cfg.buildPath = qp.get("build");
-  if (qp.get("edit")) cfg.editPath = qp.get("edit");
-
-  cfg.apiBase = (cfg.apiBase || "").trim().replace(/\/$/, "");
-  return cfg;
+function configFromUI() {
+  return {
+    apiBase: String(el("apiBase").value || "").trim(),
+    pingPath: String(el("pingPath").value || "").trim(),
+    routesPath: String(el("routesPath").value || "").trim(),
+    specPath: String(el("specPath").value || "").trim(),
+    buildPath: String(el("buildPath").value || "").trim(),
+    editPath: String(el("editPath").value || "").trim(),
+  };
 }
 
-function saveConfig(cfg) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
+function newRequestId() {
+  return `ctb_${Date.now()}_${Math.random().toString(16).slice(2)}`;
 }
 
-function setReqId(v) {
-  el("reqId").textContent = v;
-}
+function setReqId(v) { el("reqId").textContent = v || "—"; }
 
-function setStatus(api, build) {
-  if (api !== undefined) el("apiStatus").textContent = api;
-  if (build !== undefined) el("buildStatus").textContent = build;
+function setStatus(apiStatus, buildStatus) {
+  if (apiStatus !== undefined) el("apiStatus").textContent = apiStatus;
+  if (buildStatus !== undefined) el("buildStatus").textContent = buildStatus;
 }
 
 function showWarn(msg) {
@@ -118,135 +130,148 @@ function showWarn(msg) {
   box.textContent = msg;
 }
 
-function newRequestId() {
-  return "req_" + crypto.randomUUID();
+function showEcho(text) {
+  el("echoPrompt").textContent = text || "";
 }
 
-function getFlags() {
-  return {
-    useCache: !!el("useCache").checked,
-    forceFresh: !!el("forceFresh").checked,
-  };
-}
-
-function getPrompt() {
-  return (el("prompt").value || "").trim();
-}
-
-function getEditPrompt() {
-  return (el("editPrompt").value || "").trim();
-}
-
-async function apiFetch(path, bodyObj, method = "POST") {
-  const cfg = configFromUI();
-  const base = cfg.apiBase.replace(/\/$/, "");
-
-  // timestamp param defeats intermediary caching
-  const url = `${base}${path}${path.includes("?") ? "&" : "?"}ts=${Date.now()}`;
-
-  const res = await fetch(url, {
-    method,
-    headers: { "Content-Type": "application/json" },
-    body: bodyObj ? JSON.stringify(bodyObj) : undefined,
-    cache: "no-store",
-  });
-
-  const text = await res.text();
-  let data = null;
-  try { data = text ? JSON.parse(text) : null; }
-  catch { data = { raw: text }; }
-
-  if (!res.ok) {
-    const msg = data?.error || data?.message || `HTTP ${res.status}`;
-    throw new Error(msg);
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); ta.remove(); return true; } catch { ta.remove(); return false; }
   }
-  return data;
+}
+
+function downloadText(filename, text) {
+  const blob = new Blob([text || ""], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 250);
 }
 
 /* =========================================================
-   BUILDER RULES (includes your TikTok connection example)
+   BUILDER RULES (sent to API for guaranteed compliance)
    ========================================================= */
 
 const BUILDER_RULES = `
-GLOBAL GAME REQUIREMENTS (NON-NEGOTIABLE):
-- Output must include exactly 3 files: index.html, style.css, game.js.
-- Game must be 9:16 portrait layout (1080x1920 safe) and responsive for mobile.
-- Game must have a SETTINGS SCREEN first:
-  - input for TikTok Live ID
-  - Connect button (connects TikTok)
-  - Settings controls relevant to the game
-  - Start Game button
-- The game screen must replace the settings screen after start.
-- Always include clear on-screen directions for chat commands in a transparent overlay that does NOT block gameplay view.
-- DO NOT use external CSS frameworks/CDNs (no Tailwind CDN). Write real CSS.
-- DO NOT reference external sound files. Use simple WebAudio synth beeps or embedded sounds.
-- When using profile pictures: cache them in memory so repeated users don’t refetch.
+HARD CONSTRAINTS (ChatTokGaming):
+- Generate exactly THREE separate files: index.html, style.css, game.js
+- Game MUST be 9:16 portrait with TWO screens:
+  (1) Settings screen: Live ID input, Connect, settings controls, Start button
+  (2) Game screen: replaces settings screen after Start
+- Start Game MUST be gated: disabled until TikTok connection is confirmed
+  (unless an explicit Offline/Test mode toggle exists)
+- Use the existing TikTok connection method via tiktok-client.js (DO NOT replace it)
 
-TIKTOK CONNECTION EXAMPLE (DO NOT REMOVE)
-(Keep this structure and error handling style; adapt handlers for the new game)
+CRITICAL DEPENDENCY RULE (must enforce in index.html):
+Scripts MUST be loaded in this exact order before game.js:
+1) google-protobuf
+2) generic.js
+3) unknownobjects.js
+4) data_linkmic_messages.js
+5) tiktok-client.js
+6) game.js
 
-function setupTikTokClient(liveId) {
-    if (!liveId) {
-        throw new Error("liveId is required");
-    }
+Use this exact pattern (recommended):
+<script src="https://cdn.jsdelivr.net/npm/google-protobuf@3.21.2/google-protobuf.js"></script>
+<script src="generic.js"></script>
+<script src="unknownobjects.js"></script>
+<script src="unknownobjects.js"></script>  (NO - do not duplicate)
+<script src="data_linkmic_messages.js"></script>
+<script src="tiktok-client.js"></script>
+<script src="game.js"></script>
 
-    if (client && client.socket) {
-        try {
-            client.socket.close();
-        } catch (e) {
-            console.warn("Error closing previous socket:", e);
-        }
-    }
+TikTok Message Field Mapping (MessagesClean):
+- Chat text: data.content
+- Username: data.user.displayid OR data.user.nickname
+- Profile pic: data.user.avatarthumb.urllistList[0]
+- Gifts: data.gift.name, data.gift.id, data.gift.diamondcount, data.combocount / data.repeatcount
 
-    if (typeof TikTokClient === "undefined") {
-        throw new Error("TikTokClient is not available. Check tiktok-client.js.");
-    }
+Reliability rules (game.js):
+- Wrap ALL handlers in try/catch. Never crash on missing fields.
+- Create TikTokClient ONLY after clicking Connect.
+- Close previous socket if exists.
+- If CHATTOK_CREATOR_TOKEN exists, call client.setAccessToken(CHATTOK_CREATOR_TOKEN)
+- Wire events: chat, gift, like, join, social, roomUserSeq, control
 
-    client = new TikTokClient(liveId);
-
-    // ChatTok injects CHATTOK_CREATOR_TOKEN globally.
-    if (typeof CHATTOK_CREATOR_TOKEN !== "undefined" && CHATTOK_CREATOR_TOKEN) {
-        client.setAccessToken(CHATTOK_CREATOR_TOKEN);
-    }
-
-    client.on("connected", () => {
-        console.log("Connected to TikTok hub.");
-    });
-
-    client.on("disconnected", (reason) => {
-        console.log("Disconnected from TikTok hub:", reason);
-    });
-
-    client.on("error", (err) => {
-        console.error("TikTok client error:", err);
-    });
-
-    client.on("chat", onChatMessage);
-    client.on("gift", onGiftMessage);
-    client.on("like", (data) => {
-        // optional
-    });
-
-    client.connect();
-}
-
-Also:
-- Wrap chat/gift handlers in try/catch
-- Never crash if message fields are missing
-- Provide polished UI, SFX hooks, and clean code.
+NO Tailwind CDN. Use hand-written CSS. Add simple copyright-free SFX (WebAudio beeps ok).
 `.trim();
+
+/* =========================================================
+   API fetch (anti-caching enforced)
+   ========================================================= */
+
+async function apiFetch(path, body = null, method = "POST") {
+  const cfg = configFromUI();
+  const base = (cfg.apiBase || "").replace(/\/+$/, "");
+  const p = String(path || "").trim().startsWith("/") ? String(path || "").trim() : `/${String(path || "").trim()}`;
+
+  const ts = Date.now();
+  const url = `${base}${p}${p.includes("?") ? "&" : "?"}ts=${ts}`;
+
+  const requestId = (body && body.requestId) ? body.requestId : newRequestId();
+  setReqId(requestId);
+
+  const headers = {
+    "Accept": "application/json",
+    "Cache-Control": "no-store",
+    "Pragma": "no-cache",
+    "X-Request-Id": requestId,
+    "X-ChatTok-Builder": "true",
+  };
+
+  const init = {
+    method,
+    headers,
+    cache: "no-store",
+  };
+
+  if (method !== "GET") {
+    headers["Content-Type"] = "application/json";
+    init.body = JSON.stringify({ ...(body || {}), requestId });
+  }
+
+  const resp = await fetch(url, init);
+  const txt = await resp.text();
+
+  let data;
+  try { data = JSON.parse(txt); }
+  catch {
+    throw new Error(`API returned non-JSON (${resp.status}). First 200 chars:\n${txt.slice(0, 200)}`);
+  }
+
+  if (!resp.ok || data?.ok === false) {
+    throw new Error(data?.error || `Request failed (${resp.status})`);
+  }
+
+  return data;
+}
 
 /* =========================================================
    Step state
    ========================================================= */
 
-let step = 1; // 1 prompt, 2 spec, 3 files, 4 edit
+let step = 1;
 let lastSpec = null;
+let lastPrompt = "";
 let files = { html: "", css: "", js: "" };
 let builtAllFiles = false;
 let editsUsed = 0;
 
-// status dots animation
+let editScreenshotDataUrl = ""; // optional
+
 let spinnerTimer = null;
 function startSpinner(label) {
   stopSpinner();
@@ -271,7 +296,6 @@ function setPill(id, on) {
 function setStep(newStep) {
   step = newStep;
 
-  // pills
   el("pillStep1").textContent = newStep === 1 ? "Active" : "Done";
   el("pillStep2").textContent = newStep === 2 ? "Active" : (newStep > 2 ? "Done" : "Locked");
   el("pillStep3").textContent = newStep === 3 ? "Active" : (newStep > 3 ? "Done" : "Locked");
@@ -281,23 +305,21 @@ function setStep(newStep) {
   setPill("pillStep3", newStep >= 3);
   setPill("pillStep4", newStep >= 4);
 
-  // controls
-  el("btnContinue").disabled = !(newStep >= 2 && !!lastSpec);
-  el("btnCopySpec").disabled = !(!!lastSpec);
+  el("btnCopySpec").disabled = !lastSpec;
+  el("btnContinue").disabled = !lastSpec;
 
-  el("btnBuildHtml").disabled = !(newStep >= 3);
-  el("btnBuildCss").disabled = !(newStep >= 3 && !!files.html); // must build html first
-  el("btnBuildJs").disabled = !(newStep >= 3 && !!files.html && !!files.css); // must build css next
+  el("btnBuildHtml").disabled = !(newStep >= 3 && !!lastSpec);
+  el("btnBuildCss").disabled = !(newStep >= 3 && !!lastSpec && !!files.html);
+  el("btnBuildJs").disabled = !(newStep >= 3 && !!lastSpec && !!files.html && !!files.css);
 
   el("btnCopyHtml").disabled = !files.html;
   el("btnCopyCss").disabled = !files.css;
   el("btnCopyJs").disabled = !files.js;
 
-  const editUnlocked = newStep >= 4;
-  setPill("pillEditReady", editUnlocked);
-  el("btnEdit").disabled = !(editUnlocked && editsUsed < 3 && builtAllFiles);
+  el("btnDownloadHtml").disabled = !files.html;
+  el("btnDownloadCss").disabled = !files.css;
+  el("btnDownloadJs").disabled = !files.js;
 
-  // Build ready pill
   if (newStep >= 3) {
     el("pillBuildReady").classList.remove("off");
     el("pillBuildReady").textContent = "Ready";
@@ -306,10 +328,12 @@ function setStep(newStep) {
     el("pillBuildReady").textContent = "Waiting";
   }
 
-  // preview buttons
-  const previewReady = builtAllFiles;
-  el("btnRefreshPreview").disabled = !previewReady;
-  el("btnOpenPreview").disabled = !previewReady;
+  const editUnlocked = (newStep >= 4) && builtAllFiles;
+  setPill("pillEditReady", editUnlocked);
+  el("btnEdit").disabled = !(editUnlocked && editsUsed < 3);
+
+  el("btnRefreshPreview").disabled = !builtAllFiles;
+  el("btnOpenPreview").disabled = !builtAllFiles;
 }
 
 function showSpec(specObj) {
@@ -322,47 +346,22 @@ function showFileOutputs() {
   el("jsOut").textContent = files.js || "";
 }
 
-function showEcho(text) {
-  el("echoPrompt").textContent = text || "";
+function validateSpecResponse(data) {
+  const spec = data?.spec || data?.plan || data?.json?.spec;
+  if (!spec || typeof spec !== "object") return { ok: false, error: "Spec missing in response." };
+  return { ok: true, spec };
 }
 
-async function copyText(text) {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    // fallback
-    const ta = document.createElement("textarea");
-    ta.value = text;
-    ta.style.position = "fixed";
-    ta.style.left = "-9999px";
-    document.body.appendChild(ta);
-    ta.select();
-    try {
-      document.execCommand("copy");
-      ta.remove();
-      return true;
-    } catch {
-      ta.remove();
-      return false;
-    }
+function validateSingleFileResponse(data, expectedName) {
+  // New format: { content, fileName }
+  if (typeof data?.content === "string" && data?.fileName === expectedName) {
+    return { ok: true, content: data.content };
   }
-}
-
-function validateBuildResponse(obj) {
-  const f = obj?.files || obj;
-  if (!f) return { ok: false, error: "No files found in response." };
-  const html = f["index.html"];
-  const css = f["style.css"];
-  const js = f["game.js"];
-  if (typeof html !== "string" || typeof css !== "string" || typeof js !== "string") {
-    return { ok: false, error: "Response missing index.html/style.css/game.js strings." };
-  }
-  // Catch obvious contamination
-  if (js.includes('"But the builder') || js.includes("But the builder should")) {
-    return { ok: true, warn: "Warning: game.js looks contaminated with extra text at the end. Use Edit step to fix it." , files: { html, css, js } };
-  }
-  return { ok: true, files: { html, css, js } };
+  // Alternate format: { files: { "index.html": "..." } }
+  const f = data?.files || data;
+  const content = f?.[expectedName];
+  if (typeof content === "string") return { ok: true, content };
+  return { ok: false, error: `Response missing ${expectedName}.` };
 }
 
 /* =========================================================
@@ -378,7 +377,7 @@ function escapeScript(s) {
 function buildPreviewHtml(html, css, js) {
   const tiktokStub = `
 <script>
-/* TikTokClient stub for preview (so games can run without tiktok-client.js) */
+/* TikTokClient stub for preview (games can run without tiktok-client.js) */
 (function(){
   if (typeof window.TikTokClient !== "undefined") return;
   class TikTokClient {
@@ -386,11 +385,7 @@ function buildPreviewHtml(html, css, js) {
     setAccessToken(){ }
     on(evt, fn){ (this.handlers[evt] ||= []).push(fn); }
     emit(evt, data){ (this.handlers[evt]||[]).forEach(fn => { try{ fn(data); } catch(e){} }); }
-    connect(){
-      setTimeout(() => this.emit("connected"), 300);
-      // optional: emit fake chat to see effects
-      // setInterval(() => this.emit("chat",{ text:"asteroid", user:{ username:"previewUser", profilePicture:"" } }), 4000);
-    }
+    connect(){ setTimeout(() => this.emit("connected"), 300); }
   }
   window.TikTokClient = TikTokClient;
 })();
@@ -398,13 +393,9 @@ function buildPreviewHtml(html, css, js) {
 
   let out = String(html || "");
 
-  // Inline CSS: replace <link rel="stylesheet" href="style.css">
   out = out.replace(/<link[^>]+href=["']style\.css["'][^>]*>/i, `<style>\n${css || ""}\n</style>`);
-
-  // Inline JS: replace <script src="game.js"></script>
   out = out.replace(/<script[^>]+src=["']game\.js["'][^>]*>\s*<\/script>/i, `<script>\n${escapeScript(js || "")}\n</script>`);
 
-  // Ensure stub is in <head> or early <body>
   if (out.includes("</head>")) out = out.replace("</head>", `${tiktokStub}\n</head>`);
   else if (out.includes("<body")) out = out.replace(/<body[^>]*>/i, (m) => `${m}\n${tiktokStub}\n`);
   else out = `${tiktokStub}\n${out}`;
@@ -434,7 +425,11 @@ function openPreviewTab() {
    Actions
    ========================================================= */
 
+function getPrompt() { return String(el("prompt").value || "").trim(); }
+function getEditPrompt() { return String(el("editPrompt").value || "").trim(); }
+
 async function ping() {
+  showWarn("");
   const cfg = configFromUI();
   saveConfig(cfg);
 
@@ -446,7 +441,37 @@ async function ping() {
   } catch (e) {
     stopSpinner();
     setStatus(`Ping failed: ${e.message}`, "Idle");
-    showWarn(`Ping failed: ${e.message}\n\nThis is usually CORS or the ping route is different.\nTry /api/ping on your Render API in a browser.`);
+    showWarn(`Ping failed: ${e.message}\n\nUsually CORS or wrong endpoint.`);
+  }
+}
+
+async function loadRoutes() {
+  showWarn("");
+  const cfg = configFromUI();
+  saveConfig(cfg);
+
+  startSpinner("Loading routes");
+  try {
+    const data = await apiFetch(cfg.routesPath, null, "GET");
+    stopSpinner();
+
+    const routes = Array.isArray(data?.routes) ? data.routes : [];
+    const paths = new Set(routes.map(r => r.path));
+
+    // Best-effort auto-fill if present
+    if (paths.has("/api/ping")) el("pingPath").value = "/api/ping";
+    if (paths.has("/api/routes")) el("routesPath").value = "/api/routes";
+    if (paths.has("/api/plan")) el("specPath").value = "/api/plan";
+    else if (paths.has("/api/spec")) el("specPath").value = "/api/spec";
+    if (paths.has("/api/build")) el("buildPath").value = "/api/build";
+    if (paths.has("/api/edit")) el("editPath").value = "/api/edit";
+
+    saveConfig(configFromUI());
+    setStatus("Routes loaded.", "Idle");
+  } catch (e) {
+    stopSpinner();
+    setStatus(`Routes failed: ${e.message}`, "Idle");
+    showWarn(`Routes failed: ${e.message}\n\nIf /api/routes doesn't exist, just set endpoints manually.`);
   }
 }
 
@@ -455,153 +480,144 @@ async function buildSpec() {
   const prompt = getPrompt();
   if (!prompt) return alert("Enter a detailed prompt first.");
 
-  const requestId = newRequestId();
-  setReqId(requestId);
-
-  const cfg = configFromUI();
-  saveConfig(cfg);
+  lastPrompt = prompt;
 
   startSpinner("Building spec");
   try {
     const payload = {
-      requestId,
       prompt,
       theme: getTheme(),
-      flags: getFlags(),
       builderRules: BUILDER_RULES,
     };
 
-    const data = await apiFetch(cfg.specPath, payload, "POST");
+    const data = await apiFetch(configFromUI().specPath, payload, "POST");
     stopSpinner();
 
-    const spec = data?.spec || data?.plan || data;
-    lastSpec = spec;
+    showEcho(data?.echoPrompt || prompt);
 
-    showEcho(data?.echoPrompt || data?.prompt || prompt);
-    showSpec(spec);
+    const checked = validateSpecResponse(data);
+    if (!checked.ok) throw new Error(checked.error);
 
-    // unlock step 2
+    lastSpec = checked.spec;
+    showSpec(lastSpec);
+
+    // Unlock Step 2 -> allow continue
     setStep(2);
-    setStatus(el("apiStatus").textContent || "OK", "Spec ready. Review and Continue.");
+    el("btnCopySpec").disabled = false;
+    el("btnContinue").disabled = false;
+
+    setStatus(undefined, "Spec ready. Review then Continue.");
   } catch (e) {
     stopSpinner();
     setStatus(undefined, `Spec error: ${e.message}`);
-    showWarn(`Spec error: ${e.message}\n\nYour backend routes (from what you shared) include /api/plan. Make sure Spec Endpoint is /api/plan.`);
+    showWarn(`Spec error: ${e.message}`);
   }
 }
 
 function continueToBuild() {
   if (!lastSpec) return;
   setStep(3);
-  setStatus(undefined, "Ready to build files. Start with HTML.");
+  setStatus(undefined, "Ready to build. Start with HTML.");
 }
 
-async function ensureBuiltAllFiles() {
-  if (builtAllFiles) return;
+async function buildOneFile(fileName) {
+  if (!lastSpec) throw new Error("Spec is missing. Build Spec first.");
+  if (!lastPrompt) throw new Error("Prompt is missing. Enter prompt and Build Spec first.");
 
-  const prompt = getPrompt();
-  if (!prompt) throw new Error("Missing prompt.");
-
-  const requestId = newRequestId();
-  setReqId(requestId);
-
-  const cfg = configFromUI();
-  saveConfig(cfg);
-
-  startSpinner("Building files");
   const payload = {
-    requestId,
-    prompt,
+    prompt: lastPrompt,
     theme: getTheme(),
-    flags: getFlags(),
+    spec: lastSpec,
     builderRules: BUILDER_RULES,
-    spec: lastSpec || null,
+    target: fileName, // "index.html" | "style.css" | "game.js"
+    contextFiles: {
+      "index.html": files.html || "",
+      "style.css": files.css || "",
+      "game.js": files.js || "",
+    },
   };
 
-  const data = await apiFetch(cfg.buildPath, payload, "POST");
-  stopSpinner();
+  const data = await apiFetch(configFromUI().buildPath, payload, "POST");
+  showEcho(data?.echoPrompt || lastPrompt);
 
-  showEcho(data?.echoPrompt || data?.prompt || prompt);
-
-  const checked = validateBuildResponse(data);
+  const checked = validateSingleFileResponse(data, fileName);
   if (!checked.ok) throw new Error(checked.error);
-  if (checked.warn) showWarn(checked.warn);
 
-  files.html = checked.files.html;
-  files.css = checked.files.css;
-  files.js = checked.files.js;
-
-  builtAllFiles = true;
-  showFileOutputs();
-
-  // preview
-  setPreview(files.html, files.css, files.js);
+  return checked.content;
 }
 
 async function buildHtml() {
   showWarn("");
+  startSpinner("Building HTML");
   try {
-    startSpinner("Building HTML");
-    await ensureBuiltAllFiles();
-    stopSpinner();
+    const html = await buildOneFile("index.html");
+    files.html = html;
 
-    el("htmlOut").scrollIntoView({ behavior: "smooth", block: "start" });
-    setStatus(undefined, "HTML ready. Now build CSS.");
+    showFileOutputs();
     setStep(3);
 
-    // unlock CSS
+    el("btnCopyHtml").disabled = false;
+    el("btnDownloadHtml").disabled = false;
     el("btnBuildCss").disabled = false;
-    el("btnCopyHtml").disabled = !files.html;
+
+    setStatus(undefined, "HTML ready. Now build CSS.");
+    el("htmlOut").scrollIntoView({ behavior: "smooth", block: "start" });
   } catch (e) {
-    stopSpinner();
     setStatus(undefined, `Build HTML error: ${e.message}`);
-    showWarn(`Build error: ${e.message}\n\nMost common causes: wrong Build Endpoint, or CORS.`);
+    showWarn(`Build HTML error: ${e.message}`);
+  } finally {
+    stopSpinner();
   }
 }
 
 async function buildCss() {
   showWarn("");
+  if (!files.html) return alert("Build HTML first.");
+  startSpinner("Building CSS");
   try {
-    // We already have CSS from buildAll; we just reveal step-wise
-    if (!builtAllFiles) {
-      startSpinner("Building CSS");
-      await ensureBuiltAllFiles();
-      stopSpinner();
-    }
-    el("cssOut").scrollIntoView({ behavior: "smooth", block: "start" });
-    setStatus(undefined, "CSS ready. Now build game.js.");
+    const css = await buildOneFile("style.css");
+    files.css = css;
 
-    // unlock JS
+    showFileOutputs();
+    setStep(3);
+
+    el("btnCopyCss").disabled = false;
+    el("btnDownloadCss").disabled = false;
     el("btnBuildJs").disabled = false;
-    el("btnCopyCss").disabled = !files.css;
+
+    setStatus(undefined, "CSS ready. Now build game.js.");
+    el("cssOut").scrollIntoView({ behavior: "smooth", block: "start" });
   } catch (e) {
-    stopSpinner();
     setStatus(undefined, `Build CSS error: ${e.message}`);
-    showWarn(`Build error: ${e.message}`);
+    showWarn(`Build CSS error: ${e.message}`);
+  } finally {
+    stopSpinner();
   }
 }
 
 async function buildJs() {
   showWarn("");
+  if (!files.html || !files.css) return alert("Build HTML and CSS first.");
+  startSpinner("Building game.js");
   try {
-    if (!builtAllFiles) {
-      startSpinner("Building game.js");
-      await ensureBuiltAllFiles();
-      stopSpinner();
-    }
-    el("jsOut").scrollIntoView({ behavior: "smooth", block: "start" });
-    setStatus(undefined, "game.js ready. Editing unlocked.");
+    const js = await buildOneFile("game.js");
+    files.js = js;
 
-    el("btnCopyJs").disabled = !files.js;
+    builtAllFiles = true;
+    showFileOutputs();
+    setPreview(files.html, files.css, files.js);
 
-    // unlock edit step
+    el("btnCopyJs").disabled = false;
+    el("btnDownloadJs").disabled = false;
+
     setStep(4);
-    el("pillEditReady").classList.remove("off");
-    el("btnEdit").disabled = false;
+    setStatus(undefined, "game.js ready. Edit unlocked (3 max).");
+    el("jsOut").scrollIntoView({ behavior: "smooth", block: "start" });
   } catch (e) {
+    setStatus(undefined, `Build game.js error: ${e.message}`);
+    showWarn(`Build game.js error: ${e.message}`);
+  } finally {
     stopSpinner();
-    setStatus(undefined, `Build JS error: ${e.message}`);
-    showWarn(`Build error: ${e.message}`);
   }
 }
 
@@ -613,57 +629,84 @@ async function applyEdit() {
   const editPrompt = getEditPrompt();
   if (!editPrompt) return alert("Enter an edit request.");
 
-  const requestId = newRequestId();
-  setReqId(requestId);
-
-  const cfg = configFromUI();
-  saveConfig(cfg);
-
   startSpinner("Applying edit");
   try {
     const payload = {
-      requestId,
       editPrompt,
       theme: getTheme(),
-      flags: getFlags(),
       builderRules: BUILDER_RULES,
-      files: { "index.html": files.html, "style.css": files.css, "game.js": files.js }
+      files: { "index.html": files.html, "style.css": files.css, "game.js": files.js },
+      screenshotDataUrl: editScreenshotDataUrl || "",
     };
 
-    const data = await apiFetch(cfg.editPath, payload, "POST");
+    const data = await apiFetch(configFromUI().editPath, payload, "POST");
     stopSpinner();
 
-    const checked = validateBuildResponse(data);
-    if (!checked.ok) throw new Error(checked.error);
-    if (checked.warn) showWarn(checked.warn);
+    showEcho(data?.echoPrompt || editPrompt);
 
-    files.html = checked.files.html;
-    files.css = checked.files.css;
-    files.js = checked.files.js;
+    const updated = data?.files;
+    if (!updated || typeof updated["index.html"] !== "string" || typeof updated["style.css"] !== "string" || typeof updated["game.js"] !== "string") {
+      throw new Error("Edit response missing files.");
+    }
+
+    files.html = updated["index.html"];
+    files.css = updated["style.css"];
+    files.js = updated["game.js"];
 
     editsUsed++;
     el("editCount").textContent = String(editsUsed);
 
-    showEcho(data?.echoPrompt || data?.editPrompt || editPrompt);
     showFileOutputs();
     setPreview(files.html, files.css, files.js);
 
     setStatus(undefined, editsUsed >= 3 ? "Edit applied (limit reached)." : "Edit applied.");
-
-    // disable when limit reached
     el("btnEdit").disabled = editsUsed >= 3;
   } catch (e) {
     stopSpinner();
     setStatus(undefined, `Edit error: ${e.message}`);
     showWarn(`Edit error: ${e.message}`);
+  } finally {
+    stopSpinner();
   }
 }
 
 /* =========================================================
-   Copy buttons
+   Screenshot upload handling
    ========================================================= */
 
-async function hookCopy(btnId, getTextFn) {
+function wireScreenshotUpload() {
+  const input = el("editShot");
+  input.addEventListener("change", async () => {
+    editScreenshotDataUrl = "";
+    el("shotPreviewWrap").style.display = "none";
+
+    const file = input.files && input.files[0];
+    if (!file) return;
+
+    // Soft guard: huge images cause huge base64.
+    if (file.size > 2.5 * 1024 * 1024) {
+      alert("That screenshot is large. Please use a smaller image if possible (≤ 2.5MB).");
+    }
+
+    const dataUrl = await new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(String(r.result || ""));
+      r.onerror = () => reject(new Error("Failed reading screenshot."));
+      r.readAsDataURL(file);
+    });
+
+    editScreenshotDataUrl = dataUrl;
+
+    el("shotPreview").src = dataUrl;
+    el("shotPreviewWrap").style.display = "block";
+  });
+}
+
+/* =========================================================
+   Copy/Download hooks
+   ========================================================= */
+
+function hookCopy(btnId, getTextFn) {
   el(btnId).addEventListener("click", async () => {
     const t = getTextFn();
     if (!t) return;
@@ -673,31 +716,46 @@ async function hookCopy(btnId, getTextFn) {
   });
 }
 
+function hookDownload(btnId, fileName, getTextFn) {
+  el(btnId).addEventListener("click", () => {
+    const t = getTextFn();
+    if (!t) return;
+    downloadText(fileName, t);
+    setStatus(undefined, `Downloaded ${fileName}.`);
+    setTimeout(() => setStatus(undefined, "Idle"), 900);
+  });
+}
+
 /* =========================================================
    Reset
    ========================================================= */
 
 function resetAll() {
-  localStorage.removeItem(STORAGE_KEY);
-
+  // keep endpoints/colors saved, but reset state
   const cfg = loadConfig();
   pushConfigToUI(cfg);
 
   el("prompt").value = "";
   el("editPrompt").value = "";
   el("echoPrompt").textContent = "";
-  showWarn("");
-
-  lastSpec = null;
-  files = { html: "", css: "", js: "" };
-  builtAllFiles = false;
-  editsUsed = 0;
-  el("editCount").textContent = "0";
-
   el("specOut").textContent = "";
   el("htmlOut").textContent = "";
   el("cssOut").textContent = "";
   el("jsOut").textContent = "";
+
+  el("editShot").value = "";
+  el("shotPreviewWrap").style.display = "none";
+  el("shotPreview").src = "";
+  editScreenshotDataUrl = "";
+
+  showWarn("");
+
+  lastSpec = null;
+  lastPrompt = "";
+  files = { html: "", css: "", js: "" };
+  builtAllFiles = false;
+  editsUsed = 0;
+  el("editCount").textContent = "0";
 
   if (previewUrl) URL.revokeObjectURL(previewUrl);
   previewUrl = null;
@@ -705,23 +763,7 @@ function resetAll() {
 
   setReqId("—");
   setStatus("Not checked", "Idle");
-
   setStep(1);
-
-  el("btnBuildCss").disabled = true;
-  el("btnBuildJs").disabled = true;
-  el("btnCopySpec").disabled = true;
-  el("btnContinue").disabled = true;
-
-  el("btnCopyHtml").disabled = true;
-  el("btnCopyCss").disabled = true;
-  el("btnCopyJs").disabled = true;
-
-  el("btnRefreshPreview").disabled = true;
-  el("btnOpenPreview").disabled = true;
-
-  el("btnEdit").disabled = true;
-
   renderThemePreview();
 }
 
@@ -730,12 +772,10 @@ function resetAll() {
    ========================================================= */
 
 (function init() {
-  // config
   const cfg = loadConfig();
   pushConfigToUI(cfg);
   saveConfig(cfg);
 
-  // colors
   syncColorPair("cPrimary", "tPrimary", "#ff0050");
   syncColorPair("cSecondary", "tSecondary", "#00f2ea");
   syncColorPair("cBg", "tBg", "#050b17");
@@ -743,8 +783,8 @@ function resetAll() {
   syncColorPair("cText", "tText", "#ffffff");
   renderThemePreview();
 
-  // buttons
   el("btnPing").addEventListener("click", ping);
+  el("btnRoutes").addEventListener("click", loadRoutes);
   el("btnReset").addEventListener("click", resetAll);
 
   el("btnSpec").addEventListener("click", buildSpec);
@@ -762,49 +802,26 @@ function resetAll() {
   });
   el("btnOpenPreview").addEventListener("click", openPreviewTab);
 
-  // copy hooks
+  wireScreenshotUpload();
+
   hookCopy("btnCopySpec", () => el("specOut").textContent);
   hookCopy("btnCopyHtml", () => files.html);
   hookCopy("btnCopyCss", () => files.css);
   hookCopy("btnCopyJs", () => files.js);
 
-  // enable/disable when config changes
-  ["apiBase","pingPath","specPath","buildPath","editPath"].forEach((id) => {
+  hookDownload("btnDownloadHtml", "index.html", () => files.html);
+  hookDownload("btnDownloadCss", "style.css", () => files.css);
+  hookDownload("btnDownloadJs", "game.js", () => files.js);
+
+  ["apiBase","pingPath","routesPath","specPath","buildPath","editPath"].forEach((id) => {
     el(id).addEventListener("change", () => {
-      const c = configFromUI();
-      saveConfig(c);
+      saveConfig(configFromUI());
       setStatus("Config saved.", undefined);
       setTimeout(() => setStatus("Not checked", undefined), 900);
     });
   });
 
-  // initial step lock
   setReqId("—");
   setStatus("Not checked", "Idle");
   setStep(1);
-
-  // Step2/3 locks initially
-  el("btnContinue").disabled = true;
-  el("btnCopySpec").disabled = true;
-
-  el("btnBuildHtml").disabled = true; // enabled only after spec exists + continue
-  el("btnBuildCss").disabled = true;
-  el("btnBuildJs").disabled = true;
-
-  el("btnEdit").disabled = true;
-  el("btnRefreshPreview").disabled = true;
-  el("btnOpenPreview").disabled = true;
-
-  // IMPORTANT: Step progression wiring
-  // When spec is ready, Step 2 becomes active and Continue enables Build buttons.
-  // We enable Build HTML after spec is created.
-  const origSetStep = setStep;
-  setStep = (s) => {
-    origSetStep(s);
-    // enable Build HTML once spec exists and user is at step 3
-    if (s >= 3) el("btnBuildHtml").disabled = false;
-  };
-
-  // apply initial
-  origSetStep(1);
 })();
